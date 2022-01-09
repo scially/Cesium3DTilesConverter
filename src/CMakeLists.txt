@@ -2,7 +2,8 @@
 add_library(3dtiles_core STATIC 
 	"../include/3dtiles_core.h" "3dtiles_core.cpp" 
 	"../include/gdal_tools.h" "gdal_tools.cpp"
-	"../include/osg_converter.h" "osg_converter.cpp" )
+	"../include/osg_converter.h" "osg_converter.cpp"
+	"../include/tiny_gltf_tools.h")
 
 
 target_link_libraries(3dtiles_core
