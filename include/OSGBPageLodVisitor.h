@@ -21,26 +21,8 @@ namespace gzpi {
     
         virtual ~OSGBPageLodVisitor() {}
     
-        void apply(osg::Geometry& geometry) {
-            geometryArray.append(&geometry);
-            if (auto ss = geometry.getStateSet()) {
-                osg::Texture* tex = dynamic_cast<osg::Texture*>(ss->getTextureAttribute(0, osg::StateAttribute::TEXTURE));
-                if (tex) {
-                    textureArray.insert(tex);
-                    textureMap[&geometry] = tex;
-                }
-            }
-        }
-    
-        void apply(osg::PagedLOD& node) {
-            int n = node.getNumFileNames();
-            for (unsigned int i = 1; i < n; i++)
-            {
-                QString fileName = path + "/" + QString::fromStdString(node.getFileName(i));
-                subNodeNames.append(fileName);
-            }
-            traverse(node);
-        }
+        void apply(osg::Geometry& geometry);
+        void apply(osg::PagedLOD& node);
     
     public:
         QString                             path;

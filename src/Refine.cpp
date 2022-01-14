@@ -1,5 +1,5 @@
 #include <Refine.h>
-
+#include <TilesParseException.h>
 
 namespace gzpi {
     void Refine::read(const QJsonValue& object) {

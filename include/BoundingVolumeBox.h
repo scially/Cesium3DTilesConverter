@@ -35,5 +35,6 @@ namespace gzpi {
 
         virtual QJsonValue write() override;
         virtual void read(const QJsonValue& object) override;
+        virtual ~BoundingVolumeBox() {}
     };
 }

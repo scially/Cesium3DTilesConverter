@@ -5,9 +5,9 @@
 #include <QString>
 
 namespace gzpi {
-    class ThreedTilesParseException : public QException {
+    class TilesParseException : public QException {
     public:
-        ThreedTilesParseException(const QString& err) : err(err) {}
+        TilesParseException(const QString& err) : err(err) {}
         virtual const char* what() const override {
             return err.toStdString().c_str();
         }

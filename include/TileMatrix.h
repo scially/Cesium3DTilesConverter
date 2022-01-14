@@ -38,7 +38,6 @@ namespace gzpi {
             return "transform";
         }
 
-        TileMatrix();
     };
 
 

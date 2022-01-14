@@ -1,4 +1,8 @@
 #include <BoundingVolume.h>
+#include <BoundingVolumeBox.h>
+#include <BoundingVolumeRegion.h>
+#include <BoundingVolumeSphere.h>
+#include <TilesParseException.h>
 
 namespace gzpi {
 
@@ -18,7 +22,7 @@ namespace gzpi {
             boundingVolume->read(object["sphere"]);
         }
         else {
-            throw ThreedTilesParseException("box | region | sphere is required");
+            throw TilesParseException("box | region | sphere is required");
         }
         return boundingVolume;
     }

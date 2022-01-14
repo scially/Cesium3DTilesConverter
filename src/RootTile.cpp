@@ -34,11 +34,11 @@ namespace gzpi {
             return;
 
         if (!required(object["boundingVolume"], QJsonValue::Object))
-            throw ThreedTilesParseException("boundingVolume is required");
+            throw TilesParseException("boundingVolume is required");
         boundingVolume = BoundingVolume::create(object["boundingVolume"]);
 
         if (!required(object["geometricError"], QJsonValue::Double))
-            throw ThreedTilesParseException("geometricError is required");
+            throw TilesParseException("geometricError is required");
         geometricError = object["geometricError"].toDouble();
 
         if (required(object["transform"], QJsonValue::Array)) {

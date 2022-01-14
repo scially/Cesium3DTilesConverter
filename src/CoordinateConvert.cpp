@@ -40,7 +40,7 @@ namespace gzpi {
 			throw OGRException(err);
 	}
 
-	OGRCoordinateTransformationPtr CoordinateConvert::createCoordinateTransformation() throw(OGRException) {
+	CoordinateConvert::OGRCoordinateTransformationPtr CoordinateConvert::createCoordinateTransformation() {
 		OGRCoordinateTransformation* transform = OGRCreateCoordinateTransformation(&sourceSrs, &targetSrs);
 		if (transform == nullptr)
 			throw OGRException(OGRERR_UNSUPPORTED_SRS);

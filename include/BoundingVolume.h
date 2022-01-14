@@ -18,6 +18,7 @@ namespace gzpi {
         virtual QString typeName() override {
             return "boundingVolume";
         }
+        virtual ~BoundingVolume() {}
 
         static BoundingVolumePtr create(const QJsonValue& object);
     };

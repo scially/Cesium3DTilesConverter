@@ -1,6 +1,8 @@
 #include <QtTest/QTest>
+#include <BaseTile.h>
 #include <cmath>
-#include <3dtiles_core.h>
+
+using namespace gzpi;
 
 class Test3DTILES : public QObject {
     Q_OBJECT
@@ -514,4 +516,4 @@ private slots:
 
 QTEST_MAIN(Test3DTILES)
 
-#include "test_3dtiles.moc"
+#include "Test3DTiles.moc"

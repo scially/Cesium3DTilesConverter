@@ -540,18 +540,6 @@ namespace tinygltf {
         Value extras;
 
         BufferView() : byteOffset(0), byteStride(0) {}
-        template<class T>
-        void append(T value) {
-            buf.insert(data.end(), (unsigned char*)&value, (unsigned char*)&value + sizeof(T));
-        }
-
-        void alignment() {
-            while (data.size() % 4 != 0) {
-                data.push_back(0x00);
-            }
-        }
-
-        unsigned int size() const { return data.size(); }
     };
 
     struct Accessor {
@@ -722,7 +710,7 @@ namespace tinygltf {
         ParameterMap extLightsValues;      // KHR_lights_cmn extension
     };
 
-    typedef struct {
+    struct Buffer {
         std::string name;
         std::vector<unsigned char> data;
         std::string
@@ -731,7 +719,7 @@ namespace tinygltf {
 
         template<class T>
         void append(T value) {
-            buf.insert(data.end(), (unsigned char*)&value, (unsigned char*)&value + sizeof(T));
+            data.insert(data.end(), (unsigned char*)&value, (unsigned char*)&value + sizeof(T));
         }
 
         void alignment() {
@@ -741,7 +729,7 @@ namespace tinygltf {
         }
 
         unsigned int size() const { return data.size(); }
-    } Buffer;
+    };
 
     typedef struct {
         std::string version;  // required

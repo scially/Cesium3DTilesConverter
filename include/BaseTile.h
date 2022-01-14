@@ -40,8 +40,7 @@ namespace gzpi {
         virtual QString typeName() override {
             return "";
         }
-    
-        BaseTile();
+        virtual ~BaseTile() {}
         AssetProperties::AssetPropertiesPtr asset;
         double geometricError;
         RootTile::RootTilePtr root;

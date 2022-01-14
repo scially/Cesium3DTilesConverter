@@ -1,6 +1,8 @@
 #include <BoundingVolumeSphere.h>
+#include <QJsonValue>
 
 namespace gzpi {
+
     QJsonValue BoundingVolumeSphere::write() {
         QJsonObject object;
 

@@ -22,15 +22,13 @@ namespace gzpi {
     public:
         using ContentTilePtr = QSharedPointer<ContentTile>;
        
-        ContentTile::ContentTile() {}
-
+        ContentTile() {}
         virtual QJsonValue write() override;
         virtual void read(const QJsonValue& object) override;
         virtual QString typeName() override {
             return "content";
         }
 
-        ContentTile();
 
         BoundingVolume::BoundingVolumePtr boundingVolume;
         QString uri;

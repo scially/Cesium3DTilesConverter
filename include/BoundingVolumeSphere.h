@@ -4,6 +4,8 @@
 #include <QJsonValue>
 #include <QJsonArray>
 #include <QJsonObject>
+#include <TilesParseException.h>
+
 namespace gzpi {
     /// <summary>
     /// The boundingVolume.sphere property is an array of four numbers that define a bounding sphere. 
@@ -20,5 +22,6 @@ namespace gzpi {
 
         virtual QJsonValue write() override;
         virtual void read(const QJsonValue& object) override;
+        virtual ~BoundingVolumeSphere() {}
     };
 }

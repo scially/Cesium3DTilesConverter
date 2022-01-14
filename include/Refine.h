@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QObject>
-#include <BaseObject>
+#include <BaseObject.h>
 #include <QString>
 #include <QJsonValue>
 #include <QJsonObject>

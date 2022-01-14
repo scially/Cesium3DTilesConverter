@@ -19,6 +19,7 @@ namespace gzpi {
         virtual QString typeName() override {
             return "asset";
         }
+        virtual ~AssetProperties() {}
 
         QMap<QString, QString> assets;
     };

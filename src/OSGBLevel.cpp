@@ -1,81 +1,16 @@
-#pragma once
-
-#include <osg/PagedLOD>
-#include <osgDB/ReadFile>
-#include <osgDB/ConvertUTF>
-#include <osgUtil/Optimizer>
-#include <osgUtil/SmoothingVisitor>
-
-#include <string>
-#include <vector>
-#include <cmath>
-#include <utility>
-
+#include <OSGBLevel.h>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QJsonValue>
 #include <QJsonArray>
-#include <QMap>
-#include <QVector>
-#include <QString>
-#include <QDir>
-#include <QByteArray>
-#include <QDebug>
-#include <QSharedPointer>
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#define TINYGLTF_IMPLEMENTATION
-#include <tiny_gltf.h>
-#include <stb_image_write.h>
-#include <dxt_img.h>
+namespace gzpi {
 
-
-        
-  
-
-     
-
-
-class OSGBLevel {
-private:
-    struct OSGBMesh
-    {
-        QString name;
-        osg::Vec3d min;
-        osg::Vec3d max;
-    };
-
-public:
-    using OSGBLevelPtr = QSharedPointer<OSGBLevel>;
-
-    OSGBLevel() {}
-    OSGBLevel(const QString& name, const QString& path) :
-        nodeName(name), nodePath(path) {}
-    OSGBLevel(const QString& absoluteLocation) {
-
-    }
-
-    double              geometricError;
-    QString             nodeName;
-    QString             nodePath;
-    QVector<OSGBLevel>  subNodes;
-    osg::Vec3d          bBoxMax;
-    osg::Vec3d          bBoxMin;
-
-    QString absoluteLocation() const {
+    QString OSGBLevel::absoluteLocation() const {
         return QDir(nodePath).filePath(nodeName);
     }
 
-    void stbWriteBufferFunc(void* context, void* data, int len) {
-        std::vector<char>* buf = (std::vector<char>*)context;
-        buf->insert(buf->end(), (char*)data, (char*)data + len);
-    }
-
-    /// <summary>
-    /// 提取 Tile_+154_+018_L22_0000320.osgb _L后面的数字
-    /// 提取失败，返回 0
-    /// </summary>
-    int getLevelNumber() {
+    int OSGBLevel::getLevelNumber() {
         int p0 = nodeName.indexOf("_L");
         if (p0 < 0)
             return 0;
@@ -85,7 +20,7 @@ public:
         return nodeName.mid(p0 + 2, p1 - p0 - 2).toInt();
     }
 
-    bool getAllOSGBLevels(int maxLevel) {
+    bool OSGBLevel::getAllOSGBLevels(int maxLevel) {
         if (getLevelNumber() <= 0 || getLevelNumber() > maxLevel)
             return false;
 
@@ -108,12 +43,8 @@ public:
         return true;
     }
 
-    /// <summary>
-    /// 瓦片及PageLOD下的所有子节点转B3DM
-    /// </summary>
-    /// <param name="outLocation"></param>
-    /// <returns></returns>
-    bool writeB3DM(const QString& outLocation) {
+
+    bool OSGBLevel::writeB3DM(const QString& outLocation) {
         QByteArray b3dmBuffer;
 
         if (!convertB3DM(b3dmBuffer))
@@ -133,13 +64,7 @@ public:
         return true;
     }
 
-    /// <summary>
-    /// OSGB文件转B3DM
-    /// </summary>
-    /// <param name="path"></param>
-    /// <param name="tile_box"></param>
-    /// <returns></returns>
-    bool convertB3DM(QByteArray& b3dmBuffer) {
+    bool OSGBLevel::convertB3DM(QByteArray& b3dmBuffer) {
         QByteArray glbBuffer;
 
         OSGBMesh mesh;
@@ -187,8 +112,7 @@ public:
         return true;
     }
 
-
-    bool convertGLB(QByteArray& glbBuffer, OSGBMesh& mesh) {
+    bool OSGBLevel::convertGLB(QByteArray & glbBuffer, OSGBMesh & mesh) {
 
         std::vector<std::string> rootOSGBLocation = { absoluteLocation().toStdString() };
 
@@ -339,7 +263,7 @@ public:
             model.extensionsUsed = { "KHR_materials_unlit" };
             for (int i = 0; i < lodVisitor.textureArray.size(); i++)
             {
-                tinygltf::Material mat = make_color_material_osgb(1.0, 1.0, 1.0);
+                tinygltf::Material mat = makeColorMaterialFromRGB(1.0, 1.0, 1.0);
                 mat.b_unlit = true; // use KHR_materials_unlit
                 tinygltf::Parameter baseColorTexture;
                 baseColorTexture.json_int_value = { std::pair<std::string, int>("index",i) };
@@ -366,5 +290,5 @@ public:
             glbBuffer = QByteArray::fromStdString(gltf.Serialize(&model));
             return true;
         }
-    };
+    }
 }
