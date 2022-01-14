@@ -1,14 +1,6 @@
-#include <vector>
-#include <osg/Image>
+#include <dxt_img.h>
 
-#include "dxt_img.h"
 using namespace std;
-
-struct Color {
-    int r;
-    int g;
-    int b;
-};
 
 Color RGB565_RGB(unsigned short color0) {
 	unsigned char r0 = ((color0 >> 11) & 0x1F) << 3;
@@ -66,7 +58,7 @@ Color Mix_Color(
     return finalColor;
 }
 
-void resize_Image(vector<unsigned char>& jpeg_buf, int width, int height, int new_w, int new_h) {
+void resizeImage(vector<unsigned char>& jpeg_buf, int width, int height, int new_w, int new_h) {
     vector<unsigned char> new_buf(new_w * new_h * 3);
     int scale = width / new_w;
     for (int row = 0; row < new_h ; row++)
@@ -83,7 +75,7 @@ void resize_Image(vector<unsigned char>& jpeg_buf, int width, int height, int ne
     jpeg_buf = new_buf;
 }
 
-void fill_4BitImage(vector<unsigned char>& jpeg_buf, osg::Image* img, int& width, int& height) {
+void fill4BitImage(vector<unsigned char>& jpeg_buf, osg::Image* img, int& width, int& height) {
     jpeg_buf.resize(width * height * 3);
     unsigned char* pData = img->data();
     int imgSize = img->getImageSizeInBytes();
@@ -133,7 +125,7 @@ void fill_4BitImage(vector<unsigned char>& jpeg_buf, osg::Image* img, int& width
             new_w /= 2;
             new_h /= 2;
         }
-        resize_Image(jpeg_buf, width, height, new_w, new_h);
+        resizeImage(jpeg_buf, width, height, new_w, new_h);
         width = new_w;
         height = new_h;
     }

@@ -1,9 +1,12 @@
 
 add_library(3dtiles_core STATIC 
-	"../include/3dtiles_core.h" "3dtiles_core.cpp" 
-	"../include/gdal_tools.h" "gdal_tools.cpp"
-	"../include/osg_converter.h" "osg_converter.cpp"
-	"../include/tiny_gltf_tools.h")
+	"../include/CoordinateConvert.h"
+	"../include/OGRException.h"
+	"../include/OSGBPageLodVisitor.h"
+
+	"CoordinateConvert.cpp"
+	"OSGBPageLodVisitor.cpp" 
+	  "BoundingVolume.cpp" "BoundingVolumeBox.cpp" "BoundingVolumeRegion.cpp" "AssetProperties.cpp")
 
 
 target_link_libraries(3dtiles_core
