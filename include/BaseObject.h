@@ -1,5 +1,9 @@
 #pragma once
 
+#include <QSharedPointer>
+#include <QJsonArray>
+#include <QJsonValue>
+#include <QJsonObject>
 namespace gzpi {
     class BaseObject {
     public:

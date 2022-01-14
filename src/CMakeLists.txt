@@ -3,10 +3,27 @@ add_library(3dtiles_core STATIC
 	"../include/CoordinateConvert.h"
 	"../include/OGRException.h"
 	"../include/OSGBPageLodVisitor.h"
+	"../include/BoundingVolume.h"
+	"../include/BoundingVolumeBox.h"
+	"../include/BoundingVolumeRegion.h"
+	"../include/AssetProperties.h"
+	"../include/TileMatrix.h"
+	"../include/Refine.h"
+	"../include/ContentTile.h"
+	"../include/RootTile.h"
+	"../include/BaseTile.h"
 
 	"CoordinateConvert.cpp"
 	"OSGBPageLodVisitor.cpp" 
-	  "BoundingVolume.cpp" "BoundingVolumeBox.cpp" "BoundingVolumeRegion.cpp" "AssetProperties.cpp")
+	"BoundingVolume.cpp" 
+	"BoundingVolumeBox.cpp" 
+	"BoundingVolumeRegion.cpp" 
+	"AssetProperties.cpp" 
+	"TileMatrix.cpp" 
+	"Refine.cpp" 
+	"ContentTile.cpp" 
+	"RootTile.cpp"
+	"BaseTile.cpp")
 
 
 target_link_libraries(3dtiles_core
