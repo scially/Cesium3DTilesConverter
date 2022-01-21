@@ -10,6 +10,10 @@
 #include <osgUtil/Optimizer>
 #include <osgUtil/SmoothingVisitor>
 
+#include <tiny_gltf.h>
+#include <stb_image_write.h>
+#include <DxtImage.h>
+
 namespace gzpi {
 	
     class OSGBPageLodVisitor : public osg::NodeVisitor

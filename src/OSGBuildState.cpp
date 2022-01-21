@@ -2,6 +2,7 @@
 #include <QDebug>
 
 namespace gzpi {
+
     bool OSGBuildState::appendOSGGeometry(const osg::Geometry* geom) {
         osg::PrimitiveSet::Type type = geom->getPrimitiveSet(0)->getType();
         OSGPrimitiveState pmtState = { -1, -1, -1 };

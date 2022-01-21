@@ -10,8 +10,8 @@ namespace gzpi {
 
 		double sourceX;
 		double sourceY;
-		double targetX;
-		double targetY;
+		double targetX = 0;
+		double targetY = 0;
 
 		enum SrsType {
 			WKT,
@@ -20,7 +20,7 @@ namespace gzpi {
 		};
 		Q_ENUM(SrsType);
 
-		CoordinateConvert(double x, double y) : sourceX(x), sourceY(y) {}
+		CoordinateConvert(double x, double y) : sourceX(x), sourceY(y), targetX(0), targetY(0) {}
 		CoordinateConvert() : CoordinateConvert(0, 0) {}
 
 		void setSourceSrs(const QString& srs, SrsType t) throw(OGRException);

@@ -14,6 +14,7 @@ add_library(3dtiles_core STATIC
 	"../include/RootTile.h"
 	"../include/BaseTile.h"
 	"../include/OSGBuildState.h"
+	"../include/DxtImage.h"
 
 	"CoordinateConvert.cpp"
 	"OSGBPageLodVisitor.cpp" 
@@ -27,7 +28,9 @@ add_library(3dtiles_core STATIC
 	"ContentTile.cpp" 
 	"RootTile.cpp"
 	"BaseTile.cpp" 
-	"OSGBuildState.cpp" "OSGBLevel.cpp")
+	"DxtImage.cpp"
+	"OSGBuildState.cpp" 
+	"OSGBLevel.cpp" "OSGBConvert.cpp")
 
 
 target_link_libraries(3dtiles_core

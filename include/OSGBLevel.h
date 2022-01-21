@@ -18,13 +18,14 @@ namespace gzpi {
             osg::Vec3d max;
         };
 
-
-
         OSGBLevel() {}
         OSGBLevel(const QString& name, const QString& path) :
             nodeName(name), nodePath(path) {}
         OSGBLevel(const QString& absoluteLocation) {
-
+            QDir location(absoluteLocation);
+            nodeName = location.dirName();
+            location.cdUp();
+            nodePath = location.absolutePath();
         }
 
         double              geometricError;
@@ -62,21 +63,6 @@ namespace gzpi {
         bool convertGLB(QByteArray& glbBuffer, OSGBMesh& mesh);
 
     private:
-        tinygltf::Material makeColorMaterialFromRGB(double r, double g, double b) {
-            tinygltf::Material material;
-            material.name = "default";
-            tinygltf::Parameter baseColorFactor;
-            baseColorFactor.number_array = { r, g, b, 1.0 };
-            material.values["baseColorFactor"] = baseColorFactor;
-
-            tinygltf::Parameter metallicFactor;
-            metallicFactor.number_value = new double(0);
-            material.values["metallicFactor"] = metallicFactor;
-            tinygltf::Parameter roughnessFactor;
-            roughnessFactor.number_value = new double(1);
-            material.values["roughnessFactor"] = roughnessFactor;
-            //
-            return material;
-        }
+        tinygltf::Material makeColorMaterialFromRGB(double r, double g, double b);
     };
 }

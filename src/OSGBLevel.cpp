@@ -3,6 +3,14 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
+#include <QDataStream>
+
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define TINYGLTF_IMPLEMENTATION
+#include <tiny_gltf.h>
+#include <stb_image_write.h>
+#include <DxtImage.h>
 
 namespace gzpi {
 
@@ -21,7 +29,7 @@ namespace gzpi {
     }
 
     bool OSGBLevel::getAllOSGBLevels(int maxLevel) {
-        if (getLevelNumber() <= 0 || getLevelNumber() > maxLevel)
+        if (getLevelNumber() < 0 || getLevelNumber() >= maxLevel)
             return false;
 
         OSGBPageLodVisitor lodVisitor(nodePath);
@@ -66,10 +74,10 @@ namespace gzpi {
 
     bool OSGBLevel::convertB3DM(QByteArray& b3dmBuffer) {
         QByteArray glbBuffer;
-
+        QDataStream b3dmStream(&b3dmBuffer, QIODevice::WriteOnly);
+        
         OSGBMesh mesh;
         convertGLB(glbBuffer, mesh);
-
         if (glbBuffer.isEmpty())
             return false;
 
@@ -88,27 +96,24 @@ namespace gzpi {
         batch["batchId"] = ids;
         batch["name"] = names;
 
-        QString batchMeta = QJsonDocument(batch).toJson();
+        QString batchMeta = QJsonDocument(batch).toJson(QJsonDocument::Compact);
         while (batchMeta.size() % 4 != 0) {
             batchMeta.append(' ');
         }
 
 
         int totalSize = 28 /*header size*/ + feature.size() + batchMeta.size() + glbBuffer.size();
-
-        b3dmBuffer.append("b3dm");
-        int version = 1;
-        b3dmBuffer.append(QByteArray::number(version));
-        b3dmBuffer.append(QByteArray::number(totalSize));
-        b3dmBuffer.append(QByteArray::number(feature.size()));
-        b3dmBuffer.append(QByteArray::number(0));  // feature_bin_len
-        b3dmBuffer.append(QByteArray::number(batchMeta.size()));
-        b3dmBuffer.append(QByteArray::number(0));  // batch_bin_len
-
-        b3dmBuffer.append(feature);
-        b3dmBuffer.append(batchMeta);
-        b3dmBuffer.append(glbBuffer);
-
+            
+        b3dmStream.writeRawData("b3dm", 4);
+        b3dmStream << 1;          // version
+        b3dmStream << totalSize;
+        b3dmStream << feature.size();
+        b3dmStream << 0;
+        b3dmStream << batchMeta.size();
+        b3dmStream << 0;
+        b3dmStream.writeRawData(feature.toStdString().data(), feature.size());
+        b3dmStream.writeRawData(batchMeta.toStdString().data(), batchMeta.size());
+        b3dmStream.writeRawData(glbBuffer.data(), glbBuffer.size());
         return true;
     }
 
@@ -120,6 +125,7 @@ namespace gzpi {
         if (!root.valid()) {
             return false;
         }
+
         OSGBPageLodVisitor lodVisitor(nodePath);
         root->accept(lodVisitor);
         if (lodVisitor.geometryArray.empty())
@@ -290,5 +296,24 @@ namespace gzpi {
             glbBuffer = QByteArray::fromStdString(gltf.Serialize(&model));
             return true;
         }
+
+       
+    }
+
+    tinygltf::Material OSGBLevel::makeColorMaterialFromRGB(double r, double g, double b) {
+        tinygltf::Material material;
+        material.name = "default";
+        tinygltf::Parameter baseColorFactor;
+        baseColorFactor.number_array = { r, g, b, 1.0 };
+        material.values["baseColorFactor"] = baseColorFactor;
+
+        tinygltf::Parameter metallicFactor;
+        metallicFactor.number_value = new double(0);
+        material.values["metallicFactor"] = metallicFactor;
+        tinygltf::Parameter roughnessFactor;
+        roughnessFactor.number_value = new double(1);
+        material.values["roughnessFactor"] = roughnessFactor;
+        //
+        return material;
     }
 }

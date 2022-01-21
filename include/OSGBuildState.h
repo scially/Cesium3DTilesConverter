@@ -1,11 +1,8 @@
 #pragma once
 
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#define TINYGLTF_IMPLEMENTATION
 #include <tiny_gltf.h>
 #include <stb_image_write.h>
-#include <dxt_img.h>
+#include <DxtImage.h>
 
 #include <osg/PagedLOD>
 #include <osgDB/ReadFile>
