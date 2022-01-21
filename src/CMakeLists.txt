@@ -3,6 +3,7 @@ add_library(3dtiles_core STATIC
 	"../include/CoordinateConvert.h"
 	"../include/OGRException.h"
 	"../include/OSGBPageLodVisitor.h"
+	"../include/OSGBLevel.h"
 	"../include/BoundingVolume.h"
 	"../include/BoundingVolumeBox.h"
 	"../include/BoundingVolumeRegion.h"
@@ -15,6 +16,9 @@ add_library(3dtiles_core STATIC
 	"../include/BaseTile.h"
 	"../include/OSGBuildState.h"
 	"../include/DxtImage.h"
+	"../include/stb_image.h"
+	"../include/stb_image_write.h"
+	"../include/tiny_gltf.h"
 
 	"CoordinateConvert.cpp"
 	"OSGBPageLodVisitor.cpp" 
@@ -30,7 +34,9 @@ add_library(3dtiles_core STATIC
 	"BaseTile.cpp" 
 	"DxtImage.cpp"
 	"OSGBuildState.cpp" 
-	"OSGBLevel.cpp" "OSGBConvert.cpp")
+	"OSGBLevel.cpp" 
+	"OSGBConvert.cpp" 
+	"stb_image.cpp")
 
 
 target_link_libraries(3dtiles_core

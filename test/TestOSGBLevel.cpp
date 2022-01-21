@@ -4,7 +4,7 @@
 
 using namespace gzpi;
 
-class TestOSGBLevel : public QObject {
+class TestOSGBLevel: public QObject {
     Q_OBJECT
 private slots:
     void testOSGBConvert() {

@@ -4,12 +4,6 @@
 #include <QJsonValue>
 #include <QJsonArray>
 #include <QDataStream>
-
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#define TINYGLTF_IMPLEMENTATION
-#include <tiny_gltf.h>
-#include <stb_image_write.h>
 #include <DxtImage.h>
 
 namespace gzpi {
