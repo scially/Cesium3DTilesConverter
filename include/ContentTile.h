@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <BaseObject.h>
 #include <QString>
 #include <QJsonValue>
@@ -28,7 +27,6 @@ namespace gzpi {
         virtual QString typeName() override {
             return "content";
         }
-
 
         BoundingVolume::BoundingVolumePtr boundingVolume;
         QString uri;

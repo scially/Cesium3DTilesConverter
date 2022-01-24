@@ -10,10 +10,10 @@
 
 namespace gzpi {
     /// <summary>
-       /// Refinement determines the process by which a lower resolution parent tile renders 
-       /// when its higher resolution children are selected to be rendered. 
-       /// Permitted refinement types are replacement ("REPLACE") and additive ("ADD")
-       /// </summary>
+    /// Refinement determines the process by which a lower resolution parent tile renders
+    /// when its higher resolution children are selected to be rendered.
+    /// Permitted refinement types are replacement ("REPLACE") and additive ("ADD")
+    /// </summary>
     class Refine : public QObject, public BaseObject {
         Q_OBJECT
 

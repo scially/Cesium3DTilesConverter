@@ -15,7 +15,7 @@ add_library(3dtiles_core STATIC
 	"../include/RootTile.h"
 	"../include/BaseTile.h"
 	"../include/OSGBuildState.h"
-	"../include/DxtImage.h"
+	"../include/Math.h"
 	"../include/stb_image.h"
 	"../include/stb_image_write.h"
 	"../include/tiny_gltf.h"
@@ -36,7 +36,7 @@ add_library(3dtiles_core STATIC
 	"OSGBuildState.cpp" 
 	"OSGBLevel.cpp" 
 	"OSGBConvert.cpp" 
-	"stb_image.cpp")
+	)
 
 
 target_link_libraries(3dtiles_core

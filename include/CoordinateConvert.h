@@ -23,9 +23,10 @@ namespace gzpi {
 		CoordinateConvert(double x, double y) : sourceX(x), sourceY(y), targetX(0), targetY(0) {}
 		CoordinateConvert() : CoordinateConvert(0, 0) {}
 
-		void setSourceSrs(const QString& srs, SrsType t) throw(OGRException);
-		void setTargetSrs(const QString& srs, SrsType t) throw(OGRException);
-		void transform() throw(OGRException);
+		void setSourceSrs(const QString& srs, SrsType t) noexcept(false);
+		void setTargetSrs(const QString& srs, SrsType t) noexcept(false);
+		void transform() noexcept(false);
+
 	private:
 		void setSrs(OGRSpatialReference& srs, const QString& describe, SrsType t) ;
 		OGRCoordinateTransformationPtr createCoordinateTransformation();

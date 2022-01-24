@@ -1,5 +1,8 @@
 #pragma once
 
+#include <limits>
+
+#include <osg/Vec3d>
 #include <BoundingVolume.h>
 #include <QJsonValue>
 #include <QJsonObject>
@@ -18,15 +21,32 @@ namespace gzpi {
     class BoundingVolumeRegion : public BoundingVolume {
 
     public:
-        double west;
-        double south;
-        double east;
-        double north;
-        double minHeight;
-        double maxHeight;
+        double west = std::numeric_limits<double>::max();
+        double south = std::numeric_limits<double>::max();
+        double east = std::numeric_limits<double>::min();
+        double north = std::numeric_limits<double>::min();
+        double minHeight = std::numeric_limits<double>::max();
+        double maxHeight = std::numeric_limits<double>::min();
 
         virtual QJsonValue write() override;
         virtual void read(const QJsonValue& object) override;
 
+        osg::Vec3d getMax() const;
+        osg::Vec3d getMin() const;
+
+        void setMax(const osg::Vec3d& max);
+        void setMin(const osg::Vec3d& min);
+        void setMax(const osg::Vec3f& max);
+        void setMin(const osg::Vec3f& min);
+
+        void mergeMax(const osg::Vec3d& max);
+        void mergeMin(const osg::Vec3d& min);
+        void mergeMax(const osg::Vec3f& max);
+        void mergeMin(const osg::Vec3f& min);
+
+        /*纬度变化一度，球面南北方向距离变化：πR/180 ........111.7km
+          经度变化一度，球面东西方向距离变化：πR/180*cosB ....111.7*cosB*/
+        //BoundingVolumeRegion toRadin(double lon, double lat) const;
+        
     };
 }

@@ -1,15 +1,15 @@
 #include <CoordinateConvert.h>
 
 namespace gzpi {
-	void CoordinateConvert::setSourceSrs(const QString& srs, SrsType t) throw(OGRException) {
+	void CoordinateConvert::setSourceSrs(const QString& srs, SrsType t) noexcept(false) {
 		setSrs(sourceSrs, srs, t);
 	}
 
-	void CoordinateConvert::setTargetSrs(const QString& srs, SrsType t) throw(OGRException) {
+	void CoordinateConvert::setTargetSrs(const QString& srs, SrsType t) noexcept(false) {
 		setSrs(targetSrs, srs, t);
 	}
 
-	void CoordinateConvert::transform() throw(OGRException) {
+	void CoordinateConvert::transform() noexcept(false) {
 		auto transform = createCoordinateTransformation();
 		double x = sourceX, y = sourceY;
 		bool succeed = transform->Transform(1, &x, &y);

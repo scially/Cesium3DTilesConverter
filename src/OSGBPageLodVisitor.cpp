@@ -15,14 +15,13 @@ namespace gzpi {
     }
     
     void OSGBPageLodVisitor::apply(osg::PagedLOD& node) {
-        int n = node.getNumFileNames();
+        unsigned int n = node.getNumFileNames();
         for (unsigned int i = 1; i < n; i++)
         {
             QString fileName = path + "/" + QString::fromStdString(node.getFileName(i));
             subNodeNames.append(fileName);
         }
         traverse(node);
-    
     }
 
 }

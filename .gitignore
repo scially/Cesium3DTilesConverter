@@ -1,4 +1,7 @@
 CMakeSettings.json
+CMakeLists.txt.user
 out
 .vs
-CMakeLists.txt.user
+.idea
+.gitignore
+.gitattributes
