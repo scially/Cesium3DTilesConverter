@@ -32,7 +32,7 @@ namespace gzpi {
         QString                             path;
         QVector<osg::Geometry*>             geometryArray;
         QSet<osg::Texture*>                 textureArray;
-        QMap<osg::Geometry*, osg::Texture*> textureMap;  // ¼ÇÂ¼ mesh ºÍ texture µÄ¹ØÏµ£¬ÔİÊ±ÈÏÎªÒ»¸öÄ£ĞÍ×î¶àÖ»ÓĞÒ»¸ötexture
+        QMap<osg::Geometry*, osg::Texture*> textureMap;  // è®°å½• mesh å’Œ texture çš„å…³ç³»ï¼Œæš‚æ—¶è®¤ä¸ºä¸€ä¸ªæ¨¡å‹æœ€å¤šåªæœ‰ä¸€ä¸ªtexture
         QVector<QString>                    subNodeNames;
     };
 }

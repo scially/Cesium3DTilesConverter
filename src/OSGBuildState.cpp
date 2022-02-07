@@ -11,7 +11,7 @@ namespace gzpi {
             const osg::PrimitiveSet* ps = geom->getPrimitiveSet(k);
             if (type != ps->getType())
             {
-                qFatal("PrimitiveSets type are not same in osgb");
+                qCritical("PrimitiveSets type are not same in osgb");
                 return false;
             }
             appendPrimitive(geom, ps, pmtState);
@@ -130,37 +130,42 @@ namespace gzpi {
         osg::PrimitiveSet::Type t = ps->getType();
         switch (t)
         {
-        case(osg::PrimitiveSet::DrawElementsUBytePrimitiveType):
-        {
-            const osg::DrawElementsUByte* drawElements = dynamic_cast<const osg::DrawElementsUByte*>(ps);
-            appendOSGIndex(drawElements, TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE);
-            break;
-        }
-        case(osg::PrimitiveSet::DrawElementsUShortPrimitiveType):
-        {
-            const osg::DrawElementsUShort* drawElements = dynamic_cast<const osg::DrawElementsUShort*>(ps);
-            appendOSGIndex(drawElements, TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT);
-            break;
-        }
-        case(osg::PrimitiveSet::DrawElementsUIntPrimitiveType):
-        {
-            const osg::DrawElementsUInt* drawElements = dynamic_cast<const osg::DrawElementsUInt*>(ps);
-            appendOSGIndex(drawElements, TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT);
-            break;
-        }
-        case osg::PrimitiveSet::DrawArraysPrimitiveType:
-        {
-            primits.indices = -1;
-            const osg::DrawArrays* da = dynamic_cast<const osg::DrawArrays*>(ps);
-            drawArrayFirst = da->getFirst();
-            drawArrayCount = da->getCount();
-            break;
-        }
-        default:
-        {
-            qWarning("Unsupport osg::PrimitiveSet::Type [%1]", t);
-            return false;
-        }
+            case(osg::PrimitiveSet::DrawElementsUBytePrimitiveType):
+            {
+                const osg::DrawElementsUByte* drawElements = dynamic_cast<const osg::DrawElementsUByte*>(ps);
+                appendOSGIndex(drawElements, TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE);
+                break;
+            }
+            case(osg::PrimitiveSet::DrawElementsUShortPrimitiveType):
+            {
+                const osg::DrawElementsUShort* drawElements = dynamic_cast<const osg::DrawElementsUShort*>(ps);
+                appendOSGIndex(drawElements, TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT);
+                break;
+            }
+            case(osg::PrimitiveSet::DrawElementsUIntPrimitiveType):
+            {
+                const osg::DrawElementsUInt* drawElements = dynamic_cast<const osg::DrawElementsUInt*>(ps);
+                appendOSGIndex(drawElements, TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT);
+                break;
+            }
+            case osg::PrimitiveSet::DrawArraysPrimitiveType:
+            {
+                primits.indices = -1;
+                const osg::DrawArrays* da = dynamic_cast<const osg::DrawArrays*>(ps);
+                GLenum mode = da->getMode();
+                if(mode != GL_TRIANGLES){
+                    qCritical("GLenum is not GL_TRIANGLES in osgb\n");
+                    return false;
+                }
+                drawArrayFirst = da->getFirst();
+                drawArrayCount = da->getCount();
+                break;
+            }
+            default:
+            {
+                qCritical("Unsupport osg::PrimitiveSet::Type [%1]", t);
+                return false;
+            }
         }
         // vertex: full vertex and part indecis
         if (pmtState.vertexAccessor > -1 && drawArrayFirst == -1)
@@ -169,7 +174,8 @@ namespace gzpi {
         }
         else
         {
-            osg::Vec3f maxPoint, minPoint;
+            osg::Vec3f maxPoint(-1e38, -1e38, -1e38);
+            osg::Vec3f minPoint(1e38, 1e38, 1e38);
             osg::Vec3Array* vertexArr = (osg::Vec3Array*)g->getVertexArray();
             primits.attributes["POSITION"] = model->accessors.size();
             // reuse vertex accessor if multi indecis
@@ -184,7 +190,7 @@ namespace gzpi {
         }
         // normal
         osg::Vec3Array* normalArr = (osg::Vec3Array*)g->getNormalArray();
-        if (normalArr)
+        if (normalArr != nullptr)
         {
             if (pmtState.normalAccessor > -1 && drawArrayFirst == -1)
             {
@@ -192,7 +198,8 @@ namespace gzpi {
             }
             else
             {
-                osg::Vec3f maxPoint, minPoint;
+                osg::Vec3f maxPoint(-1e38, -1e38, -1e38);
+                osg::Vec3f minPoint(1e38, 1e38, 1e38);
                 primits.attributes["NORMAL"] = model->accessors.size();
                 // reuse vertex accessor if multi indecis
                 if (pmtState.normalAccessor == -1 && drawArrayFirst == -1)
@@ -204,7 +211,7 @@ namespace gzpi {
         }
         // textcoord
         osg::Vec2Array* texArr = (osg::Vec2Array*)g->getTexCoordArray(0);
-        if (texArr)
+        if (texArr != nullptr)
         {
             if (pmtState.textcdAccessor > -1 && drawArrayFirst == -1)
             {
@@ -227,18 +234,18 @@ namespace gzpi {
 
         switch (ps->getMode())
         {
-        case GL_TRIANGLES:
-            primits.mode = TINYGLTF_MODE_TRIANGLES;
-            break;
-        case GL_TRIANGLE_STRIP:
-            primits.mode = TINYGLTF_MODE_TRIANGLE_STRIP;
-            break;
-        case GL_TRIANGLE_FAN:
-            primits.mode = TINYGLTF_MODE_TRIANGLE_FAN;
-            break;
-        default:
-            qWarning("Unsupport Primitive Mode: [%1]", ps->getMode());
-            return false;
+            case GL_TRIANGLES:
+                primits.mode = TINYGLTF_MODE_TRIANGLES;
+                break;
+            case GL_TRIANGLE_STRIP:
+                primits.mode = TINYGLTF_MODE_TRIANGLE_STRIP;
+                break;
+            case GL_TRIANGLE_FAN:
+                primits.mode = TINYGLTF_MODE_TRIANGLE_FAN;
+                break;
+            default:
+                qWarning("Unsupport Primitive Mode: [%1]", ps->getMode());
+                return false;
         }
         model->meshes.back().primitives.push_back(primits);
         return true;

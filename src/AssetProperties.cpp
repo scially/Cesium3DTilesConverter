@@ -11,7 +11,7 @@ namespace gzpi {
 
     void AssetProperties::read(const QJsonValue& object) {
         assets.clear();
-        if (!required(object, QJsonValue::Object))
+        if (!object.isObject())
             throw TilesParseException("asset is required");
 
         for (const auto& key : object.toObject().keys()) {

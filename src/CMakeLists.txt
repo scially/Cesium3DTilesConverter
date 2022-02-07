@@ -1,5 +1,5 @@
 
-add_library(3dtiles_core STATIC 
+add_library(Core STATIC
 	"../include/CoordinateConvert.h"
 	"../include/OGRException.h"
 	"../include/OSGBPageLodVisitor.h"
@@ -15,10 +15,18 @@ add_library(3dtiles_core STATIC
 	"../include/RootTile.h"
 	"../include/BaseTile.h"
 	"../include/OSGBuildState.h"
-	"../include/Math.h"
 	"../include/stb_image.h"
 	"../include/stb_image_write.h"
 	"../include/tiny_gltf.h"
+	"../include/TilesParseException.h"
+	"../include/TilesConvertException.h"
+        "../include/OSGBConvertJob.h"
+        "../include/ModelMetadata.h"
+        "../include/QuadTree.h"
+        "../include/ShpConvert.h"
+        "../include/GeometryMesh.h"
+        "../include/GDALWrapper.h"
+        "../include/earcut.hpp"
 
 	"CoordinateConvert.cpp"
 	"OSGBPageLodVisitor.cpp" 
@@ -36,23 +44,35 @@ add_library(3dtiles_core STATIC
 	"OSGBuildState.cpp" 
 	"OSGBLevel.cpp" 
 	"OSGBConvert.cpp" 
+        "OSGBConvertJob.cpp"
+        "ModelMetadata.cpp"
+        "QuadTree.cpp"
+        "GeometryMesh.cpp"
+        "GDALWrapper.cpp"
 	)
 
 
-target_link_libraries(3dtiles_core
+target_link_libraries(Core
 	${GDAL_LIBRARY}
 	${OPENSCENEGRAPH_LIBRARIES}
 	Qt5::Core 
-	Qt5::Xml
-	Qt5::Gui)
+	Qt5::Xml)
 
 
-#add_executable(3dtiles_cli "main.cpp")
+add_executable(Converter "main.cpp")
+target_link_libraries(Converter
+    ${GDAL_LIBRARY}
+    ${OPENSCENEGRAPH_LIBRARIES}
+    Qt5::Core
+    Qt5::Xml
+    Core)
 
-#target_link_libraries(3dtiles_cli 3dtiles_core)
+add_custom_command(
+        TARGET Converter PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${PROJECT_SOURCE_DIR}/proj_data/proj.db
+                ${CMAKE_BINARY_DIR}/src/proj.db
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${PROJECT_SOURCE_DIR}/proj_data/proj.ini
+                ${CMAKE_BINARY_DIR}/src/proj.ini)
 
-#add_custom_command(
-#        TARGET 3dtiles_cli POST_BUILD
-#        COMMAND ${CMAKE_COMMAND} -E copy_directory
-#                ${PROJECT_SOURCE_DIR}/gdal_data
-#                ${PROJECT_BINARY_DIR}/gdal_data)

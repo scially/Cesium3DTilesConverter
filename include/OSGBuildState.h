@@ -18,8 +18,8 @@ namespace gzpi {
         tinygltf::Model* model;
         osg::Vec3f pointMax;
         osg::Vec3f pointMin;
-        int drawArrayFirst;
-        int drawArrayCount;
+        int drawArrayFirst = -1;
+        int drawArrayCount = 0;
 
         struct OSGPrimitiveState
         {
@@ -33,19 +33,18 @@ namespace gzpi {
         void expandBBox2d(osg::Vec2f& minPoint, osg::Vec2f& maxPoint, const osg::Vec2f& point);
         void appendVec2Array(const osg::Vec2Array* v2f, osg::Vec2f& minPoint, osg::Vec2f& maxPoint);
         void appendVec3Array(const osg::Vec3Array* v3f, osg::Vec3f& minPoint, osg::Vec3f& maxPoint);
-        bool appendPrimitive(const osg::Geometry* g, const osg::PrimitiveSet* ps, OSGPrimitiveState& pmtState);
 
-        template <typename GLType>
-        inline void appendOSGIndex(const osg::MixinVector<GLType>* ps, int componentType)
+        template <typename DrawElementsType>
+        inline void appendOSGIndex(const DrawElementsType* drawElements, int componentType)
         {
             unsigned int maxIndex = 0;
             unsigned int minIndex = 1 << 30;
             unsigned int bufferStart = buffer->data.size();
 
-            unsigned int indNum = ps->size();
+            unsigned int indNum = drawElements->getNumIndices();
             for (unsigned m = 0; m < indNum; m++)
             {
-                GLType idx = ps->at(m);
+                auto idx = drawElements->at(m);
                 buffer->append(idx);
                 if (idx > maxIndex) maxIndex = idx;
                 if (idx < minIndex) minIndex = idx;
@@ -68,6 +67,8 @@ namespace gzpi {
             bfv.byteLength = buffer->data.size() - bufferStart;
             model->bufferViews.push_back(bfv);
         }
+private:
+        bool appendPrimitive(const osg::Geometry* g, const osg::PrimitiveSet* ps, OSGPrimitiveState& pmtState);
 
     };
 }

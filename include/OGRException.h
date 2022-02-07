@@ -11,7 +11,7 @@ namespace gzpi {
 	public:
 		OGRException(OGRErr err) : error(err) {}
 		
-		virtual const char* what() const override {
+        virtual const char* what() const noexcept override {
 			switch (error) {
 			case OGRERR_NOT_ENOUGH_DATA:
 				return "Not enough data";

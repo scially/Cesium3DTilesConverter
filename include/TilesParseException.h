@@ -7,11 +7,11 @@
 namespace gzpi {
     class TilesParseException : public QException {
     public:
-        TilesParseException(const QString& err) : err(err) {}
-        virtual const char* what() const override {
-            return err.toStdString().c_str();
+        TilesParseException(const char* err) : err(err) {}
+        virtual const char* what() const noexcept override {
+            return err;
         }
     private:
-        QString err;
+        const char* err;
     };
 }

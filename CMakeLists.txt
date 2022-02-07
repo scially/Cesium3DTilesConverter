@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required (VERSION 3.8)
-project(3dtiles)
+project(Cesium3DTilesConverter)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -10,7 +10,7 @@ endif()
 find_package(GDAL REQUIRED)
 find_package(Qt5 
 	REQUIRED
-	COMPONENTS Core Xml Gui Test)
+	COMPONENTS Core Xml Test)
 
 find_package(OpenSceneGraph 
 	REQUIRED 

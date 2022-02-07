@@ -1,5 +1,6 @@
 #include <BoundingVolumeSphere.h>
 #include <QJsonValue>
+#include <QDebug>
 
 namespace gzpi {
 
@@ -17,8 +18,10 @@ namespace gzpi {
     }
 
     void BoundingVolumeSphere::read(const QJsonValue& object) {
-        if (!required(object, QJsonValue::Array))
-            throw TilesParseException("sphere is required");
+        if(!object.isArray()){
+            qCritical() << "parse BoundingVolumeSphere: " << object << "failed\n";
+            return;
+        }
 
         centerX = object[0].toDouble();
         centerY = object[1].toDouble();

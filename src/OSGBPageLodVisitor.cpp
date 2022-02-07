@@ -7,7 +7,7 @@ namespace gzpi {
         geometryArray.append(&geometry);
         if (auto ss = geometry.getStateSet()) {
             osg::Texture* tex = dynamic_cast<osg::Texture*>(ss->getTextureAttribute(0, osg::StateAttribute::TEXTURE));
-            if (tex) {
+            if (tex != nullptr) {
                 textureArray.insert(tex);
                 textureMap[&geometry] = tex;
             }

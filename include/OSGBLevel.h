@@ -2,33 +2,34 @@
 
 #include <OSGBuildState.h>
 #include <OSGBPageLodVisitor.h>
+#include <RootTile.h>
+#include <BaseTile.h>
 #include <QSharedPointer>
 #include <QString>
 #include <QDir>
 #include <QVector>
 
+#include <limits>
+
 namespace gzpi {
     class OSGBLevel {
     public:
-        using OSGBLevelPtr = QSharedPointer<OSGBLevel>;
-        struct OSGBMesh
-        {
-            QString name;
-            osg::Vec3d min;
-            osg::Vec3d max;
-        };
+        static constexpr const char* OSGBEXTENSION = ".osgb";
+        static constexpr const char* B3DMEXTENSION = ".b3dm";
 
-        OSGBLevel() {}
-        OSGBLevel(const QString& name, const QString& path) :
-            nodeName(name), nodePath(path) {}
+        using OSGBLevelPtr = QSharedPointer<OSGBLevel>;
+
+        OSGBLevel() = delete;
         OSGBLevel(const QString& absoluteLocation) {
             QDir location(absoluteLocation);
-            nodeName = location.dirName();
+            QString dirName = location.dirName();
+            nodeName = dirName.left(dirName.lastIndexOf("."));
             location.cdUp();
             nodePath = location.absolutePath();
         }
 
         double              geometricError;
+        BoundingVolumeBox   region;
         QString             nodeName;
         QString             nodePath;
         QVector<OSGBLevel>  subNodes;
@@ -38,31 +39,17 @@ namespace gzpi {
         QString absoluteLocation() const;
 
         /// <summary>
-        /// ÌáÈ¡ Tile_+154_+018_L22_0000320.osgb _LºóÃæµÄÊı×Ö
-        /// ÌáÈ¡Ê§°Ü£¬·µ»Ø 0
+        /// æå– Tile_+154_+018_L22_0000320.osgb _Låé¢çš„æ•°å­—
+        /// æå–å¤±è´¥ï¼Œè¿”å› 0
         /// </summary>
-        int getLevelNumber();
-
+        int getLevelNumber() const;
+        QString getTileName() const;
         bool getAllOSGBLevels(int maxLevel);
+        bool convertTiles(BaseTile &tile, const QString& output, int maxLevel = std::numeric_limits<int>::max());
+        bool convertTiles(RootTile &root, const QString& output);
 
-        /// <summary>
-        /// ÍßÆ¬¼°PageLODÏÂµÄËùÓĞ×Ó½Úµã×ªB3DM
-        /// </summary>
-        /// <param name="outLocation"></param>
-        /// <returns></returns>
-        bool writeB3DM(const QString& outLocation);
-
-        /// <summary>
-        /// OSGBÎÄ¼ş×ªB3DM
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="tile_box"></param>
-        /// <returns></returns>
-        bool convertB3DM(QByteArray& b3dmBuffer);
-
-        bool convertGLB(QByteArray& glbBuffer, OSGBMesh& mesh);
 
     private:
-        tinygltf::Material makeColorMaterialFromRGB(double r, double g, double b);
+        void createDir(const QString& output) const;
     };
 }

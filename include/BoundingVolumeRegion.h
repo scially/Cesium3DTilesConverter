@@ -3,11 +3,12 @@
 #include <limits>
 
 #include <osg/Vec3d>
-#include <BoundingVolume.h>
 #include <QJsonValue>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <TilesParseException.h>
+#include <BaseObject.h>
+#include <CoordinateConvert.h>
+#include <osg/Math>
 
 namespace gzpi {
 
@@ -18,9 +19,9 @@ namespace gzpi {
     /// Latitudes and longitudes are in the WGS 84 datum as defined in EPSG 4979 and are in radians. 
     /// Heights are in meters above (or below) the WGS 84 ellipsoid.
     /// </summary>
-    class BoundingVolumeRegion : public BoundingVolume {
-
+    class BoundingVolumeRegion : public BaseObject {
     public:
+        using BoundingVolumeRegionPtr = QSharedPointer<BoundingVolumeRegion>;
         double west = std::numeric_limits<double>::max();
         double south = std::numeric_limits<double>::max();
         double east = std::numeric_limits<double>::min();
@@ -30,6 +31,9 @@ namespace gzpi {
 
         virtual QJsonValue write() override;
         virtual void read(const QJsonValue& object) override;
+        virtual QString typeName() override {
+            return "region";
+        };
 
         osg::Vec3d getMax() const;
         osg::Vec3d getMin() const;
@@ -44,9 +48,24 @@ namespace gzpi {
         void mergeMax(const osg::Vec3f& max);
         void mergeMin(const osg::Vec3f& min);
 
-        /*纬度变化一度，球面南北方向距离变化：πR/180 ........111.7km
-          经度变化一度，球面东西方向距离变化：πR/180*cosB ....111.7*cosB*/
-        //BoundingVolumeRegion toRadin(double lon, double lat) const;
+        double geometricError() const {
+            double maxErr = std::max({north - south, maxHeight - minHeight, east - west});
+            return maxErr / 20.0;
+        }
         
+         BoundingVolumeRegion merge(BoundingVolumeRegion bounding) const {
+           BoundingVolumeRegion mergeRegion;
+           mergeRegion.west = std::min(bounding.west, this->west);
+           mergeRegion.east = std::max(bounding.east, this->east);
+           mergeRegion.north = std::max(bounding.north, this->north);
+           mergeRegion.south = std::min(bounding.south, this->south);
+           mergeRegion.minHeight = std::min(bounding.minHeight, this->minHeight);
+           mergeRegion.maxHeight = std::max(bounding.maxHeight, this->maxHeight);
+           return mergeRegion;
+        }
+
+        BoundingVolumeRegion toRadin(double lon, double lat) const;
+
+        virtual ~BoundingVolumeRegion() {}
     };
 }

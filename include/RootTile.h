@@ -40,12 +40,14 @@ namespace gzpi {
         }
 
         RootTile();
-        BoundingVolume::BoundingVolumePtr boundingVolume;
-        TileMatrix::TileMatrixPtr         transform;
-        double                            geometricError;
-        Refine::RefinePtr                 refine;
-        ContentTile::ContentTilePtr       content;
-        QVector<RootTilePtr>              children;
+        virtual ~RootTile() {}
+
+        BoundingVolume boundingVolume;
+        TileMatrix     transform;
+        double         geometricError = 0;
+        Refine         refine;
+        std::optional<ContentTile>  content;
+        QVector<RootTile>           children;
     };
 
 }

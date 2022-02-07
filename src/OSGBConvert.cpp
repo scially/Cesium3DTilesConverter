@@ -25,64 +25,64 @@ namespace gzpi {
         return QDir(nodePath).filePath(nodeName);
     }
 
-    bool OSGBConvert::writeB3DM(const QString& outLocation) {
-       
-        if (b3dmBuffer.isEmpty()) {
-            qFatal() << "It's like toB3DM fail or you need to invoke toB3DM...\n";
+    bool OSGBConvert::writeB3DM(const QByteArray &buffer, const QString& outLocation) {
+
+        if (buffer.isEmpty()) {
+            qCritical() << "B3DM buffer is empty...\n";
             return false;
         }
-            
 
-        // 根据osgb文件名获取对应的b3dm输出路径    
+        //
         QFile b3dmFile(outLocation + "/" + nodeName.replace(".osgb", ".b3dm"));
         if (!b3dmFile.open(QIODevice::ReadWrite)) {
-            qFatal() << "Can't open file [" << b3dmFile.fileName() << "]\n";
+            qCritical() << "Can't open file [" << b3dmFile.fileName() << "]\n";
             return false;
         }
-        b3dmFile.write(b3dmBuffer);
+        int writeBytes = b3dmFile.write(buffer);
 
+        if (writeBytes <= 0) {
+            qCritical() << "Can't write file [" << b3dmFile.fileName() << "]\n";
+            return false;
+        }
         return true;
     }
 
-    bool OSGBConvert::toB3DM() {
+    QByteArray OSGBConvert::toB3DM() {
+        QByteArray b3dmBuffer;
         QDataStream b3dmStream(&b3dmBuffer, QIODevice::WriteOnly);
+        b3dmStream.setByteOrder(QDataStream::LittleEndian);
 
         QByteArray glbBuffer = convertGLB();
+
         if (glbBuffer.isEmpty())
-            return false;
+            return QByteArray();
 
-        QString feature = QString(R"({"BATCH_LENGTH":%1})").arg(1);
-        while (feature.size() % 4 != 0) {
-            feature.append(' ');
+        QString featureTable = R"({"BATCH_LENGTH":1})";
+        while (featureTable.size() % 4 != 0) {
+            featureTable.append(' ');
         }
 
-        QJsonObject batch;
-        QJsonArray ids = { 1 };
-        QJsonArray names = { QString("mesh_%1").arg(1) };
-
-        batch["batchId"] = ids;
-        batch["name"] = names;
-
-        QString batchMeta = QJsonDocument(batch).toJson(QJsonDocument::Compact);
-        while (batchMeta.size() % 4 != 0) {
-            batchMeta.append(' ');
+        QString batchTable = R"({"batchId":[0],"name":["mesh_0"]})";
+        while (batchTable.size() % 4 != 0) {
+            batchTable.append(' ');
         }
 
-        int totalSize = 28 /*header size*/ + feature.size() + batchMeta.size() + glbBuffer.size();
+        int totalSize = 28 /*header size*/ + featureTable.size() + batchTable.size() + glbBuffer.size();
 
         b3dmStream.writeRawData("b3dm", 4);
         b3dmStream << 1;          // version
         b3dmStream << totalSize;
-        b3dmStream << feature.size();
+        b3dmStream << featureTable.size();
         b3dmStream << 0;
-        b3dmStream << batchMeta.size();
+        b3dmStream << batchTable.size();
         b3dmStream << 0;
 
         // DataStream << will write byte length first, so invoke wrteRawData
-        b3dmStream.writeRawData(feature.toStdString().data(), feature.size()); 
-        b3dmStream.writeRawData(batchMeta.toStdString().data(), batchMeta.size());
+        b3dmStream.writeRawData(featureTable.toStdString().data(), featureTable.size());
+        b3dmStream.writeRawData(batchTable.toStdString().data(), batchTable.size());
         b3dmStream.writeRawData(glbBuffer.data(), glbBuffer.size());
-        return true;
+
+        return b3dmBuffer;
     }
 
     QByteArray OSGBConvert::convertGLB() {
@@ -91,17 +91,16 @@ namespace gzpi {
         std::vector<std::string> rootOSGBLocation = { absoluteLocation().toStdString() };
         osg::ref_ptr<osg::Node> root = osgDB::readNodeFiles(rootOSGBLocation);
         if (!root.valid()) {
-            qFatal() << "Read OSGB File [" << absoluteLocation() << "] Fail...\n";
+            qCritical() << "Read OSGB File [" << absoluteLocation() << "] Fail...\n";
             return QByteArray();
         }
 
         OSGBPageLodVisitor lodVisitor(nodePath);
         root->accept(lodVisitor);
         if (lodVisitor.geometryArray.empty()) {
-            qFatal() << "Read OSGB File [" << absoluteLocation() << "] ] is Empty...\n";
+            qCritical() << "Read OSGB File [" << absoluteLocation() << "] geometries is Empty...\n";
             return QByteArray();
         }
-            
 
         osgUtil::SmoothingVisitor sv;
         root->accept(sv);
@@ -110,7 +109,7 @@ namespace gzpi {
         tinygltf::Model model;
         tinygltf::Buffer buffer;
 
-        osg::Vec3f point_max, point_min;
+
         OSGBuildState osgState = {
             &buffer,
             &model,
@@ -136,7 +135,7 @@ namespace gzpi {
                 {
                     auto tex = lodVisitor.textureMap[g];
                     // if hava texture
-                    if (tex)
+                    if (tex != nullptr)
                     {
                         for (auto texture : lodVisitor.textureArray)
                         {
@@ -151,21 +150,19 @@ namespace gzpi {
         }
         // empty geometry or empty vertex-array
         if (model.meshes[0].primitives.empty())
-            return false;
+            return QByteArray();
 
         region.setMax(osgState.pointMax);
         region.setMin(osgState.pointMin);
-        //bBoxMin = osg::Vec3d(osgState.pointMin.x(), osgState.pointMin.y(), osgState.pointMin.z());
-        //bBoxMax = osg::Vec3d(osgState.pointMax.x(), osgState.pointMax.y(), osgState.pointMax.z());
-        
+
         // image
         {
             for (auto tex : lodVisitor.textureArray)
             {
                 unsigned bufferStart = buffer.size();
-                std::vector<unsigned char> jpegBuffer(512 * 512 * 3);
+                std::vector<unsigned char> jpegBuffer;
                 int width, height, comp;
-                if (tex) {
+                if (tex != nullptr) {
                     if (tex->getNumImages() > 0) {
                         osg::Image* img = tex->getImage(0);
                         if (img) {
@@ -180,20 +177,20 @@ namespace gzpi {
                             }
                             else
                             {
-                                unsigned row_step = img->getRowStepInBytes();
-                                unsigned row_size = img->getRowSizeInBytes();
-                                for (size_t i = 0; i < height; i++)
+                                unsigned rowStep = img->getRowStepInBytes();
+                                unsigned rowSize = img->getRowSizeInBytes();
+                                for (int i = 0; i < height; i++)
                                 {
                                     jpegBuffer.insert(jpegBuffer.end(),
-                                        img->data() + row_step * i,
-                                        img->data() + row_step * i + row_size);
+                                        img->data() + rowStep * i,
+                                        img->data() + rowSize * i + rowSize);
                                 }
                             }
                         }
                     }
                 }
 
-                auto stbImgWriteBuffer = [](void* context, void* data, int len) {
+                const auto stbImgWriteBuffer = [](void* context, void* data, int len) {
                     auto buf = (std::vector<char>*)context;
                     buf->insert(buf->end(), (char*)data, (char*)data + len);
                 };
@@ -205,18 +202,18 @@ namespace gzpi {
                 else {
                     std::vector<unsigned char> vData(256 * 256 * 3);
                     stbi_write_jpg_to_func(stbImgWriteBuffer, &buffer.data, 256, 256, 3, vData.data(), 80);
-
-                    tinygltf::Image image;
-                    image.mimeType = "image/jpeg";
-                    image.bufferView = model.bufferViews.size();
-                    model.images.push_back(image);
-                    tinygltf::BufferView bfv;
-                    bfv.buffer = 0;
-                    bfv.byteOffset = bufferStart;
-                    buffer.alignment();
-                    bfv.byteLength = buffer.size() - bufferStart;
-                    model.bufferViews.push_back(bfv);
                 }
+
+                tinygltf::Image image;
+                image.mimeType = "image/jpeg";
+                image.bufferView = model.bufferViews.size();
+                model.images.push_back(image);
+                tinygltf::BufferView bfv;
+                bfv.buffer = 0;
+                bfv.byteOffset = bufferStart;
+                buffer.alignment();
+                bfv.byteLength = buffer.size() - bufferStart;
+                model.bufferViews.push_back(bfv);
             }
             // node
             {
@@ -231,6 +228,7 @@ namespace gzpi {
                 model.scenes = { sence };
                 model.defaultScene = 0;
             }
+
             // sample
             {
                 tinygltf::Sampler sample;
@@ -240,34 +238,37 @@ namespace gzpi {
                 sample.wrapT = TINYGLTF_TEXTURE_WRAP_REPEAT;
                 model.samplers = { sample };
             }
-            // use KHR_materials_unlit
-            model.extensionsRequired = { "KHR_materials_unlit" };
-            model.extensionsUsed = { "KHR_materials_unlit" };
-            for (int i = 0; i < lodVisitor.textureArray.size(); i++)
+
+            // use pbr material
             {
-                tinygltf::Material mat = makeColorMaterialFromRGB(1.0, 1.0, 1.0);
-                mat.b_unlit = true; // use KHR_materials_unlit
-                tinygltf::Parameter baseColorTexture;
-                baseColorTexture.json_int_value = { std::pair<std::string, int>("index",i) };
-                mat.values["baseColorTexture"] = baseColorTexture;
-                model.materials.push_back(mat);
+                model.extensionsRequired = { "KHR_materials_unlit" };
+                model.extensionsUsed = { "KHR_materials_unlit" };
+                for (int i = 0; i < lodVisitor.textureArray.size(); i++)
+                {
+                    tinygltf::Material mat = makeColorMaterialFromRGB(1.0, 1.0, 1.0);
+                    mat.b_unlit = true; // use KHR_materials_unlit
+                    tinygltf::Parameter baseColorTexture;
+                    baseColorTexture.json_int_value = { std::pair<std::string, int>("index",i) };
+                    mat.values["baseColorTexture"] = baseColorTexture;
+                    model.materials.push_back(mat);
+                }
             }
 
             // finish buffer
-            model.buffers.push_back(std::move(buffer));
+            model.buffers.push_back(buffer);
             // texture
             {
-                int texture_index = 0;
+                int textureIndex = 0;
                 for (auto tex : lodVisitor.textureArray)
                 {
                     tinygltf::Texture texture;
-                    texture.source = texture_index++;
+                    texture.source = textureIndex++;
                     texture.sampler = 0;
                     model.textures.push_back(texture);
                 }
             }
             model.asset.version = "2.0";
-            model.asset.generator = "gzpi";
+            model.asset.generator = "hwang";
 
             glbBuffer = QByteArray::fromStdString(gltf.Serialize(&model));
             return glbBuffer;
@@ -374,7 +375,7 @@ namespace internal {
         int imgSize = img->getImageSizeInBytes();
         int x_pos = 0;
         int y_pos = 0;
-        for (size_t i = 0; i < imgSize; i += 8)
+        for (int i = 0; i < imgSize; i += 8)
         {
             // 64 bit matrix
             unsigned short color0, color1;

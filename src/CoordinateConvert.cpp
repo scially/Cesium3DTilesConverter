@@ -19,7 +19,7 @@ namespace gzpi {
 		targetY = y;
 	}
 
-	void CoordinateConvert::setSrs(OGRSpatialReference& srs, const QString& describe, SrsType t) throw(OGRException) {
+    void CoordinateConvert::setSrs(OGRSpatialReference& srs, const QString& describe, SrsType t) {
 		OGRErr err = OGRERR_UNSUPPORTED_SRS;
 		switch (t)
 		{

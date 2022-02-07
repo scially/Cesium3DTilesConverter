@@ -20,7 +20,7 @@ namespace gzpi {
             return "asset";
         }
         virtual ~AssetProperties() {}
-
         QMap<QString, QString> assets;
     };
 }
+

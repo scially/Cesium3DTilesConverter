@@ -33,7 +33,7 @@ namespace gzpi {
     public:
         using BaseTilePtr = QSharedPointer<BaseTile>;
 
-        BaseTile::BaseTile() {}
+        BaseTile() {}
         virtual QJsonValue write() override;
         virtual void read(const QJsonValue& object) override;
     
@@ -41,9 +41,8 @@ namespace gzpi {
             return "";
         }
         virtual ~BaseTile() {}
-        AssetProperties::AssetPropertiesPtr asset;
+        AssetProperties asset;
         double geometricError;
-        RootTile::RootTilePtr root;
+        RootTile root;
     };
-    
 }

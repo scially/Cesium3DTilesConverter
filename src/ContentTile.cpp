@@ -5,22 +5,23 @@ namespace gzpi {
 
     QJsonValue ContentTile::write() {
         QJsonObject object;
-        if (boundingVolume != nullptr)
+        if (boundingVolume.has_value())
             object["boundingVolume"] = boundingVolume->write();
         object["uri"] = uri;
         return object;
     }
 
     void ContentTile::read(const QJsonValue& object) {
-
-        if (object.isNull())
+       if(!object.isObject())
             return;
+       uri = object["uri"].toString();
 
-        if (required(object["boundingVolume"], QJsonValue::Object))
-            boundingVolume = BoundingVolume::create(object["boundingVolume"]);
+       QJsonValue boundingVolumeJson = object["boundingVolume"];
+       if(boundingVolumeJson.isObject()){
+           BoundingVolume boundingResult;
+           boundingResult.read(boundingVolumeJson);
+           boundingVolume = boundingResult;
+       }
 
-        if (!required(object["uri"], QJsonValue::String))
-            throw TilesParseException("uri is required");
-        uri = object["uri"].toString();
     }
 }

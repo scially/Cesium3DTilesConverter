@@ -7,6 +7,7 @@
 #include <QDir>
 #include <QVector>
 #include <BoundingVolumeRegion.h>
+#include <BoundingVolumeBox.h>
 
 namespace gzpi {
     class OSGBConvert {
@@ -21,12 +22,11 @@ namespace gzpi {
             nodePath = location.absolutePath();
         }
 
-        double               geometricError = 0;
+        //double geometricError = 0;
         BoundingVolumeRegion region;
-        QByteArray           b3dmBuffer;
 
-        bool writeB3DM(const QString& outLocation);
-        bool toB3DM();
+        bool writeB3DM(const QByteArray& buffer, const QString& outLocation);
+        QByteArray toB3DM();
   
     private:
         tinygltf::Material makeColorMaterialFromRGB(double r, double g, double b);

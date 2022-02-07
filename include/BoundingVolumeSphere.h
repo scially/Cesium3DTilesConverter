@@ -1,10 +1,12 @@
 #pragma once
 
-#include <BoundingVolume.h>
+#include <limits>
+
+#include <BaseObject.h>
 #include <QJsonValue>
 #include <QJsonArray>
 #include <QJsonObject>
-#include <TilesParseException.h>
+
 
 namespace gzpi {
     /// <summary>
@@ -13,15 +15,18 @@ namespace gzpi {
     /// for the center of the sphere in a right-handed 3-axis (x, y, z) Cartesian coordinate system where the z-axis is up. 
     /// The last element (with index 3) defines the radius in meters.
     /// </summary>
-    class BoundingVolumeSphere : public BoundingVolume {
+    class BoundingVolumeSphere : public BaseObject {
     public:
-        double centerX;
-        double centerY;
-        double centerZ;
-        double radius;
+        double centerX = std::numeric_limits<double>::min();
+        double centerY = std::numeric_limits<double>::min();
+        double centerZ = std::numeric_limits<double>::min();
+        double radius  = std::numeric_limits<double>::min();
 
         virtual QJsonValue write() override;
         virtual void read(const QJsonValue& object) override;
+        virtual QString typeName() override {
+            return "sphere";
+        }
         virtual ~BoundingVolumeSphere() {}
     };
 }

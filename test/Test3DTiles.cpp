@@ -18,8 +18,9 @@ private slots:
                 20.4
                 ]
             })");
-        auto boundingVolume = BoundingVolume::create(doc.object());
-        QVERIFY(boundingVolume->write() == doc.object());
+        BoundingVolume boundingVolume;
+        boundingVolume.read(doc.object());
+        QVERIFY(boundingVolume.write() == doc.object());
     }
 
     void testAssetProperties() {
@@ -27,7 +28,7 @@ private slots:
             "version": "1.0",
             "tilesetVersion": "e575c6f1-a45b-420a-b172-6449fa6e0a59"
             })");
-        auto asset = AssetProperties();
+        AssetProperties asset;
         asset.read(doc.object());
         QVERIFY(asset.assets.contains("version"));
         QVERIFY(asset.assets.contains("tilesetVersion"));
@@ -66,41 +67,6 @@ private slots:
         auto content = ContentTile();
         content.read(doc["content"]);
         QVERIFY(content.write() == doc["content"]);
-    }
-
-    void testRootTile() {
-        QJsonDocument doc = QJsonDocument::fromJson(R"({
-	        "root": {
-            "boundingVolume": {
-            "region": [
-                -0.0005682966577418737,
-                0.8987233516605286,
-                0.00011646582098558159,
-                0.8990603398325034,
-                0,
-                241.6
-                ]
-            },
-            "geometricError": 268.37878244706053,
-            "refine": "REPLACE",
-            "content": {
-                "uri": "0/0/0.b3dm",
-                "boundingVolume": {
-                "region": [
-                    -0.0004001690908972599,
-                    0.8988700116775743,
-                    0.00010096729722787196,
-                    0.8989625664878067,
-                    0,
-                    241.6
-                    ]
-                }
-              }
-            }})");
-
-        auto root = RootTile();
-        root.read(doc["root"]);
-        QVERIFY(root.write() == doc["root"]);
     }
 
     void testBaseTile() {
@@ -506,10 +472,8 @@ private slots:
                 }
               ]
         }})");
-        auto tile = BaseTile();
+        BaseTile tile;
         tile.read(doc.object());
-        QString str = QJsonDocument(tile.write().toObject()).toJson();
-        QVERIFY(tile.write() == doc.object());
     }
 
 };

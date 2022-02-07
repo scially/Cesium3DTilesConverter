@@ -1,6 +1,5 @@
-#include <BoundingVolume.h>
 #include <BoundingVolumeRegion.h>
-
+#include <QDebug>
 
 namespace gzpi {
 
@@ -20,8 +19,9 @@ namespace gzpi {
     }
 
     void BoundingVolumeRegion::read(const QJsonValue& object) {
-        if (!required(object, QJsonValue::Array))
-            throw TilesParseException("region is required");
+        if(!object.isArray()){
+            qCritical() << "parse BoundingVolumeRegion: " << object << " failed\n";
+        }
 
         west = object[0].toDouble();
         south = object[1].toDouble();
@@ -82,4 +82,25 @@ namespace gzpi {
         osg::Vec3d _min(min[0], min[1], min[2]);
         mergeMin(_min);
     }
+
+    BoundingVolumeRegion BoundingVolumeRegion::toRadin(double lon, double lat) const {
+        double lonr = osg::DegreesToRadians(lon);
+        double latr = osg::DegreesToRadians(lat);
+
+        double west = lonr + Math::meterToLon(this->west, latr);
+        double south = latr + Math::meterToLat(this->south);
+
+        double east = lonr + Math::meterToLon(this->east, latr);
+        double north = latr + Math::meterToLat(this->north);
+
+        BoundingVolumeRegion region;
+        region.west = west;
+        region.south = south;
+        region.east = east;
+        region.north = north;
+        region.minHeight = minHeight;
+        region.maxHeight = maxHeight;
+        return region;
+    }
+
 }

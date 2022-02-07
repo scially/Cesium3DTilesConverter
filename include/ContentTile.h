@@ -5,7 +5,7 @@
 #include <QJsonValue>
 #include <QJsonObject>
 #include <BoundingVolume.h>
-
+#include <optional>
 namespace gzpi {
     /// <summary>
     /// Metadata about the tile's content and a link to the content.
@@ -28,7 +28,7 @@ namespace gzpi {
             return "content";
         }
 
-        BoundingVolume::BoundingVolumePtr boundingVolume;
+        std::optional<BoundingVolume> boundingVolume;
         QString uri;
     };
 
