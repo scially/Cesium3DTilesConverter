@@ -3,7 +3,7 @@
 #include <QString>
 
 
-namespace gzpi {
+namespace scially {
     class ModelMetadata {
     public:
         QString srs;

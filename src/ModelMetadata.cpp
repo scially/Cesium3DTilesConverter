@@ -6,7 +6,7 @@
 #include <CoordinateConvert.h>
 #include <TilesConvertException.h>
 
-namespace gzpi {
+namespace scially {
     void ModelMetadata::parse(const QString &input){
         QFile metaDataFile(input);
         if(!metaDataFile.exists()){

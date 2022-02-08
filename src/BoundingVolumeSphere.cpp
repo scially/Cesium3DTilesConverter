@@ -2,7 +2,7 @@
 #include <QJsonValue>
 #include <QDebug>
 
-namespace gzpi {
+namespace scially {
 
     QJsonValue BoundingVolumeSphere::write() {
         QJsonObject object;

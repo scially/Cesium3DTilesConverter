@@ -6,7 +6,7 @@
 #include <QJsonObject>
 #include <BoundingVolume.h>
 #include <optional>
-namespace gzpi {
+namespace scially {
     /// <summary>
     /// Metadata about the tile's content and a link to the content.
     /// -------------------------------------------------------------------------------------------------

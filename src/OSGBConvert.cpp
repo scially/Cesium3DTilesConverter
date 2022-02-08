@@ -19,7 +19,7 @@
 #include <tiny_gltf.h>
 
 
-namespace gzpi {
+namespace scially {
 
     QString OSGBConvert::absoluteLocation() const {
         return QDir(nodePath).filePath(nodeName);

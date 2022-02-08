@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QDomDocument>
 
-namespace gzpi {
+namespace scially {
 
     void OSGBConvertJob::run() {
         // 解析XML中的坐标

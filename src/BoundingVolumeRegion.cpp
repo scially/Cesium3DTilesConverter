@@ -1,7 +1,8 @@
 #include <BoundingVolumeRegion.h>
+#include <Utils.h>
 #include <QDebug>
 
-namespace gzpi {
+namespace scially {
 
     QJsonValue BoundingVolumeRegion::write() {
         QJsonObject object;
@@ -87,11 +88,11 @@ namespace gzpi {
         double lonr = osg::DegreesToRadians(lon);
         double latr = osg::DegreesToRadians(lat);
 
-        double west = lonr + Math::meterToLon(this->west, latr);
-        double south = latr + Math::meterToLat(this->south);
+        double west = lonr + meterToLon(this->west, latr);
+        double south = latr + meterToLat(this->south);
 
-        double east = lonr + Math::meterToLon(this->east, latr);
-        double north = latr + Math::meterToLat(this->north);
+        double east = lonr + meterToLon(this->east, latr);
+        double north = latr + meterToLat(this->north);
 
         BoundingVolumeRegion region;
         region.west = west;
@@ -101,6 +102,21 @@ namespace gzpi {
         region.minHeight = minHeight;
         region.maxHeight = maxHeight;
         return region;
+    }
+
+    BoundingVolumeRegion BoundingVolumeRegion::fromCenterXY(double centerX, double centerY, double xDiff, double yDiff, double minHeight, double maxHeight) {
+        BoundingVolumeRegion region;
+        double centerXr = osg::DegreesToRadians(centerX);
+        double centerYr = osg::DegreesToRadians(centerY);
+        double xDiffr = osg::DegreesToRadians(xDiff) * 1.05;
+        double yDiffr = osg::DegreesToRadians(yDiff) * 1.05;
+        region.west = centerXr - xDiffr / 2;
+        region.east = centerXr + xDiffr / 2;  
+        region.north = centerYr + yDiffr / 2;
+        region.south = centerYr - yDiffr / 2;
+        region.minHeight = minHeight;
+        region.maxHeight = maxHeight;
+        return region;  
     }
 
 }

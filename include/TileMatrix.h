@@ -8,7 +8,7 @@
 #include <QString>
 #include <osg/Matrixd>
 
-namespace gzpi {
+namespace scially {
     /// <summary>
     /// The transform property is a 4x4 affine transformation matrix, stored in column-major order, that 
     /// transforms from the tile's local coordinate system to the parent tile's coordinate system or

@@ -9,7 +9,7 @@
 #include <Refine.h>
 #include <TileMatrix.h>
 
-namespace gzpi {
+namespace scially {
 
     /// <summary>
     /// A tile in a 3D Tiles tileset.

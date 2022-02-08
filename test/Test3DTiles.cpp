@@ -2,7 +2,7 @@
 #include <BaseTile.h>
 #include <cmath>
 
-using namespace gzpi;
+using namespace scially;
 
 class Test3DTILES : public QObject {
     Q_OBJECT

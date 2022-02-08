@@ -8,7 +8,7 @@
 #include <QMap>
 #include <TilesParseException.h>
 
-namespace gzpi {
+namespace scially {
     class AssetProperties : public BaseObject {
     public:
         using AssetPropertiesPtr = QSharedPointer<AssetProperties>;

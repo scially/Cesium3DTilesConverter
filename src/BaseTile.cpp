@@ -1,6 +1,6 @@
 #include <BaseTile.h>
 
-namespace gzpi {
+namespace scially {
  
     QJsonValue BaseTile::write() {
         QJsonObject object;

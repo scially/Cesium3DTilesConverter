@@ -4,7 +4,7 @@
 #include <QException>
 #include <QString>
 
-namespace gzpi {
+namespace scially {
     class TilesParseException : public QException {
     public:
         TilesParseException(const char* err) : err(err) {}

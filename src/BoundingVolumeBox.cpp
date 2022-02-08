@@ -1,7 +1,7 @@
 #include <BoundingVolumeBox.h>
 
 
-namespace gzpi {
+namespace scially {
 
     QJsonValue BoundingVolumeBox::write() {
         QJsonObject object;

@@ -4,7 +4,7 @@
 #include <osg/Math>
 #include <osg/Vec3d>
 #include <osg/Matrixd>
-namespace gzpi {
+namespace scially {
 
     QJsonValue TileMatrix::write() {
         QJsonArray array;

@@ -1,7 +1,7 @@
 #include <QString>
 #include <OSGBPageLodVisitor.h>
 
-namespace gzpi {
+namespace scially {
  
     void OSGBPageLodVisitor::apply(osg::Geometry& geometry) {
         geometryArray.append(&geometry);

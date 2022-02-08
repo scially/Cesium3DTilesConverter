@@ -6,45 +6,48 @@
 #include <QException>
 #include <ogr_spatialref.h>
 
-namespace gzpi {
+namespace scially {
 	class OGRException : QException {
 	public:
-		OGRException(OGRErr err) : error(err) {}
-		
-        virtual const char* what() const noexcept override {
-			switch (error) {
+		OGRException(const QString& err) : error(err) {}
+		OGRException(OGRErr err) {
+			switch (err) {
 			case OGRERR_NOT_ENOUGH_DATA:
-				return "Not enough data";
+				error =  "Not enough data";
 				break;
 			case OGRERR_NOT_ENOUGH_MEMORY:
-				return "Not enough memory";
+				error =  "Not enough memory";
 				break;
 			case OGRERR_UNSUPPORTED_GEOMETRY_TYPE:
-				return "Unsupported geometry type";
+				error = "Unsupported geometry type";
 				break;
 			case OGRERR_UNSUPPORTED_OPERATION:
-				return "Unsupported operation";
+				error = "Unsupported operation";
 				break;
 			case OGRERR_CORRUPT_DATA:
-				return "Corrupt data";
+				error = "Corrupt data";
 				break;
 			case OGRERR_FAILURE:
-				return "Failure";
+				error = "Failure";
 				break;
 			case OGRERR_UNSUPPORTED_SRS:
-				return "Unsupported srs";
+				error = "Unsupported srs";
 				break;
 			case OGRERR_INVALID_HANDLE:
-				return "Invalid handle";
+				error = "Invalid handle";
 				break;
 			case OGRERR_NON_EXISTING_FEATURE:
-				return "Non existing feataure";
+				error = "Non existing feataure";
 				break;
 			default:
-				return "Unkonwn error";
-			}	
+				error = "Unkonwn error";
+			}
+		}
+		
+        virtual const char* what() const noexcept override {
+			return error.toStdString().data();
 		}
 	private:
-		OGRErr error;
+		QString error;
 	};
 }

@@ -6,7 +6,7 @@
 #include <BaseObject.h>
 #include <BoundingVolumeRegion.h>
 
-namespace gzpi {
+namespace scially {
     /// <summary>
     /// The boundingVolume.box property is an array of 12 numbers 
     /// that define an oriented bounding box in a right-handed 3-axis (x, y, z) Cartesian coordinate system 

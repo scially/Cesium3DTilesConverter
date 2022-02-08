@@ -7,10 +7,10 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <BaseObject.h>
-#include <CoordinateConvert.h>
+#include <Utils.h>
 #include <osg/Math>
 
-namespace gzpi {
+namespace scially {
 
     /// <summary>
     /// The boundingVolume.region property is an array of six numbers that define the bounding geographic region 
@@ -65,7 +65,8 @@ namespace gzpi {
         }
 
         BoundingVolumeRegion toRadin(double lon, double lat) const;
-
+        
+        static BoundingVolumeRegion fromCenterXY(double centerX, double centerY, double xLength, double yLength, double minHeight, double maxHeight);
         virtual ~BoundingVolumeRegion() {}
     };
 }

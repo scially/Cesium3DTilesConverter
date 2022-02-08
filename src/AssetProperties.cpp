@@ -1,6 +1,6 @@
 #include <AssetProperties.h>
 
-namespace gzpi {
+namespace scially {
     QJsonValue AssetProperties::write() {
         QJsonObject object;
         for (auto iter = assets.constKeyValueBegin(); iter != assets.constKeyValueEnd(); iter++) {

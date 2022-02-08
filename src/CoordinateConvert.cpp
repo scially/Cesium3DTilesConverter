@@ -1,6 +1,6 @@
 #include <CoordinateConvert.h>
 
-namespace gzpi {
+namespace scially {
 	void CoordinateConvert::setSourceSrs(const QString& srs, SrsType t) noexcept(false) {
 		setSrs(sourceSrs, srs, t);
 	}

@@ -1,11 +1,11 @@
 #pragma once
 
 #include <QDebug>
-#include <QException>
+#include <OGRException.h>
 #include <QSharedPointer>
 #include <ogrsf_frmts.h>
 
-namespace gzpi {
+namespace scially {
     namespace internal {
         class GDALDriverWrapper {
         public:
@@ -14,82 +14,63 @@ namespace gzpi {
             }
         };
     }
-    class GDALWrapperError: public QException{
-    public:
-        GDALWrapperError() = default;
-        GDALWrapperError(const QString &m): msg(m) {}
-        virtual const char* what() const override {
-            return msg.isEmpty() ? "GDAL Unknown error" : msg.toStdString().data();
-        }
-    private:
-        QString msg;
-    };
+
+    class OGRFeatureWrapper;
+    class OGRLayerWrapper;
+    class GDALDatasetWrapper;
+
 
    class OGRFeatureWrapper {
    public:
-       OGRFeatureWrapper(const OGRFeatureWrapper &) = delete;
-       OGRFeatureWrapper(OGRFeatureWrapper &&) = default;
-       OGRFeatureWrapper& operator=(const OGRFeatureWrapper& other) = delete;
-       OGRFeatureWrapper& operator=(OGRFeatureWrapper&& other) = default;
+       friend class OGRLayerWrapper;
 
-       QSharedPointer<OGRGeometry> GetGeometryRef() {
-           OGRGeometry *geom = feature->GetGeometryRef();
-           return QSharedPointer<OGRGeometry>(geom);
+       OGRGeometry* GetGeometryRef() {
+           return feature->GetGeometryRef();
        }
+
        double GetFieldAsDouble(GIntBig fid){
            return feature->GetFieldAsDouble(fid);
        }
 
-       bool isValid() {
+       bool isValid() const{
            return feature != nullptr;
        }
+
        GIntBig GetFID(){
            return feature->GetFID();
        }
 
    private:
-       explicit OGRFeatureWrapper(OGRFeature *feature):feature(feature) {}
+       explicit OGRFeatureWrapper(OGRFeature *f){
+           feature = QSharedPointer<OGRFeature>(f, &OGRFeature::DestroyFeature);
+       }
+
        QSharedPointer<OGRFeature> feature;
    };
 
-   class OGRFeatureDefnWrapper{
-   public:
-       OGRFeatureDefnWrapper(const OGRFeatureDefnWrapper &) = delete;
-       OGRFeatureDefnWrapper(OGRFeatureDefnWrapper &&) = default;
-       OGRFeatureDefnWrapper& operator=(const OGRFeatureDefnWrapper& other) = delete;
-       OGRFeatureDefnWrapper& operator=(OGRFeatureDefnWrapper&& other) = default;
-
-       int GetFieldIndex(const char* name){
-           int index = def->GetFieldIndex(name);
-           if(index == -1)
-               throw GDALWrapperError(QString("No Field ") + name + "in Feature Define");
-           return index;
-       }
-
-   private:
-       explicit OGRFeatureDefnWrapper(OGRFeatureDefn* d): def(d){}
-       QSharedPointer<OGRFeatureDefn> def;
-   };
 
    class OGRLayerWrapper {
    public:
-       friend class OGRFeatureWrapper;
-       friend class OGRFeatureDefnWrapper;
+       friend class GDALDatasetWrapper;
 
-       OGRLayerWrapper(const OGRLayerWrapper &) = delete;
-       OGRLayerWrapper(OGRLayerWrapper &&) = default;
-       OGRLayerWrapper& operator=(const OGRLayerWrapper& other) = delete;
-       OGRLayerWrapper& operator=(OGRLayerWrapper&& other) = default;
-
-       QSharedPointer<OGRFeatureWrapper> GetNextFeature(){
+       OGRFeatureWrapper GetNextFeature(){
            OGRFeature* feature = layer->GetNextFeature();
-           return QSharedPointer<OGRFeatureWrapper>::create(feature);
+           return OGRFeatureWrapper(feature);
+       }
+
+       OGREnvelope GetExtent(int bForce = 1) {
+           OGREnvelope envelope;
+           OGRErr err = layer->GetExtent(&envelope, bForce);
+           if (err != OGRERR_NONE)
+               throw OGRException(err);
+
+           return envelope;
        }
 
        OGRFeatureWrapper GetFeature(GIntBig fid){
            OGRFeature* feature = layer->GetFeature(fid);
            if(feature == nullptr){
-               throw GDALWrapperError(QString("No feature ") + fid + "in Layer");
+               throw OGRException(QString("No feature ") + fid + "in Layer");
            }
            return OGRFeatureWrapper(feature);
        }
@@ -102,22 +83,17 @@ namespace gzpi {
            layer->ResetReading();
        }
 
-       OGREnvelope GetExtent(){
-           OGREnvelope e;
-           layer->GetExtent(&e);
-           return e;
+       OGRSpatialReference* GetSpatialRef() {
+           return layer->GetSpatialRef();
        }
 
-       OGRFeatureDefnWrapper GetLayerDefn(){
-           OGRFeatureDefn* def = layer->GetLayerDefn();
-           return OGRFeatureDefnWrapper(def);
+       OGRFeatureDefn* GetLayerDefn(){
+           return layer->GetLayerDefn();
        }
 
    private:
-       explicit OGRLayerWrapper(OGRLayer *layer): layer(layer){
-           Q_ASSERT(layer != nullptr);
-       }
-       QSharedPointer<OGRLayer> layer;
+       explicit OGRLayerWrapper(OGRLayer *layer): layer(layer){}
+       OGRLayer* layer;  // will auto dispose when ds close.
    };
 
    class GDALDatasetWrapper {
@@ -128,27 +104,25 @@ namespace gzpi {
                                              const char* const* papszAllowedDrivers = nullptr,
                                              const char* const* papszOpenOptions = nullptr,
                                              const char* const* papszSiblingFiles = nullptr){
+           static internal::GDALDriverWrapper init;
            GDALDataset *dataset = (GDALDataset*)GDALOpenEx(pszFilename,
                                                            nOpenFlags,
                                                            papszAllowedDrivers,
                                                            papszOpenOptions,
                                                            papszSiblingFiles);
+           if (dataset == nullptr)
+               throw OGRException(QString("Can't open dataset %1").arg(pszFilename));
+
            return GDALDatasetWrapper(dataset);
        }
 
        OGRLayerWrapper GetLayer(int iLayer){
             OGRLayer* layer = ds->GetLayer(iLayer);
-            if(layer == nullptr){
-                throw GDALWrapperError();
-            }
             return OGRLayerWrapper(layer);
        }
 
        OGRLayerWrapper GetLayerByName(const char *nLayer){
             OGRLayer* layer = ds->GetLayerByName(nLayer);
-            if(layer == nullptr){
-                throw GDALWrapperError();
-            }
             return OGRLayerWrapper(layer);
        }
        bool isValid() const{
@@ -164,8 +138,7 @@ namespace gzpi {
        };
        // dataset 将被 GDALDatasetWrapper 接管
        explicit GDALDatasetWrapper(GDALDataset *dataset){
-           Q_ASSERT(dataset != nullptr);
-           ds = QSharedPointer<GDALDataset>(nullptr, GDALDatasetDeleteWrapper());
+           ds = QSharedPointer<GDALDataset>(dataset, GDALDatasetDeleteWrapper());
        }
        QSharedPointer<GDALDataset> ds;
    };

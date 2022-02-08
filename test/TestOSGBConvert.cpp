@@ -2,7 +2,7 @@
 #include <OSGBConvert.h>
 
 
-using namespace gzpi;
+using namespace scially;
 
 class TestOSGBConvert : public QObject {
     Q_OBJECT

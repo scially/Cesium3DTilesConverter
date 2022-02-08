@@ -1,12 +1,20 @@
 #include <QuadTree.h>
-#include <CoordinateConvert.h>
+#include <Utils.h>
 
-namespace gzpi {
-    bool QuadTree::add(long long id, const OGREnvelope& box) {
+namespace scially {
+
+    QuadTree::QuadTree(double minX, double maxX, double minY, double maxY) {
+        envelope.MinX = minX;
+        envelope.MaxX = maxX;
+        envelope.MinY = minY;
+        envelope.MaxY = maxY;
+    }
+
+    bool QuadTree::add(int id, const OGREnvelope& box) {
           if (!envelope.Intersects(box)) {
               return false;
           }
-          if (envelope.MaxX - envelope.MinX < Math::METERIC) {
+          if (envelope.MaxX - envelope.MinX <= METERIC) {
               geoms.append(id);
               return true;
           }
@@ -28,7 +36,7 @@ namespace gzpi {
     void QuadTree::split() {
         double cX = (envelope.MinX + envelope.MaxX) / 2.0;
         double cY = (envelope.MinY + envelope.MaxY) / 2.0;
-        nodes.reserve(4);
+        nodes.resize(4);
         for (int i = 0; i < 4; i++) {
             OGREnvelope box;
             switch (i) {
@@ -39,7 +47,7 @@ namespace gzpi {
                     box.MaxY = cY;
 
                     nodes[i] = new QuadTree(box);
-                    nodes[i]->setNo(row * 2, col * 2, zoom + 1);
+                    nodes[i]->setNo(row * 2, col * 2, level + 1);
                     break;
                  case 1:
                     box.MinX = cX;
@@ -48,7 +56,7 @@ namespace gzpi {
                     box.MaxY = cY;
 
                     nodes[i] = new QuadTree(box);
-                    nodes[i]->setNo(row * 2 + 1, col * 2, zoom + 1);
+                    nodes[i]->setNo(row * 2 + 1, col * 2, level + 1);
                     break;
                   case 2:
                     box.MinX = cX;
@@ -57,7 +65,7 @@ namespace gzpi {
                     box.MaxY = envelope.MaxY;
 
                     nodes[i] = new QuadTree(box);
-                    nodes[i]->setNo(row * 2 + 1, col * 2 + 1, zoom + 1);
+                    nodes[i]->setNo(row * 2 + 1, col * 2 + 1, level + 1);
                     break;
                   case 3:
                     box.MinX = envelope.MinX;
@@ -66,7 +74,7 @@ namespace gzpi {
                     box.MaxY = envelope.MaxY;
 
                     nodes[i] = new QuadTree(box);
-                    nodes[i]->setNo(row * 2, col * 2 + 1, zoom + 1);
+                    nodes[i]->setNo(row * 2, col * 2 + 1, level + 1);
                     break;
               }
         }

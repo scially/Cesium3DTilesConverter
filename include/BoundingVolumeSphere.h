@@ -8,7 +8,7 @@
 #include <QJsonObject>
 
 
-namespace gzpi {
+namespace scially {
     /// <summary>
     /// The boundingVolume.sphere property is an array of four numbers that define a bounding sphere. 
     /// The first three elements define the x, y, and z values 

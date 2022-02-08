@@ -11,7 +11,7 @@
 
 #include <limits>
 
-namespace gzpi {
+namespace scially {
     class OSGBLevel {
     public:
         static constexpr const char* OSGBEXTENSION = ".osgb";

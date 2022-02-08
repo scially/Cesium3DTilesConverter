@@ -11,13 +11,13 @@
 #include <QSharedPointer>
 #include <QDomDocument>
 
-namespace gzpi {
+namespace scially {
     class OSGBConvertTask;
 
     class OSGBConvertJob: public QObject{
         Q_OBJECT
     public:
-        explicit OSGBConvertJob(const QString& input, const QString &output)
+        OSGBConvertJob(const QString& input, const QString &output)
             :input(input), output(output), threadPool(new QThreadPool) {}
 
         void setMaxThread(int thread){

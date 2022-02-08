@@ -2,7 +2,7 @@
 #include <TilesParseException.h>
 #include <QDebug>
 
-namespace gzpi {
+namespace scially {
     void Refine::read(const QJsonValue& object) {
        if(object.isString()){
             type = object.toString();

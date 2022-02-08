@@ -2,7 +2,7 @@
 #include <OSGBLevel.h>
 #include <BaseTile.h>
 
-using namespace gzpi;
+using namespace scially;
 
 class TestOSGBLevel : public QObject {
     Q_OBJECT

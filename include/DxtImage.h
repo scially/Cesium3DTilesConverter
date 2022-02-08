@@ -3,7 +3,7 @@
 #include <osg/Image>
 #include <vector>
 
-namespace gzpi {
+namespace scially {
     
     struct Color {
         int r;

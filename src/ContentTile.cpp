@@ -1,11 +1,11 @@
 #include <ContentTile.h>
 #include <TilesParseException.h>
 
-namespace gzpi {
+namespace scially {
 
     QJsonValue ContentTile::write() {
         QJsonObject object;
-        if (boundingVolume.has_value())
+        if (boundingVolume.has_value() && boundingVolume->hasValue())
             object["boundingVolume"] = boundingVolume->write();
         object["uri"] = uri;
         return object;

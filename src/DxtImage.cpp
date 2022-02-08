@@ -2,7 +2,7 @@
 
 using namespace std;
 
-namespace gzpi {
+namespace scially {
 
     Color RGB565_RGB(unsigned short color0) {
         unsigned char r0 = ((color0 >> 11) & 0x1F) << 3;

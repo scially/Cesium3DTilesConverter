@@ -1,4 +1,5 @@
 #include <OSGBConvertJob.h>
+#include <ShpConvertJob.h>
 #include <TilesConvertException.h>
 #include <QCoreApplication>
 #include <QCommandLineParser>
@@ -26,6 +27,8 @@ int main(int argc, char** argv){
     parser.addOption(heightOption);
     const QCommandLineOption fieldOption("field", "height field name", "filed");
     parser.addOption(fieldOption);
+    const QCommandLineOption layerOption("layer", "layer name", "layer");
+    parser.addOption(layerOption);
     const QCommandLineOption threadOption("thread", "thread count", "thread", "4");
     parser.addOption(threadOption);
 
@@ -51,26 +54,27 @@ int main(int argc, char** argv){
     if(format == "OSGB"){
         const int maxLevel = parser.value(maxLvlOption) == "-1" ? std::numeric_limits<int>::max(): parser.value(maxLvlOption).toInt();
         const double height = parser.value(heightOption) == "0" ? 0 : parser.value(heightOption).toDouble();
-        gzpi::OSGBConvertJob osgbConvert(input, output);
+        scially::OSGBConvertJob osgbConvert(input, output);
         osgbConvert.setMaxLevel(thread);
         osgbConvert.setHeight(height);
         osgbConvert.setMaxLevel(maxLevel);
-        try{
-            osgbConvert.run();
-        }catch(gzpi::TilesConvertException &e){
-            qCritical() << e.what();
-            app.exit(1);
-        }catch(...){
-            qCritical() << "Unknown error";
-            app.exit(1);
-        }
+        osgbConvert.run();
     }
     else if (format == "SHAPE"){
         if(!parser.isSet(fieldOption)){
             qCritical() << "Commandline field is requested";
             return 1;
         }
+        if (!parser.isSet(layerOption)) {
+            qCritical() << "Commandline layer is requested";
+            return 1;
+        }
         const QString fieldName = parser.value(fieldOption);
+        const QString layerName = parser.value(layerOption);
+
+        scially::ShpConvertJob shpConvert(input, layerName, output, fieldName);
+        shpConvert.run();
+      
     }
     else{
         qCritical() << "Only support osgb and shape format";

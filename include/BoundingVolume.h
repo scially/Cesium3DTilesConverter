@@ -12,7 +12,7 @@
 #include <BoundingVolumeSphere.h>
 #include <QDebug>
 
-namespace gzpi {
+namespace scially {
 
     class BoundingVolume : public BaseObject {
     public:
@@ -34,9 +34,13 @@ namespace gzpi {
                 return sphere->write();
             }else{
                 // TODO: BoundingVolume type must be box,region,sphere
-                qCritical() << "BoundingVolume type must be box,region,sphere\n";
+                qCritical() << "BoundingVolume not set";
                 return QJsonValue();
             }
+        }
+
+        bool hasValue() const {
+            return box.has_value() || region.has_value() || sphere.has_value();
         }
 
         inline BoundingVolume& operator =(const BoundingVolumeBox &box) {
@@ -90,4 +94,3 @@ namespace gzpi {
     };
 }
 
-Q_DECLARE_METATYPE(gzpi::BoundingVolume);

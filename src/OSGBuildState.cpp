@@ -1,7 +1,7 @@
 #include <OSGBuildState.h>
 #include <QDebug>
 
-namespace gzpi {
+namespace scially {
 
     bool OSGBuildState::appendOSGGeometry(const osg::Geometry* geom) {
         osg::PrimitiveSet::Type type = geom->getPrimitiveSet(0)->getType();

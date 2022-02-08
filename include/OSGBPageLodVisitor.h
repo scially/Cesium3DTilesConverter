@@ -14,7 +14,7 @@
 #include <stb_image_write.h>
 #include <DxtImage.h>
 
-namespace gzpi {
+namespace scially {
 	
     class OSGBPageLodVisitor : public osg::NodeVisitor
     {

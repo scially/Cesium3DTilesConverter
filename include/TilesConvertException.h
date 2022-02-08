@@ -4,7 +4,7 @@
 #include <QException>
 #include <QString>
 
-namespace gzpi {
+namespace scially {
     class TilesConvertException : public QException {
     public:
         TilesConvertException(const QString &err) : err(err) {}

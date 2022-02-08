@@ -16,7 +16,7 @@
 #include <QJsonDocument>
 #include <TilesParseException.h>
 
-namespace gzpi {
+namespace scially {
     /// <summary>
     /// A 3D Tiles tileset.
     /// -----------------------------------------------------------------------------

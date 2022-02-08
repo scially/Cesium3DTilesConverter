@@ -5,23 +5,20 @@
 #include <QVector>
 #include <QString>
 
-namespace gzpi {
+namespace scially {
 
     class QuadTree {
     public:
         QuadTree() = default;
-        QuadTree(double minX, double maxX, double minY, double maxY){
-            envelope.MinX = minX;
-            envelope.MaxX = maxX;
-            envelope.MinY = minY;
-            envelope.MaxY = maxY;
-        }
+        QuadTree(double minX, double maxX, double minY, double maxY);
         QuadTree(const OGREnvelope &e): envelope(e) {}
-        bool add(long long id, const OGREnvelope& box);
-        void setNo(int r, int c, int z){
+
+        bool add(int id, const OGREnvelope& box);
+        
+        void setNo(int r, int c, int l){
             row  = r;
             col  = c;
-            zoom = z;
+            level = l;
         }
         void setEnvelope(const OGREnvelope &e){
             envelope.MinX = e.MinX;
@@ -31,7 +28,9 @@ namespace gzpi {
         }
 
         void traverse(std::function<void(QuadTree*)> f){
-            f(this);
+            if(!geoms.isEmpty())
+                f(this);
+            
             for(auto iter = nodes.begin(); iter != nodes.end(); iter++){
                 (*iter)->traverse(f);
             }
@@ -39,7 +38,9 @@ namespace gzpi {
 
         int geomsSize() const { return geoms.size(); }
         int getGeomFID(int i) const { return geoms.at(i); }
-
+        int getRow() const { return row; }
+        int getCol() const { return col; }
+        int getLevel() const { return level; }
         virtual ~QuadTree() {
             for(auto iter = nodes.begin(); iter != nodes.end(); iter++){
                 if(*iter != nullptr)
@@ -52,10 +53,9 @@ namespace gzpi {
 
         OGREnvelope envelope;
         QVector<QuadTree*> nodes;
-        long long id;
         int row = 0;
         int col = 0;
-        int zoom = 0;
+        int level = 0;
         QVector<int> geoms;
     };
 }

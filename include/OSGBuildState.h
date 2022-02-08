@@ -10,7 +10,7 @@
 #include <osgUtil/Optimizer>
 #include <osgUtil/SmoothingVisitor>
 
-namespace gzpi {
+namespace scially {
     class OSGBuildState
     {
     public:

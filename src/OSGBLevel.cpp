@@ -10,7 +10,7 @@
 #include <TilesConvertException.h>
 #include <QDebug>
 
-namespace gzpi {
+namespace scially {
 
     QString OSGBLevel::absoluteLocation() const {
         return QDir(nodePath).filePath(nodeName) + OSGBEXTENSION;

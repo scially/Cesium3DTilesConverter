@@ -4,7 +4,7 @@
 #include <QJsonArray>
 #include <QJsonValue>
 #include <QJsonObject>
-namespace gzpi {
+namespace scially {
     class BaseObject {
     public:
         using BasePtr = QSharedPointer<BaseObject>;

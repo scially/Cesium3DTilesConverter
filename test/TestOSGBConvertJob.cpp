@@ -1,7 +1,7 @@
 #include <QtTest/QTest>
 #include <OSGBConvertJob.h>
 
-using namespace gzpi;
+using namespace scially;
 
 class TestOSGBConvertJob : public QObject {
     Q_OBJECT

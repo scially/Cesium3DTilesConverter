@@ -8,7 +8,7 @@
 #include <QJsonArray>
 #include <QMetaEnum>
 
-namespace gzpi {
+namespace scially {
     /// <summary>
     /// Refinement determines the process by which a lower resolution parent tile renders
     /// when its higher resolution children are selected to be rendered.

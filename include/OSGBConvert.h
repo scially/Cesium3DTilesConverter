@@ -9,7 +9,7 @@
 #include <BoundingVolumeRegion.h>
 #include <BoundingVolumeBox.h>
 
-namespace gzpi {
+namespace scially {
     class OSGBConvert {
     public:
         OSGBConvert() {}

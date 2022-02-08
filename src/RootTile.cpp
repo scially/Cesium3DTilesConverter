@@ -1,6 +1,6 @@
 #include <RootTile.h>
 
-namespace gzpi {
+namespace scially {
 
     RootTile::RootTile() {
         children.clear();
