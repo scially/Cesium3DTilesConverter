@@ -19,7 +19,7 @@ int main(int argc, char** argv){
     parser.addOption(inputOption);
     const QCommandLineOption outputOption("output", "output path", "output");
     parser.addOption(outputOption);
-    const QCommandLineOption formatOption("format", "<OSGB,SHAPE>", "format");
+    const QCommandLineOption formatOption("format", "<OSGB,GDAL>", "format");
     parser.addOption(formatOption);
     const QCommandLineOption maxLvlOption("level", "max level", "level", "-1");
     parser.addOption(maxLvlOption);
@@ -60,7 +60,7 @@ int main(int argc, char** argv){
         osgbConvert.setMaxLevel(maxLevel);
         osgbConvert.run();
     }
-    else if (format == "SHAPE"){
+    else if (format == "GDAL"){
         if(!parser.isSet(fieldOption)){
             qCritical() << "Commandline field is requested";
             return 1;

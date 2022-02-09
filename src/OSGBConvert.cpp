@@ -1,10 +1,8 @@
-#pragma once
-
 #include <OSGBConvert.h>
+#include <Batched3DModel.h>
 #include <OSGBPageLodVisitor.h>
 #include <osgDB/ReadFile>
 #include <osg/Image>
-#include <vector>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -12,6 +10,8 @@
 #include <QDataStream>
 #include <QDebug>
 
+#include <vector>
+#include <initializer_list>
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #define TINYGLTF_IMPLEMENTATION
@@ -57,32 +57,13 @@ namespace scially {
         if (glbBuffer.isEmpty())
             return QByteArray();
 
-        QString featureTable = R"({"BATCH_LENGTH":1})";
-        while (featureTable.size() % 4 != 0) {
-            featureTable.append(' ');
-        }
+        Batched3DModel b3dm;
+        b3dm.glbBuffer = glbBuffer;
+        b3dm.batchLength = 1;
+        b3dm.batchID = { 0 };
+        b3dm.names = {"mesh_0"};
 
-        QString batchTable = R"({"batchId":[0],"name":["mesh_0"]})";
-        while (batchTable.size() % 4 != 0) {
-            batchTable.append(' ');
-        }
-
-        int totalSize = 28 /*header size*/ + featureTable.size() + batchTable.size() + glbBuffer.size();
-
-        b3dmStream.writeRawData("b3dm", 4);
-        b3dmStream << 1;          // version
-        b3dmStream << totalSize;
-        b3dmStream << featureTable.size();
-        b3dmStream << 0;
-        b3dmStream << batchTable.size();
-        b3dmStream << 0;
-
-        // DataStream << will write byte length first, so invoke wrteRawData
-        b3dmStream.writeRawData(featureTable.toStdString().data(), featureTable.size());
-        b3dmStream.writeRawData(batchTable.toStdString().data(), batchTable.size());
-        b3dmStream.writeRawData(glbBuffer.data(), glbBuffer.size());
-
-        return b3dmBuffer;
+        return b3dm.write();
     }
 
     QByteArray OSGBConvert::convertGLB() {
