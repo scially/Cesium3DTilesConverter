@@ -47,6 +47,7 @@ namespace scially {
         bool getAllOSGBLevels(int maxLevel);
         bool convertTiles(BaseTile &tile, const QString& output, int maxLevel = std::numeric_limits<int>::max());
         bool convertTiles(RootTile &root, const QString& output);
+        void updateGeometryError(RootTile &root);
 
 
     private:

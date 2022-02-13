@@ -38,7 +38,7 @@ namespace scially {
             return 0;
         }
         double halfXLength () {
-            return (region.west - region.east) / 2;
+            return (region.east - region.west) / 2;
         }
 
         double directionY0() {
@@ -50,7 +50,7 @@ namespace scially {
         }
 
         double halfYLength () {
-            return (region.south - region.north) / 2;
+            return (region.north - region.south) / 2;
         }
 
         double directionZ0 () {
@@ -62,7 +62,7 @@ namespace scially {
         }
 
         double halfZLength () {
-            return (region.minHeight + region.maxHeight) / 2;
+            return (region.maxHeight - region.minHeight) / 2;
         }
 
         virtual QJsonValue write() override;

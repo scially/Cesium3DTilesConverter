@@ -18,7 +18,7 @@
 提供了如下的子工具：
 
 - `OSGB(OpenSceneGraph Binary)` 转 `3DTiles`
-- `Esri Shapefile` 转 `3DTiles`
+- `GDAL数据集` 转 `3DTiles`
 
 # 用法说明
 
@@ -55,6 +55,7 @@ Converter.exe --format gdal --input <GDB Path> --output <DIR>  --field height --
 - `--field` 高度字段。指定GDAL数据集中的高度属性字段，此项为转换 GDAL 时的必须参数。
 
 - `--offset` OSGB高度偏移字段。
+- `--thread` 处理线程数量（仅对OSGB生效）
 
 # 数据要求及说明
 
@@ -87,5 +88,3 @@ Converter.exe --format gdal --input <GDB Path> --output <DIR>  --field height --
    2. vcpkg install "qt5[all]"
 3. VS2019选择CMakeLists.txt，导入工程，编译
 4. 把OSGPlugins文件夹复制到编译目录下
-
-# About Author

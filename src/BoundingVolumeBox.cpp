@@ -70,8 +70,7 @@ namespace scially {
         return region.getMax();
     }
     double BoundingVolumeBox::geometricError() const {
-        //return region.geometricError();
-        return 1000;
+        return region.geometricError();
     }
 
     BoundingVolumeBox BoundingVolumeBox::merge(BoundingVolumeBox bounding) const {

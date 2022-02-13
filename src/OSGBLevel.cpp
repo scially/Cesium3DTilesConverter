@@ -79,18 +79,21 @@ namespace scially {
             return false;
         }
 
+        //update geometry error
+        updateGeometryError(childTile);
+
+
         // update this region
         this->region = childTile.boundingVolume.box.value();
-        this->geometricError = 1000;
 
         // update root tile
-        tile.geometricError = 1000;
+        tile.geometricError = 2000;
         tile.asset.assets["gltfUpAxis"] = "Z";
         tile.asset.assets["version"] = "1.0";
-        // tile.root.transform = TileMatrix::fromXYZ(lon, lat, 0); // still child tile, so doesn't need transform
+
         tile.root.children.append(childTile);
         tile.root.boundingVolume = this->region;
-        tile.root.geometricError = this->region.geometricError();
+        tile.root.geometricError = 1000;
         QJsonDocument jsonDoc(tile.write().toObject());
         QByteArray json = jsonDoc.toJson(QJsonDocument::Indented);
         QFile tilesetFile(output + "/" + getTileName() + "/tileset.json");
@@ -121,19 +124,29 @@ namespace scially {
        
         root.refine = "REPLACE";
         root.content = content;
-        root.boundingVolume = content.boundingVolume.value();
-        root.geometricError = root.boundingVolume.box->geometricError();
+        root.boundingVolume = BoundingVolumeBox(convert.region);
 
-        //
         for(int i = 0; i < subNodes.size(); i++){
             RootTile child;
             subNodes[i].convertTiles(child, output);
             root.children.append(child);
-            root.boundingVolume = root.boundingVolume.box->merge(child.boundingVolume.box.value());
-            root.geometricError = root.boundingVolume.box->geometricError();
+            root.boundingVolume = root.boundingVolume.box->merge(child.boundingVolume.box.value());  
         }
 
         return true;
+    }
+
+    void OSGBLevel::updateGeometryError(RootTile &root){
+        if(root.children.isEmpty()){
+            root.geometricError = 0;
+            return;
+        }
+        else{
+            for(auto& tile : root.children)
+                updateGeometryError(tile);
+            root.geometricError = root.children[0].boundingVolume.box->geometricError() * 2;
+        }
+
     }
 
 }
