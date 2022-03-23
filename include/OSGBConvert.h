@@ -27,7 +27,9 @@ namespace scially {
 
         bool writeB3DM(const QByteArray& buffer, const QString& outLocation);
         QByteArray toB3DM();
-  
+
+        bool yUpAxis = false;
+
     private:
         tinygltf::Material makeColorMaterialFromRGB(double r, double g, double b);
         QByteArray convertGLB();
@@ -35,6 +37,7 @@ namespace scially {
 
         QString              nodeName;
         QString              nodePath;
+
     };
 }
 

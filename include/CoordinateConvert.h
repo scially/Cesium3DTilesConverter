@@ -17,7 +17,8 @@ namespace scially {
 		enum SrsType {
 			WKT,
 			EPSG,
-			Proj4
+            Proj4,
+            Esri,
 		};
 		Q_ENUM(SrsType);
 

@@ -28,20 +28,20 @@ namespace scially {
     bool OSGBConvert::writeB3DM(const QByteArray &buffer, const QString& outLocation) {
 
         if (buffer.isEmpty()) {
-            qCritical() << "B3DM buffer is empty...\n";
+            qWarning() << "B3DM buffer is empty...\n";
             return false;
         }
 
         //
         QFile b3dmFile(outLocation + "/" + nodeName.replace(".osgb", ".b3dm"));
         if (!b3dmFile.open(QIODevice::ReadWrite)) {
-            qCritical() << "Can't open file [" << b3dmFile.fileName() << "]\n";
+            qWarning() << "Can't open file [" << b3dmFile.fileName() << "]\n";
             return false;
         }
         int writeBytes = b3dmFile.write(buffer);
 
         if (writeBytes <= 0) {
-            qCritical() << "Can't write file [" << b3dmFile.fileName() << "]\n";
+            qWarning() << "Can't write file [" << b3dmFile.fileName() << "]\n";
             return false;
         }
         return true;
@@ -72,14 +72,14 @@ namespace scially {
         std::vector<std::string> rootOSGBLocation = { absoluteLocation().toStdString() };
         osg::ref_ptr<osg::Node> root = osgDB::readNodeFiles(rootOSGBLocation);
         if (!root.valid()) {
-            qCritical() << "Read OSGB File [" << absoluteLocation() << "] Fail...\n";
+            qWarning() << "Read OSGB File [" << absoluteLocation() << "] Fail...\n";
             return QByteArray();
         }
 
         OSGBPageLodVisitor lodVisitor(nodePath);
         root->accept(lodVisitor);
         if (lodVisitor.geometryArray.empty()) {
-            qCritical() << "Read OSGB File [" << absoluteLocation() << "] geometries is Empty...\n";
+            qWarning() << "Read OSGB File [" << absoluteLocation() << "] geometries is Empty...\n";
             return QByteArray();
         }
 
@@ -200,6 +200,14 @@ namespace scially {
             {
                 tinygltf::Node node;
                 node.mesh = 0;
+                if(yUpAxis){
+                    // z-UpAxis to y-UpAxis
+                    node.matrix = {1,0,0,0,
+                                   0,0,-1,0,
+                                   0,1,0,0,
+                                   0,0,0,1};
+                }
+
                 model.nodes.push_back(node);
             }
             // scene

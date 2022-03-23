@@ -48,9 +48,10 @@ namespace scially {
         bool convertTiles(BaseTile &tile, const QString& output, int maxLevel = std::numeric_limits<int>::max());
         bool convertTiles(RootTile &root, const QString& output);
         void updateGeometryError(RootTile &root);
-
+        void setYUpAxis(bool y) { yUpAxis = y; }
 
     private:
         void createDir(const QString& output) const;
+        bool yUpAxis = false;
     };
 }

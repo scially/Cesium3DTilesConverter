@@ -7,7 +7,6 @@
 #include <DxtImage.h>
 #include <OSGBConvert.h>
 #include <BaseTile.h>
-#include <TilesConvertException.h>
 #include <QDebug>
 
 namespace scially {
@@ -27,8 +26,10 @@ namespace scially {
         for (int i = 0; i < subNodes.size(); i++) {
             QDir createDir(output + '/' + subNodes[i].getTileName());
             if (!createDir.exists()) {
-                if (!createDir.mkpath("."))
-                    throw TilesConvertException("Can't create dir " + createDir.absolutePath());
+                if (!createDir.mkpath(".")){
+                    qWarning() << "Can't create dir: " << createDir.absolutePath();
+                }
+
             }
         }
     }
@@ -88,7 +89,7 @@ namespace scially {
 
         // update root tile
         tile.geometricError = 2000;
-        tile.asset.assets["gltfUpAxis"] = "Z";
+        tile.asset.assets["gltfUpAxis"] = "Y";
         tile.asset.assets["version"] = "1.0";
 
         tile.root.children.append(childTile);
@@ -109,6 +110,8 @@ namespace scially {
 
     bool OSGBLevel::convertTiles(RootTile &root, const QString& output) {
         OSGBConvert convert(absoluteLocation());
+        convert.yUpAxis = yUpAxis;
+
         QByteArray b3dmBuffer = convert.toB3DM();
         if (b3dmBuffer.isEmpty())
             return false;

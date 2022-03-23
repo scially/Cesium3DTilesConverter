@@ -62,7 +62,7 @@ namespace scially {
             lon = convert.targetX;
             lat = convert.targetY;
         }
-        else {  // maybe wkt
+        else{// maybe wkt
             if(srsOrigin.isEmpty()){
                 throw TilesConvertException("Don't find ModelMetaData::SRSOrigin node in metadata.xml");
             }

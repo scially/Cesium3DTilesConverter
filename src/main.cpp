@@ -3,6 +3,7 @@
 #include <TilesConvertException.h>
 #include <QCoreApplication>
 #include <QCommandLineParser>
+#include <QProcessEnvironment>
 #include <QDebug>
 #include <QTime>
 
@@ -31,6 +32,9 @@ int main(int argc, char** argv){
     parser.addOption(layerOption);
     const QCommandLineOption threadOption("thread", "thread count", "thread", "4");
     parser.addOption(threadOption);
+    const QCommandLineOption yUpAxis("yUpAxis", "y up axis", "yUpAxis");
+    parser.addOption(yUpAxis);
+
 
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     parser.process(app);
@@ -55,6 +59,9 @@ int main(int argc, char** argv){
         const int maxLevel = parser.value(maxLvlOption) == "-1" ? std::numeric_limits<int>::max(): parser.value(maxLvlOption).toInt();
         const double height = parser.value(heightOption) == "0" ? 0 : parser.value(heightOption).toDouble();
         scially::OSGBConvertJob osgbConvert(input, output);
+        if(parser.isSet(yUpAxis))
+            osgbConvert.setYUpAxis(true);
+
         osgbConvert.setMaxLevel(thread);
         osgbConvert.setHeight(height);
         osgbConvert.setMaxLevel(maxLevel);

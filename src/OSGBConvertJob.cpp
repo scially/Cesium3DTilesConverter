@@ -19,13 +19,15 @@ namespace scially {
         // 遍历Data
         QDir dataDir(input + "/Data");
         if(!dataDir.exists()){
-            throw TilesConvertException("Can't find Data dir in " + input);
+            qCritical() << "Can't find Data dir in " << input;
+            return;
         }
 
         QFileInfoList tileDirs = dataDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot , QDir::Name);
         for(auto iter = tileDirs.constBegin(); iter != tileDirs.constEnd(); iter++){
             QString tileLocation = iter->absoluteFilePath() + "/" + iter->fileName() + OSGBLevel::OSGBEXTENSION;
             auto task = QSharedPointer<OSGBConvertTask>::create(tileLocation, output, maxLevel);
+            task->setYUpAxis(yUpAxis);
             tasks.append(task);
             threadPool->start(task.get());
         }
@@ -34,7 +36,7 @@ namespace scially {
         // 合并子节点
         BaseTile baseTile;
         baseTile.geometricError = 2000;
-        baseTile.asset.assets["gltfUpAxis"] = "Z";
+        baseTile.asset.assets["gltfUpAxis"] = "Y";
         baseTile.asset.assets["version"] = "1.0";
         baseTile.root.transform = TileMatrix::fromXYZ(lon, lat, height);
         baseTile.root.geometricError = 1000;
@@ -56,11 +58,13 @@ namespace scially {
         QJsonDocument doc(baseTile.write().toObject());
         QFile tilesetjsonFile(output + "/tileset.json");
         if(!tilesetjsonFile.open(QIODevice::WriteOnly)){
-            throw TilesConvertException("Can't not write tileset.json in " + output);
+            qWarning() << "Can't not write tileset.json in " << output;
+            return;
         }
         int writeBytes = tilesetjsonFile.write(doc.toJson(QJsonDocument::Indented));
         if(writeBytes <= 0){
-            throw TilesConvertException("Can't not write tileset.json in "  + output);
+            qWarning() << "Can't not write tileset.json in " << output;
+            return;
         }
     }
 }

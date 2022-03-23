@@ -34,10 +34,12 @@ namespace scially {
 
         void setHeight(double h) {height = h;}
         void setMaxLevel(int level){ maxLevel = level; }
+        void setYUpAxis(bool y){yUpAxis = y;}
     private:
         QString input;
         QString output;
         double height = 0;
+        bool yUpAxis = false;
         QThreadPool *threadPool;
         int maxThread = 4;
         int maxLevel = std::numeric_limits<int>::max();
@@ -50,11 +52,17 @@ namespace scially {
         OSGBConvertTask(const QString& input, const QString& output, int maxLevel = std::numeric_limits<int>::max())
             :osgbLevel(input), output(output), maxLevel(maxLevel){
             setAutoDelete(false);
+
         };
 
         virtual void run() override {
-            qInfo() << "Strart process tile: " << osgbLevel.nodeName;
-            isSucceed = osgbLevel.convertTiles(tile, output, maxLevel);
+            qInfo() << "Start process tile: " << osgbLevel.nodeName;
+            try{
+                isSucceed = osgbLevel.convertTiles(tile, output, maxLevel);
+            }catch(...){
+                qCritical() << "Unkown error";
+            }
+
             if(isSucceed){
                 qInfo() << "Finish process tile: " << osgbLevel.nodeName;
             }else{
@@ -62,6 +70,7 @@ namespace scially {
             }
 
         }
+        void setYUpAxis(bool y) {osgbLevel.setYUpAxis(y);}
 
         OSGBLevel osgbLevel;
         bool isSucceed;

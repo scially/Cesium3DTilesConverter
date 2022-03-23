@@ -1,6 +1,7 @@
 #include <ShpConvert.h>
 #include <BaseTile.h>
 
+#include <QDebug>
 #include <QDir>
 #include <QFile>
 
@@ -89,7 +90,7 @@ namespace scially {
                     }
                 }
                 else {
-                    throw TilesConvertException("Only support Polygon(MultiPolygon)");
+                    qWarning() << "Only support Polygon(MultiPolygon)";
                 }
             }
             QByteArray b3dmBuffer = meshes.toB3DM(true);
@@ -98,12 +99,17 @@ namespace scially {
                 arg(root->getLevel()).
                 arg(root->getRow()).
                 arg(root->getCol());
-            if (!b3dmFile.open(QIODevice::WriteOnly))
-                throw TilesConvertException("Can't write file " + b3dmFile.fileName());
+            if (!b3dmFile.open(QIODevice::WriteOnly)){
+                qWarning() << "Can't write file: " << b3dmFile.fileName();
+                return;
+            }
 
             int writeBytes = b3dmFile.write(b3dmBuffer);
-            if (writeBytes <= 0)
-                throw TilesConvertException("Can't write file " + b3dmFile.fileName());
+            if (writeBytes <= 0){
+                qWarning() << "Can't write file: " << b3dmFile.fileName();
+                return;
+            }
+
             RootTile child;
             child.boundingVolume = BoundingVolumeRegion::fromCenterXY(
                 centerX, centerY,
@@ -132,10 +138,14 @@ namespace scially {
         tile.root.boundingVolume = rootBounding;
         QByteArray tileBuffer = jsonDump(tile.write().toObject());
         QFile tileFile(output + "/tileset.json");
-        if (!tileFile.open(QIODevice::WriteOnly))
-            throw TilesConvertException("Can't write file " + tileFile.fileName());
+        if (!tileFile.open(QIODevice::WriteOnly)){
+             qWarning() << "Can't write file: " << tileFile.fileName();
+             return;
+        }
         int writeBytes = tileFile.write(tileBuffer);
-        if (writeBytes <= 0)
-            throw TilesConvertException("Can't write file " + tileFile.fileName());
+        if (writeBytes <= 0){
+            qWarning() << "Can't write file: " << tileFile.fileName();
+            return;
+        }
     }
 }

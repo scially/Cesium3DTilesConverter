@@ -34,7 +34,7 @@ Converter.exe --format <FORMAT> --input <INPUT> --output <OUTPUT> [OPTIONS]
 
 ```sh
 # from osgb dataset
-Converter.exe --format osgb -input E:\osgb_path -o E:\out_path
+Converter.exe --format osgb -input E:\osgb_path -o E:\out_path  --yUpAxis true
 
 # from single shp file
 Converter.exe --format gdal --input <Shapefile Path> --output <DIR>  --field height --layer <Shapefile Name>
@@ -44,7 +44,7 @@ Converter.exe --format gdal --input <GDB Path> --output <DIR>  --field height --
 ```
 
 ## 参数说明
-- `-f, --format <FORMAT>` 输入数据格式。
+- `--format <FORMAT>` 输入数据格式。
 
   `FORMAT` 可选：OSGB, GDAL
 
@@ -58,7 +58,11 @@ Converter.exe --format gdal --input <GDB Path> --output <DIR>  --field height --
 
 - `--offset` OSGB高度偏移字段。
 - `--thread` 处理线程数量（仅对OSGB生效）
-
+- `--yUpAxis` 是否将gltf模型转为y轴朝上  
+  
+  `yUpAxis` 可选： true, false   
+  如果是用`Cesium for Unreal`加载数据，需要启用yUpAxis
+ 
 # 数据要求及说明
 
 ### 倾斜摄影数据
