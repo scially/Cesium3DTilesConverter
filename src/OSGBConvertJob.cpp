@@ -36,7 +36,11 @@ namespace scially {
         // 合并子节点
         BaseTile baseTile;
         baseTile.geometricError = 2000;
-        baseTile.asset.assets["gltfUpAxis"] = "Y";
+        if(yUpAxis)
+            baseTile.asset.assets["gltfUpAxis"] = "Y";
+        else
+            baseTile.asset.assets["gltfUpAxis"] = "Z";
+
         baseTile.asset.assets["version"] = "1.0";
         baseTile.root.transform = TileMatrix::fromXYZ(lon, lat, height);
         baseTile.root.geometricError = 1000;

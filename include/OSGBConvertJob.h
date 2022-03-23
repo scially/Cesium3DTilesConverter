@@ -70,7 +70,9 @@ namespace scially {
             }
 
         }
-        void setYUpAxis(bool y) {osgbLevel.setYUpAxis(y);}
+        void setYUpAxis(bool y) {
+            osgbLevel.setYUpAxis(y);
+        }
 
         OSGBLevel osgbLevel;
         bool isSucceed;

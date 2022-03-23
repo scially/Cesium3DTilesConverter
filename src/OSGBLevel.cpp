@@ -60,6 +60,7 @@ namespace scially {
 
         for (int i = 0; i < lodVisitor.subNodeNames.size(); i++) {
             OSGBLevel subLevel(lodVisitor.subNodeNames[i]);
+            subLevel.setYUpAxis(yUpAxis);
             if (subLevel.getAllOSGBLevels(maxLevel)) {
                 subNodes.append(subLevel);
             }
@@ -89,7 +90,10 @@ namespace scially {
 
         // update root tile
         tile.geometricError = 2000;
-        tile.asset.assets["gltfUpAxis"] = "Y";
+        if(yUpAxis)
+            tile.asset.assets["gltfUpAxis"] = "Y";
+        else
+            tile.asset.assets["gltfUpAxis"] = "Z";
         tile.asset.assets["version"] = "1.0";
 
         tile.root.children.append(childTile);

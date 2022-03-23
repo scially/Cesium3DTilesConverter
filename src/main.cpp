@@ -84,7 +84,7 @@ int main(int argc, char** argv){
       
     }
     else{
-        qCritical() << "Only support osgb and shape format";
+        qCritical() << "Only support OSGB and GDAL format";
         return 1;
     }
     qInfo() << "Finish convert in " << beginTime.secsTo( QTime::currentTime()) << "s";
