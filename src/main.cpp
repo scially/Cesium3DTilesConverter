@@ -7,7 +7,7 @@
 int main(int argc, char** argv){
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("Cesium3DTilesConverter");
-    QCoreApplication::setApplicationVersion("0.2");
+    QCoreApplication::setApplicationVersion("1.2");
     QTime beginTime = QTime::currentTime();
     QCommandLineParser parser;
     parser.setApplicationDescription("Convert OSGB, GDAL to Cesium 3DTiles");
