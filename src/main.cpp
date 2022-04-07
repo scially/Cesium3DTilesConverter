@@ -1,19 +1,16 @@
 #include <OSGBConvertJob.h>
 #include <ShpConvertJob.h>
-#include <TilesConvertException.h>
 #include <QCoreApplication>
 #include <QCommandLineParser>
-#include <QProcessEnvironment>
-#include <QDebug>
 #include <QTime>
 
 int main(int argc, char** argv){
     QCoreApplication app(argc, argv);
     QCoreApplication::setApplicationName("Cesium3DTilesConverter");
-    QCoreApplication::setApplicationVersion("0.1");
+    QCoreApplication::setApplicationVersion("0.2");
     QTime beginTime = QTime::currentTime();
     QCommandLineParser parser;
-    parser.setApplicationDescription("Convert osgb,shp to Cesium 3dtiles");
+    parser.setApplicationDescription("Convert OSGB, GDAL to Cesium 3DTiles");
     parser.addHelpOption();
     parser.addVersionOption();
     const QCommandLineOption inputOption("input", "input path", "input");
@@ -34,7 +31,6 @@ int main(int argc, char** argv){
     parser.addOption(threadOption);
     const QCommandLineOption yUpAxis("yUpAxis", "y up axis", "yUpAxis");
     parser.addOption(yUpAxis);
-
 
     parser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
     parser.process(app);

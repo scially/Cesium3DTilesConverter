@@ -1,7 +1,8 @@
 #pragma once
+
+#include <GDALWrapper.h>
 #include <OGRException.h>
 #include <osg/Math>
-
 namespace scially {
 
 	class CoordinateConvert : QObject {
@@ -18,22 +19,25 @@ namespace scially {
 			WKT,
 			EPSG,
             Proj4,
-            Esri,
 		};
 		Q_ENUM(SrsType);
 
-		CoordinateConvert(double x, double y) : sourceX(x), sourceY(y), targetX(0), targetY(0) {}
-		CoordinateConvert() : CoordinateConvert(0, 0) {}
+		CoordinateConvert(double x, double y) : sourceX(x), sourceY(y), targetX(0), targetY(0) {
+            static internal::GDALDriverWrapper init;
+        }
+		CoordinateConvert() : CoordinateConvert(0, 0) {  }
 
-		void setSourceSrs(const QString& srs, SrsType t) noexcept(false);
-		void setTargetSrs(const QString& srs, SrsType t) noexcept(false);
-		void transform() noexcept(false);
-
-		
+		void setSourceSrs(const QString& srs, SrsType t) ;
+		void setTargetSrs(const QString& srs, SrsType t);
+		void transform() ;
 
 	private:
 		void setSrs(OGRSpatialReference& srs, const QString& describe, SrsType t) ;
 		OGRCoordinateTransformationPtr createCoordinateTransformation();
+        void init() const {
+            const char* projResource = "proj_data";
+            proj_context_set_search_paths(nullptr, 1, &projResource);
+        }
 	private:
 		OGRSpatialReference sourceSrs;
 		OGRSpatialReference targetSrs;

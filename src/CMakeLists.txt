@@ -20,16 +20,16 @@ add_library(Core STATIC
 	"../include/tiny_gltf.h"
 	"../include/TilesParseException.h"
 	"../include/TilesConvertException.h"
-        "../include/OSGBConvertJob.h"
+    "../include/OSGBConvertJob.h"
 	"../include/ShpConvertJob.h"
-        "../include/ModelMetadata.h"
-        "../include/QuadTree.h"
-        "../include/ShpConvert.h"
-        "../include/GeometryMesh.h"
-        "../include/GDALWrapper.h"
+    "../include/ModelMetadata.h"
+    "../include/QuadTree.h"
+    "../include/ShpConvert.h"
+    "../include/GeometryMesh.h"
+    "../include/GDALWrapper.h"
 	"../include/Batched3DModel.h"
 	"../include/Utils.h"
-        "../include/earcut.hpp"
+    "../include/earcut.hpp"
 
 	"CoordinateConvert.cpp"
 	"OSGBPageLodVisitor.cpp" 
@@ -47,11 +47,10 @@ add_library(Core STATIC
 	"OSGBuildState.cpp" 
 	"OSGBLevel.cpp" 
 	"OSGBConvert.cpp" 
-        "OSGBConvertJob.cpp"
-        "ModelMetadata.cpp"
-        "QuadTree.cpp"
-        "GeometryMesh.cpp"
-        "GDALWrapper.cpp"
+    "OSGBConvertJob.cpp"
+    "ModelMetadata.cpp"
+    "QuadTree.cpp"
+    "GeometryMesh.cpp"
 	"Batched3DModel.cpp"
 	"ShpConvert.cpp" 
 	"ShpConvertJob.cpp")
@@ -59,25 +58,12 @@ add_library(Core STATIC
 
 target_link_libraries(Core
 	${GDAL_LIBRARY}
+	${PROJ_LIBRARIES}
 	${OPENSCENEGRAPH_LIBRARIES}
 	Qt5::Core 
 	Qt5::Xml)
 
 
 add_executable(Converter "main.cpp")
-target_link_libraries(Converter
-    ${GDAL_LIBRARY}
-    ${OPENSCENEGRAPH_LIBRARIES}
-    Qt5::Core
-    Qt5::Xml
-    Core)
-
-add_custom_command(
-        TARGET Converter PRE_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy
-                ${PROJECT_SOURCE_DIR}/proj_data/proj.db
-                ${CMAKE_BINARY_DIR}/src/proj.db
-        COMMAND ${CMAKE_COMMAND} -E copy
-                ${PROJECT_SOURCE_DIR}/proj_data/proj.ini
-                ${CMAKE_BINARY_DIR}/src/proj.ini)
+target_link_libraries(Converter Core)
 

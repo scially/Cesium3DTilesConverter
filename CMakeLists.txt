@@ -7,7 +7,10 @@ if(MSVC)
 	add_definitions(-DNOMINMAX)
 endif()
 
+option(ENABLE_TEST "Enable test" ON)
+
 find_package(GDAL REQUIRED)
+find_package(PROJ REQUIRED)
 find_package(Qt5 
 	REQUIRED
 	COMPONENTS Core Xml Test)
@@ -30,5 +33,18 @@ set(CMAKE_AUTORCC ON)
 
 add_subdirectory(src)
 
-enable_testing(true)
-add_subdirectory(test)
+if(ENABLE_TEST)
+	enable_testing(true)
+	add_subdirectory(test)
+	add_custom_target(CopyResources ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/proj_data ${PROJECT_BINARY_DIR}/src/proj_data
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/proj_data ${PROJECT_BINARY_DIR}/test/proj_data
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/gdal_data ${PROJECT_BINARY_DIR}/src/gdal_data
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/gdal_data ${PROJECT_BINARY_DIR}/test/gdal_data
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data      ${PROJECT_BINARY_DIR}/test/data)
+
+else()
+	add_custom_target(CopyResources ALL
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/proj_data  ${PROJECT_BINARY_DIR}/src/proj_data
+			COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/gdal_data ${PROJECT_BINARY_DIR}/src/gdal_data)
+endif()

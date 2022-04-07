@@ -4,12 +4,20 @@
 #include <OGRException.h>
 #include <QSharedPointer>
 #include <ogrsf_frmts.h>
+#include <proj.h>
 
 namespace scially {
     namespace internal {
         class GDALDriverWrapper {
         public:
             GDALDriverWrapper() {
+                init();
+            }
+        private:
+            void init() const {
+                CPLSetConfigOption("GDAL_DATA","gdal_data");
+                const char* projResource = "proj_data";
+                proj_context_set_search_paths(nullptr, 1, &projResource);
                 GDALAllRegister();
             }
         };

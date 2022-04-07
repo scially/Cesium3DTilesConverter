@@ -93,4 +93,4 @@ Converter.exe --format gdal --input <GDB Path> --output <DIR>  --field height --
    1. 通过Qt官网安装
    2. vcpkg install "qt5[all]"
 3. VS2019选择CMakeLists.txt，导入工程，编译
-4. 把OSGPlugins文件夹复制到编译目录下
+4. 将OSGPlugins-${Version}文件夹复制到编译目录下

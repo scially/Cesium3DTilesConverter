@@ -1,15 +1,15 @@
 #include <CoordinateConvert.h>
 
 namespace scially {
-	void CoordinateConvert::setSourceSrs(const QString& srs, SrsType t) noexcept(false) {
+	void CoordinateConvert::setSourceSrs(const QString& srs, SrsType t) {
 		setSrs(sourceSrs, srs, t);
 	}
 
-	void CoordinateConvert::setTargetSrs(const QString& srs, SrsType t) noexcept(false) {
+	void CoordinateConvert::setTargetSrs(const QString& srs, SrsType t) {
 		setSrs(targetSrs, srs, t);
 	}
 
-	void CoordinateConvert::transform() noexcept(false) {
+	void CoordinateConvert::transform() {
 		auto transform = createCoordinateTransformation();
 		double x = sourceX, y = sourceY;
 		bool succeed = transform->Transform(1, &x, &y);

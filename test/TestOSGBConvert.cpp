@@ -1,7 +1,6 @@
 #include <QtTest/QTest>
 #include <OSGBConvert.h>
 
-
 using namespace scially;
 
 class TestOSGBConvert : public QObject {

@@ -5,3 +5,4 @@ out
 .idea
 .gitignore
 .gitattributes
+cmake-build*
