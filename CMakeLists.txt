@@ -42,7 +42,6 @@ if(ENABLE_TEST)
 			COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/gdal_data ${PROJECT_BINARY_DIR}/src/gdal_data
 			COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/gdal_data ${PROJECT_BINARY_DIR}/test/gdal_data
 			COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/data      ${PROJECT_BINARY_DIR}/test/data)
-
 else()
 	add_custom_target(CopyResources ALL
 			COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/proj_data  ${PROJECT_BINARY_DIR}/src/proj_data

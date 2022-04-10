@@ -63,7 +63,10 @@ target_link_libraries(Core
 	Qt5::Core 
 	Qt5::Xml)
 
-
-add_executable(Converter "main.cpp")
+add_executable(Converter main.cpp)
 target_link_libraries(Converter Core)
+
+add_custom_command(TARGET Converter POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Qt5::Core> $<TARGET_FILE_DIR:Converter>
+		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Qt5::Xml> $<TARGET_FILE_DIR:Converter>)
 

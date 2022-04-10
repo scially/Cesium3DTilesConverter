@@ -10,11 +10,14 @@ namespace scially {
     void OSGBConvertJob::run() {
         // 解析XML中的坐标
         ModelMetadata metadata;
-        metadata.parse(input + "/metadata.xml");
-
         double lon, lat;
-        metadata.getCoordinate(lon, lat);
-
+        try{
+            metadata.parse(input + "/metadata.xml");
+            metadata.getCoordinate(lon, lat);
+        }catch (const TilesConvertException& e){
+            qCritical() << e.what();
+            return;
+        }
 
         // 遍历Data
         QDir dataDir(input + "/Data");

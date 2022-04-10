@@ -77,7 +77,6 @@ int main(int argc, char** argv){
 
         scially::ShpConvertJob shpConvert(input, layerName, output, fieldName);
         shpConvert.run();
-      
     }
     else{
         qCritical() << "Only support OSGB and GDAL format";

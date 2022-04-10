@@ -8,9 +8,7 @@
 3. 本人本身是对Qt比较熟悉的，就萌生了这个想法，用C++和Qt，从新梳理整个框架，刚好今年春节一个人，秉着学习想法，使用纯C++（加了Qt）重写了该工程，新的工程基于C++ 17标准重写，使用了Qt5.15，主要作者本身写C++大部分时候都是基于Qt，对Qt也稍微了解，同时也借助Qt很好的跨平台特性，性能没有变化，并且也便于调试学习。
    1. 整个工程开源，但是鉴于Qt一些限制，该程序采用LGPL协议。
    2. 后续会与作者同步保持更新，后期希望可以加入自己一些特色功能。
-  
-[Download Windows Pre-build](https://github.com/scially/Cesium3DTilesConverter/releases/download/V1.0/Cesium3DTilesConverter.zip)
-
+   
 # 简介
 
 3DTiles 转换工具集, 快速将OSGB、Shp、GDB等格式转为Cesium 3DTiles, 方便搭建三维平台。
@@ -34,7 +32,7 @@ Converter.exe --format <FORMAT> --input <INPUT> --output <OUTPUT> [OPTIONS]
 
 ```sh
 # from osgb dataset
-Converter.exe --format osgb -input E:\osgb_path --output E:\out_path  --yUpAxis true
+Converter.exe --format osgb -input <OSGB Path> --output <Out Path>  --yUpAxis true
 
 # from single shp file
 Converter.exe --format gdal --input <Shapefile Path> --output <DIR>  --field height --layer <Shapefile Name>
