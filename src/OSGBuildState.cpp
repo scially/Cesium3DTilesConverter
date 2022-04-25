@@ -163,7 +163,7 @@ namespace scially {
             }
             default:
             {
-                qCritical("Unsupport osg::PrimitiveSet::Type [%1]", t);
+                qCritical("Unsupport osg::PrimitiveSet::Type [%d]", t);
                 return false;
             }
         }
@@ -244,7 +244,7 @@ namespace scially {
                 primits.mode = TINYGLTF_MODE_TRIANGLE_FAN;
                 break;
             default:
-                qWarning("Unsupport Primitive Mode: [%1]", ps->getMode());
+                qWarning("Unsupport Primitive Mode: [%d]", ps->getMode());
                 return false;
         }
         model->meshes.back().primitives.push_back(primits);
