@@ -17,10 +17,15 @@ namespace scially {
     class OSGBConvertJob: public QObject{
         Q_OBJECT
     public:
-        OSGBConvertJob(const QString& input, const QString &output)
-            :input(input), output(output), threadPool(new QThreadPool) {}
+        OSGBConvertJob(const std::string& input, const std::string &output)
+            : input(QString::fromStdString(input)), output(QString::fromStdString(output)), 
+            threadPool(new QThreadPool) {
+            }
 
         void setMaxThread(int thread){
+            if(thread == 0)
+                thread = QThread::idealThreadCount();
+            spdlog::info("set process thread to {}", thread);
             maxThread = thread;
             threadPool->setMaxThreadCount(maxThread);
         }
@@ -38,10 +43,10 @@ namespace scially {
     private:
         QString input;
         QString output;
-        double height = 0;
-        bool yUpAxis = false;
+        double height;
+        bool yUpAxis;
         QThreadPool *threadPool;
-        int maxThread = 4;
+        int maxThread;
         int maxLevel = std::numeric_limits<int>::max();
         QVector<QSharedPointer<OSGBConvertTask>> tasks;
     };

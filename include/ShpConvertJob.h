@@ -1,13 +1,16 @@
 #pragma once
 
 #include <QDebug>
+#include <string>
 
 namespace scially {
 
     class ShpConvertJob{
     public:
-        ShpConvertJob(const QString& input, const QString& layerName, const QString &output, const QString& height)
-            :input(input), output(output), height(height), layerName(layerName) {}
+        ShpConvertJob(const std::string& input, const std::string& layerName, 
+                      const std::string &output, const std::string& height)
+            :input(QString::fromStdString(input)), output(QString::fromStdString(output)), 
+             height(QString::fromStdString(height)), layerName(QString::fromStdString(layerName)) {}
 
         void run();
 

@@ -34,10 +34,6 @@ namespace scially {
 	private:
 		void setSrs(OGRSpatialReference& srs, const QString& describe, SrsType t) ;
 		OGRCoordinateTransformationPtr createCoordinateTransformation();
-        void init() const {
-            const char* projResource = "proj_data";
-            proj_context_set_search_paths(nullptr, 1, &projResource);
-        }
 	private:
 		OGRSpatialReference sourceSrs;
 		OGRSpatialReference targetSrs;

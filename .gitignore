@@ -9,3 +9,8 @@ cmake-build*
 AppDir
 binary
 *.AppImage
+.vscode
+.xmake
+build
+vsxmake*
+app

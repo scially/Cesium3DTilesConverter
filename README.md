@@ -1,17 +1,9 @@
 # About Project
-1. 整体参考[https://github.com/fanvanzh/3dtiles](https://github.com/fanvanzh/3dtiles),  向作者致敬，市面上唯一的开源好用的3DTILES转换工具，在学习过程中，从中收获很多，对3DTiles、OSGB、GLTF等数据格式有了进一步了解。
-2. 原工程基于C++、C和Rust，本人本身对Rust不了解，但是学习过程中难免涉及到调试，也看了整个代码，个人理解作者采用Rust和C++混编应该是两个问题：
-    1. OpenSceneGraph没有除了C++之外其他版本，而且我们在用这个工具时，最主要的就是OSGB转3DTILES
-    2. 本身C++可以跨平台，但是C++对字符串、文件系统支持不够好，Rust可以很好满足这一点，并且Rust也便于和C++交互
-    3. 综合下来，原作者使用了Rust和C++来编写，一是保证跨平台，二是保证了性能。
-
-3. 本人本身是对Qt比较熟悉的，用C++和Qt，从新梳理整个框架，刚好今年春节一个人，使用C++（加了Qt）重写了该工程，新的工程基于C++ 17标准重写，使用了Qt5.15，借助Qt很好的跨平台特性，性能没有变化，并且也便于调试学习。
-    1. 整个工程开源，但是鉴于Qt一些限制，该程序采用LGPL协议。
-    2. 后续会与作者同步保持更新，后期希望可以加入自己一些特色功能。
+基于C++17、Qt5的3DTiles 转换工具集，采用xmake作为构建工具，`xmake`可一键安装依赖并编译。
 
 # 简介
 
-3DTiles 转换工具集, 快速将OSGB、Shp、GDB等格式转为Cesium 3DTiles, 方便搭建三维平台。
+3DTiles 转换工具集, 快速将OSGB、Shp、GDB等格式转为Cesium 3DTiles。
 
 这是一个基于c++ 17 和 Qt5.15 项目。
 
@@ -86,12 +78,10 @@ Converter.exe --format gdal --input <GDB Path> --output <DIR>  --field height --
 图层中需要有字段来表示高度信息。
 
 # How To Build
-1. Windows下建议使用Vcpkg来管理C++依赖，Ubuntu20以上版本可直接使用apt安装。
-2. 版本说明：
-    1. GDAL >= 3.4
-    2. GCC >= 8.0 OR MSVC 2019以上
-    3. Qt >= 5.9
-    4. PROJ >= 8.0
-    5. OSG >= 3.2
-5. VS2019选择CMakeLists.txt，导入工程，编译
-6. 将OSGPlugins-${Version}文件夹复制到编译目录下
+1. 采用xmake作为构建工具，在工程根目录下执行`xmake`可一键完成依赖下载和编译;
+2. 也可执行`xmake project -k vsxmake2015 -m "debug;release"`生成Visual Studio工程，在VS里开发;
+3. 默认采用静态编译，会将需要的OSGPlugins依赖一起编译.
+
+# Reference
+1. 3dtiles [https://github.com/fanvanzh/3dtiles](https://github.com/fanvanzh/3dtiles)
+2. 3dtiles specification [https://github.com/CesiumGS/3d-tiles](https://github.com/CesiumGS/3d-tiles)

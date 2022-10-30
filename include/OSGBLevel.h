@@ -4,6 +4,8 @@
 #include <OSGBPageLodVisitor.h>
 #include <RootTile.h>
 #include <BaseTile.h>
+
+#include <spdlog/spdlog.h>
 #include <QSharedPointer>
 #include <QString>
 #include <QDir>
@@ -39,8 +41,8 @@ namespace scially {
         QString absoluteLocation() const;
 
         /// <summary>
-        /// 提取 Tile_+154_+018_L22_0000320.osgb _L后面的数字
-        /// 提取失败，返回 0
+        /// ��ȡ Tile_+154_+018_L22_0000320.osgb _L���������
+        /// ��ȡʧ�ܣ����� 0
         /// </summary>
         int getLevelNumber() const;
         QString getTileName() const;

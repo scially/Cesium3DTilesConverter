@@ -1,23 +1,32 @@
 #pragma once
 
 #include <QDebug>
+#include <QCoreApplication>
 #include <OGRException.h>
 #include <QSharedPointer>
 #include <ogrsf_frmts.h>
-#include <proj.h>
+#include <string>
 
 namespace scially {
     namespace internal {
         class GDALDriverWrapper {
         public:
             GDALDriverWrapper() {
+                #ifdef _WIN32
+                    CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "YES");
+                #endif
+                gdal_data_ = (QCoreApplication::applicationDirPath() + "/GDAL_DATA").toStdString();
+                proj_data_ = (QCoreApplication::applicationDirPath() + "/proj_data").toStdString();
                 init();
             }
         private:
+            std::string gdal_data_;
+            std::string proj_data_;
+
             void init() const {
-                CPLSetConfigOption("GDAL_DATA","gdal_data");
-                const char* projResource = "proj_data";
-                proj_context_set_search_paths(nullptr, 1, &projResource);
+                CPLSetConfigOption("GDAL_DATA", gdal_data_.c_str());
+                const char *const proj_lib_path[] = {proj_data_.c_str(), nullptr};
+                OSRSetPROJSearchPaths(proj_lib_path);
                 GDALAllRegister();
             }
         };
