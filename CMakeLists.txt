@@ -23,11 +23,7 @@ else()
 	set(LIBRARY_OUTPUT_PATH     "${LIBRARY_OUTPUT_PATH}/release")
 endif()
 
-
-option(ENABLE_TEST "Enable Test" ON)
-
 find_package(GDAL REQUIRED)
-find_package(PROJ REQUIRED)
 find_package(Qt5 
 	REQUIRED
 	COMPONENTS Core Xml Test)
@@ -118,10 +114,7 @@ target_link_libraries(Converter
 add_custom_command(TARGET Converter
 		POST_BUILD
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/proj_data  ${EXECUTABLE_OUTPUT_PATH}/proj_data
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/gdal_data  ${EXECUTABLE_OUTPUT_PATH}/gdal_data)
-
-if(ENABLE_TEST)
-	message(status "open test")
-	enable_testing(true)
-	add_subdirectory(test)
-endif()
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/gdal_data  ${EXECUTABLE_OUTPUT_PATH}/gdal_data
+		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Qt5::Xml>  $<TARGET_FILE_DIR:Converter>
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Qt5::Core>  $<TARGET_FILE_DIR:Converter>
+)

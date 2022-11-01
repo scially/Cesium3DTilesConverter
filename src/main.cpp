@@ -1,11 +1,14 @@
 #include <OSGBConvertJob.h>
 #include <ShpConvertJob.h>
+#include <GDALWrapper.h>
+
 #include <QCoreApplication>
 #include <QCommandLineParser>
 #include <QTime>
 
 int main(int argc, char** argv){
     QCoreApplication app(argc, argv);
+    scially::GDALDriverWrapper init;
     QCoreApplication::setApplicationName("Cesium3DTilesConverter");
     QCoreApplication::setApplicationVersion("1.2");
     QTime beginTime = QTime::currentTime();

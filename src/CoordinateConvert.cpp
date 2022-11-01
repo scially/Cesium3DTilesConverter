@@ -1,4 +1,5 @@
 #include <CoordinateConvert.h>
+#include <OGRException.h>
 
 namespace scially {
 	void CoordinateConvert::setSourceSrs(const QString& srs, SrsType t) {

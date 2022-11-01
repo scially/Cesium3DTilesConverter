@@ -1,5 +1,5 @@
 # About Project
-基于C++17、Qt5的3DTiles 转换工具集，采用xmake作为构建工具，`xmake`可一键安装依赖并编译。
+基于C++17、Qt5的3DTiles 转换工具集。
 
 # 简介
 
@@ -78,9 +78,12 @@ Converter.exe --format gdal --input <GDB Path> --output <DIR>  --field height --
 图层中需要有字段来表示高度信息。
 
 # How To Build
-1. 采用xmake作为构建工具，在工程根目录下执行`xmake`可一键完成依赖下载和编译;
-2. 也可执行`xmake project -k vsxmake2015 -m "debug;release"`生成Visual Studio工程，在VS里开发;
-3. 默认采用静态编译，会将需要的OSGPlugins依赖一起编译.
+1. vcpkg install "osg" "osg[plugins]"
+2. 如果没有Qt5.15，可以通过以下两种方式安装：
+   1. 通过Qt官网安装
+   2. vcpkg install "qt5[all]"
+3. Visual Studio选择CMakeLists.txt，导入工程，编译
+4. 将OSGPlugins-${Version}文件夹复制到编译目录下
 
 # Reference
 1. 3dtiles [https://github.com/fanvanzh/3dtiles](https://github.com/fanvanzh/3dtiles)
