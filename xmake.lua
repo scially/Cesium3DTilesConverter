@@ -33,7 +33,12 @@ target("Converter")
         osg_pkg:add("links", "osgdb_osg")
     end)
 
+    after_build(function (target)
+        os.cp("$(projectdir)/gdal_data", target:targetdir() .. "/GDAL_DATA")
+        os.cp("$(projectdir)/proj_data", target:targetdir() .. "/PROJ_LIB")
+    end)
+    -- link gdal plugins for gdal format read
     after_install(function(target)
         os.cp("$(projectdir)/gdal_data", target:installdir() .. "/bin/GDAL_DATA")
-        os.cp("$(projectdir)/proj_data", target:installdir() .. "/bin/proj_data")
+        os.cp("$(projectdir)/proj_data", target:installdir() .. "/bin/PROJ_LIB")
     end)

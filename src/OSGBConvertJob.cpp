@@ -1,61 +1,61 @@
 #include <OSGBConvertJob.h>
 #include <ModelMetadata.h>
 #include <TilesConvertException.h>
+
+#include <spdlog/spdlog.h>
 #include <QDir>
-#include <QDebug>
+#include <QThreadPool>
+#include <QJsonDocument>
 #include <QDomDocument>
 
 namespace scially {
 
-    void OSGBConvertJob::run() {
+    void OSGBConverter::run() {
         // 解析XML中的坐标
         ModelMetadata metadata;
-        double lon, lat;
-        try{
-            metadata.parse(input + "/metadata.xml");
-            metadata.getCoordinate(lon, lat);
-        }catch (const TilesConvertException& e){
-            qCritical() << e.what();
+        metadata.loadFromFile(input_ + "/metadata.xml");
+        
+        // 遍历Data
+        QDir dataDir(input_ + "/Data");
+        if(!dataDir.exists()){
+            spdlog::error( "can't find Data in {}", input_);
             return;
         }
 
-        // 遍历Data
-        QDir dataDir(input + "/Data");
-        if(!dataDir.exists()){
-            qCritical() << "Can't find Data dir in " << input;
-            return;
-        }
+        QThreadPool *threadPool = new QThreadPool(this);
+        QVector<OSGBTileConverterTask*> tasks;
+        threadPool->setMaxThreadCount(threadCount_);
+        spdlog::info("set process thread to {}", threadPool->maxThreadCount());
 
         QFileInfoList tileDirs = dataDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot , QDir::Name);
         for(auto iter = tileDirs.constBegin(); iter != tileDirs.constEnd(); iter++){
             QString tileLocation = iter->absoluteFilePath() + "/" + iter->fileName() + OSGBLevel::OSGBEXTENSION;
-            auto task = QSharedPointer<OSGBConvertTask>::create(tileLocation, output, maxLevel);
-            task->setYUpAxis(yUpAxis);
+            auto task =new OSGBTileConverterTask(this);
+            task->setTileLocation(tileLocation);
+            task->setOutput(output_);
+            task->setMaxLevel(maxLevel_);
+
             tasks.append(task);
-            threadPool->start(task.get());
+            threadPool->start(task);
         }
         threadPool->waitForDone();
 
         // 合并子节点
         BaseTile baseTile;
         baseTile.geometricError = 2000;
-        if(yUpAxis)
-            baseTile.asset.assets["gltfUpAxis"] = "Y";
-        else
-            baseTile.asset.assets["gltfUpAxis"] = "Z";
-
+        baseTile.asset.assets["gltfUpAxis"] = "Y";
         baseTile.asset.assets["version"] = "1.0";
-        baseTile.root.transform = TileMatrix::fromXYZ(lon, lat, height);
+        baseTile.root.transform = TileMatrix::fromXYZ(metadata.srsOrigin().y(), metadata.srsOrigin().x(), height_);
         baseTile.root.geometricError = 1000;
         BoundingVolumeBox mergeBox;
         for(auto iter = tasks.constBegin(); iter != tasks.constEnd(); ++iter){
-            QSharedPointer<OSGBConvertTask> task = *iter;
-            if(task->isSucceed){
+            auto task = *iter;
+            if(task->isSuccess()){
                 // for this child
-                RootTile childTile = task->tile.root;
-                mergeBox = mergeBox.merge(task->tile.root.boundingVolume.box.value());
+                RootTile childTile = task->baseTile().root;
+                mergeBox = mergeBox.merge(task->baseTile().root.boundingVolume.box.value());
                 ContentTile content;
-                content.uri = "./" + task->osgbLevel.getTileName() + "/tileset.json";
+                content.uri = "./" + task->osgbLevel().getTileName() + "/tileset.json";
                 childTile.content = content;
                 childTile.children.clear();
                 baseTile.root.children.append(childTile);
@@ -63,14 +63,14 @@ namespace scially {
         }
         baseTile.root.boundingVolume = mergeBox;
         QJsonDocument doc(baseTile.write().toObject());
-        QFile tilesetjsonFile(output + "/tileset.json");
+        QFile tilesetjsonFile(output_ + "/tileset.json");
         if(!tilesetjsonFile.open(QIODevice::WriteOnly)){
-            qWarning() << "Can't not write tileset.json in " << output;
+            spdlog::error("can't not write tileset.json in {}", output_);
             return;
         }
         int writeBytes = tilesetjsonFile.write(doc.toJson(QJsonDocument::Indented));
         if(writeBytes <= 0){
-            qWarning() << "Can't not write tileset.json in " << output;
+            spdlog::error("can't not write tileset.json in {}", output_);
             return;
         }
     }
