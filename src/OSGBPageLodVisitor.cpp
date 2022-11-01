@@ -18,7 +18,7 @@ namespace scially {
         unsigned int n = node.getNumFileNames();
         for (unsigned int i = 1; i < n; i++)
         {
-            QString fileName = path + "/" + QString::fromStdString(node.getFileName(i));
+            QString fileName = path + "/" + QString::fromLocal8Bit(node.getFileName(i).c_str());
             subNodeNames.append(fileName);
         }
         traverse(node);

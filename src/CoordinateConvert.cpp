@@ -24,13 +24,13 @@ namespace scially {
 		switch (t)
 		{
 		case CoordinateConvert::WKT:
-			err = srs.importFromWkt(describe.toStdString().c_str());
+			err = srs.importFromWkt(describe.toUtf8());
 			break;
 		case CoordinateConvert::EPSG:
 			err = srs.importFromEPSG(describe.toInt());
 			break;
 		case CoordinateConvert::Proj4:
-			err = srs.importFromProj4(describe.toStdString().c_str());
+			err = srs.importFromProj4(describe.toUtf8());
 			break;
 		default:
 			break;

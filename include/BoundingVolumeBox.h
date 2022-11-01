@@ -1,10 +1,11 @@
 #pragma once
 
+#include <BaseObject.h>
+#include <BoundingVolumeRegion.h>
+
 #include <QJsonValue>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <BaseObject.h>
-#include <BoundingVolumeRegion.h>
 
 namespace scially {
     /// <summary>

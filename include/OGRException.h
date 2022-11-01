@@ -4,6 +4,7 @@
 #include <QString>
 #include <QSharedPointer>
 #include <QException>
+
 #include <ogr_spatialref.h>
 
 namespace scially {

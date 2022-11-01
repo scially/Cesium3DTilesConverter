@@ -2,9 +2,10 @@
 
 #include <GDALWrapper.h>
 #include <OGRException.h>
-#include <osg/Math>
-namespace scially {
 
+#include <osg/Math>
+
+namespace scially {
 	class CoordinateConvert : QObject {
 		Q_OBJECT
 	public:
@@ -23,7 +24,6 @@ namespace scially {
 		Q_ENUM(SrsType);
 
 		CoordinateConvert(double x, double y) : sourceX(x), sourceY(y), targetX(0), targetY(0) {
-            static internal::GDALDriverWrapper init;
         }
 		CoordinateConvert() : CoordinateConvert(0, 0) {  }
 
@@ -34,10 +34,6 @@ namespace scially {
 	private:
 		void setSrs(OGRSpatialReference& srs, const QString& describe, SrsType t) ;
 		OGRCoordinateTransformationPtr createCoordinateTransformation();
-        void init() const {
-            const char* projResource = "proj_data";
-            proj_context_set_search_paths(nullptr, 1, &projResource);
-        }
 	private:
 		OGRSpatialReference sourceSrs;
 		OGRSpatialReference targetSrs;

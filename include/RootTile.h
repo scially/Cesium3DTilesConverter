@@ -1,13 +1,14 @@
 #pragma once
 
 #include <BaseObject.h>
-#include <TilesParseException.h>
-#include <QVector>
-#include <QString>
 #include <BoundingVolume.h>
 #include <ContentTile.h>
 #include <Refine.h>
 #include <TileMatrix.h>
+#include <TilesParseException.h>
+
+#include <QVector>
+#include <QString>
 
 namespace scially {
 

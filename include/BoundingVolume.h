@@ -1,16 +1,18 @@
 #pragma once
 
-#include <optional>
 #include <BaseObject.h>
+#include <BoundingVolumeBox.h>
+#include <BoundingVolumeRegion.h>
+#include <BoundingVolumeSphere.h>
+
 #include <QSharedPointer>
 #include <QString>
 #include <QJsonValue>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <BoundingVolumeBox.h>
-#include <BoundingVolumeRegion.h>
-#include <BoundingVolumeSphere.h>
 #include <QDebug>
+
+#include <optional>
 
 namespace scially {
 

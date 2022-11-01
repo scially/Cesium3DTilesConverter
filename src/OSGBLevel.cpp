@@ -50,8 +50,8 @@ namespace scially {
 
         OSGBPageLodVisitor lodVisitor(nodePath);
 
-        std::vector<std::string> rootOSGBLocation = { absoluteLocation().toStdString() };
-        osg::ref_ptr<osg::Node> root = osgDB::readNodeFiles(rootOSGBLocation);
+        std::string rootOSGBLocation =  absoluteLocation().toLocal8Bit();
+        osg::ref_ptr<osg::Node> root = osgDB::readNodeFile(rootOSGBLocation);
 
         if (root == nullptr)
             return false;
