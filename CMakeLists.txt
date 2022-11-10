@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required (VERSION 3.8)
-project(Cesium3DTilesConverter)
+project(Cesium3DTilesConverter VERSION 3.0.0)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_STANDARD 17)
@@ -40,81 +40,37 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
-add_library(Core STATIC
-		"include/CoordinateConvert.h"
-		"include/OGRException.h"
-		"include/OSGBPageLodVisitor.h"
-		"include/OSGBLevel.h"
-		"include/BoundingVolume.h"
-		"include/BoundingVolumeBox.h"
-		"include/BoundingVolumeRegion.h"
-		"include/AssetProperties.h"
-		"include/BoundingVolumeSphere.h"
-		"include/TileMatrix.h"
-		"include/Refine.h"
-		"include/ContentTile.h"
-		"include/RootTile.h"
-		"include/BaseTile.h"
-		"include/OSGBuildState.h"
-		"include/stb_image.h"
-		"include/stb_image_write.h"
-		"include/tiny_gltf.h"
-		"include/TilesParseException.h"
-		"include/TilesConvertException.h"
-		"include/OSGBConvertJob.h"
-		"include/ShpConvertJob.h"
-		"include/ModelMetadata.h"
-		"include/QuadTree.h"
-		"include/ShpConvert.h"
-		"include/GeometryMesh.h"
-		"include/GDALWrapper.h"
-		"include/Batched3DModel.h"
-		"include/Utils.h"
-		"include/earcut.hpp"
+file(GLOB_RECURSE PROJECT_HEADERS
+	"include/*.h"
+	"include/*.hpp"
+)
 
-		"src/CoordinateConvert.cpp"
-		"src/OSGBPageLodVisitor.cpp"
-		"src/BoundingVolume.cpp"
-		"src/BoundingVolumeBox.cpp"
-		"src/BoundingVolumeRegion.cpp"
-		"src/BoundingVolumeSphere.cpp"
-		"src/AssetProperties.cpp"
-		"src/TileMatrix.cpp"
-		"src/Refine.cpp"
-		"src/ContentTile.cpp"
-		"src/RootTile.cpp"
-		"src/BaseTile.cpp"
-		"src/DxtImage.cpp"
-		"src/OSGBuildState.cpp"
-		"src/OSGBLevel.cpp"
-		"src/OSGBConvert.cpp"
-		"src/OSGBConvertJob.cpp"
-		"src/ModelMetadata.cpp"
-		"src/QuadTree.cpp"
-		"src/GeometryMesh.cpp"
-		"src/Batched3DModel.cpp"
-		"src/ShpConvert.cpp"
-		"src/ShpConvertJob.cpp")
+file(GLOB_RECURSE PROJECT_SRCS
+	"src/*.cpp"
+)
 
-target_link_libraries(Core
+add_executable(Converter 
+	${PROJECT_HEADERS} 
+	${PROJECT_SRCS}
+)
+
+target_link_libraries(Converter
 		${GDAL_LIBRARIES}
 		${PROJ_LIBRARIES}
 		${OPENSCENEGRAPH_LIBRARIES}
 		Qt5::Xml
 		Qt5::Core)
 
-if(UNIX)
-	target_link_libraries(Core -lGL)
-endif()
-
-add_executable(Converter src/main.cpp)
-target_link_libraries(Converter
-		Core)
-
-add_custom_command(TARGET Converter
-		POST_BUILD
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/proj_data  ${EXECUTABLE_OUTPUT_PATH}/proj_data
-		COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/gdal_data  ${EXECUTABLE_OUTPUT_PATH}/gdal_data
-		COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Qt5::Xml>  $<TARGET_FILE_DIR:Converter>
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Qt5::Core>  $<TARGET_FILE_DIR:Converter>
+add_custom_command(TARGET Converter POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/share/proj_data  ${EXECUTABLE_OUTPUT_PATH}/proj_data
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/share/gdal_data  ${EXECUTABLE_OUTPUT_PATH}/gdal_data
 )
+
+if (WIN32)
+    get_target_property(QT5_QMAKE_EXECUTABLE Qt5::qmake IMPORTED_LOCATION)
+    get_filename_component(QT5_WINDEPLOYQT_EXECUTABLE ${QT5_QMAKE_EXECUTABLE} PATH)
+    set(QT5_WINDEPLOYQT_EXECUTABLE "${QT5_WINDEPLOYQT_EXECUTABLE}/windeployqt.exe")
+
+    add_custom_command(TARGET Converter POST_BUILD
+       COMMAND ${QT5_WINDEPLOYQT_EXECUTABLE} $<TARGET_FILE_DIR:Converter>)
+endif(WIN32)

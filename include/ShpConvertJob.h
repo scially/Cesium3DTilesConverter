@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QDebug>
+#include <QString>
 
 namespace scially {
 

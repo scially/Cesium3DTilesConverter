@@ -1,11 +1,10 @@
 #pragma once
 
-#include <BaseObject.h>
-#include <QString>
+#include <Cesium3DTiles/BoundingVolume.h>
+
 #include <QJsonValue>
 #include <QJsonObject>
-#include <BoundingVolume.h>
-#include <optional>
+
 namespace scially {
     /// <summary>
     /// Metadata about the tile's content and a link to the content.
@@ -17,18 +16,13 @@ namespace scially {
     /// uri            |A uri that points to the tile's content.               |string          |Required
     /// -------------------------------------------------------------------------------------------------
     /// </summary>
-    class ContentTile : public BaseObject {
-    public:
-        using ContentTilePtr = QSharedPointer<ContentTile>;
+    struct Content {
+        static constexpr const char* TypeName = "content";
        
-        ContentTile() {}
-        virtual QJsonValue write() override;
-        virtual void read(const QJsonValue& object) override;
-        virtual QString typeName() override {
-            return "content";
-        }
+        QJsonObject write() const;
+        void read(const QJsonObject& object);
 
-        std::optional<BoundingVolume> boundingVolume;
+        BoundingVolume boundingVolume;
         QString uri;
     };
 

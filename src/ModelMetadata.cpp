@@ -1,10 +1,10 @@
 #include <ModelMetadata.h>
-#include <QIODevice>
+#include <CoordinateConvert.h>
+#include <TilesConvertException.h>
+
 #include <QFile>
 #include <QDebug>
 #include <QDomDocument>
-#include <CoordinateConvert.h>
-#include <TilesConvertException.h>
 
 namespace scially {
     void ModelMetadata::parse(const QString &input){
@@ -59,8 +59,8 @@ namespace scially {
             convert.setSourceSrs(epsg, CoordinateConvert::EPSG);
             convert.setTargetSrs("4326", CoordinateConvert::EPSG);
             convert.transform();
-            lon = convert.targetX;
-            lat = convert.targetY;
+            lat = convert.targetX;
+            lon = convert.targetY;
         }
         else{// maybe wkt
             if(srsOrigin.isEmpty()){
@@ -76,8 +76,8 @@ namespace scially {
             convert.setSourceSrs(srs, CoordinateConvert::WKT);
             convert.setTargetSrs("4326", CoordinateConvert::EPSG);
             convert.transform();
-            lon = convert.targetX;
-            lat = convert.targetY;
+            lat = convert.targetX;
+            lon = convert.targetY;
         }
     }
 }

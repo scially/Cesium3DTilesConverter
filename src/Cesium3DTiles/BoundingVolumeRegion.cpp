@@ -1,12 +1,9 @@
-#include <BoundingVolumeRegion.h>
+#include <Cesium3DTiles/BoundingVolumeRegion.h>
 #include <Utils.h>
-#include <QDebug>
 
 namespace scially {
 
-    QJsonValue BoundingVolumeRegion::write() {
-        QJsonObject object;
-
+    QJsonArray BoundingVolumeRegion::write() const {
         QJsonArray array;
         array.append(west);
         array.append(south);
@@ -14,16 +11,10 @@ namespace scially {
         array.append(north);
         array.append(minHeight);
         array.append(maxHeight);
-
-        object["region"] = array;
-        return object;
+        return array;
     }
 
-    void BoundingVolumeRegion::read(const QJsonValue& object) {
-        if(!object.isArray()){
-            qCritical() << "parse BoundingVolumeRegion: " << object << " failed\n";
-        }
-
+    void BoundingVolumeRegion::read(const QJsonArray& object) {
         west = object[0].toDouble();
         south = object[1].toDouble();
         east = object[2].toDouble();

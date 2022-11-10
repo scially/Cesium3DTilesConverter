@@ -1,13 +1,15 @@
 #pragma once
 
+#include <Cesium3DTiles/BoundingVolumeRegion.h>
+#include <Cesium3DTiles/BoundingVolumeBox.h>
+
 #include <OSGBuildState.h>
 #include <OSGBPageLodVisitor.h>
 #include <QSharedPointer>
 #include <QString>
 #include <QDir>
 #include <QVector>
-#include <BoundingVolumeRegion.h>
-#include <BoundingVolumeBox.h>
+
 
 namespace scially {
     class OSGBConvert {

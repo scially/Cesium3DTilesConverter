@@ -1,7 +1,9 @@
 #pragma once
 
 #include <ogrsf_frmts.h>
+
 #include <functional>
+
 #include <QVector>
 #include <QString>
 

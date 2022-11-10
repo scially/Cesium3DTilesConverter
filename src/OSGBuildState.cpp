@@ -1,5 +1,6 @@
 #include <OSGBuildState.h>
-#include <QDebug>
+
+#include <QtDebug>
 
 namespace scially {
 

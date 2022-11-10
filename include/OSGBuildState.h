@@ -1,7 +1,7 @@
 #pragma once
 
-#include <tiny_gltf.h>
-#include <stb_image_write.h>
+#include <tiny_gltf/tiny_gltf.h>
+#include <tiny_gltf/stb_image_write.h>
 #include <DxtImage.h>
 
 #include <osg/PagedLOD>

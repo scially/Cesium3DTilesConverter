@@ -2,11 +2,11 @@
 
 #include <OGRException.h>
 
+#include <ogrsf_frmts.h>
+
 #include <QDebug>
 #include <QCoreApplication>
 #include <QSharedPointer>
-
-#include <ogrsf_frmts.h>
 
 namespace scially {
     class GDALDriverWrapper {

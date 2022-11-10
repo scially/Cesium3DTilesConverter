@@ -9,9 +9,11 @@
 int main(int argc, char** argv){
     QCoreApplication app(argc, argv);
     scially::GDALDriverWrapper init;
+
     QCoreApplication::setApplicationName("Cesium3DTilesConverter");
-    QCoreApplication::setApplicationVersion("1.2");
+    QCoreApplication::setApplicationVersion("2.0");
     QTime beginTime = QTime::currentTime();
+
     QCommandLineParser parser;
     parser.setApplicationDescription("Convert OSGB, GDAL to Cesium 3DTiles");
     parser.addHelpOption();

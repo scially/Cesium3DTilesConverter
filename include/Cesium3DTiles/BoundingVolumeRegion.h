@@ -1,17 +1,16 @@
 #pragma once
 
+#include <Utils.h>
+
 #include <limits>
+#include <osg/Math>
 
 #include <osg/Vec3d>
 #include <QJsonValue>
 #include <QJsonObject>
 #include <QJsonArray>
-#include <BaseObject.h>
-#include <Utils.h>
-#include <osg/Math>
 
 namespace scially {
-
     /// <summary>
     /// The boundingVolume.region property is an array of six numbers that define the bounding geographic region 
     /// with latitude, longitude, and height coordinates with the order 
@@ -19,21 +18,10 @@ namespace scially {
     /// Latitudes and longitudes are in the WGS 84 datum as defined in EPSG 4979 and are in radians. 
     /// Heights are in meters above (or below) the WGS 84 ellipsoid.
     /// </summary>
-    class BoundingVolumeRegion : public BaseObject {
-    public:
-        using BoundingVolumeRegionPtr = QSharedPointer<BoundingVolumeRegion>;
-        double west = std::numeric_limits<double>::max();
-        double south = std::numeric_limits<double>::max();
-        double east = std::numeric_limits<double>::min();
-        double north = std::numeric_limits<double>::min();
-        double minHeight = std::numeric_limits<double>::max();
-        double maxHeight = std::numeric_limits<double>::min();
-
-        virtual QJsonValue write() override;
-        virtual void read(const QJsonValue& object) override;
-        virtual QString typeName() override {
-            return "region";
-        };
+    struct BoundingVolumeRegion {
+        static constexpr const char* TypeName = "region";
+        QJsonArray write() const;
+        void read(const QJsonArray& object);
 
         osg::Vec3d getMax() const;
         osg::Vec3d getMin() const;
@@ -67,6 +55,12 @@ namespace scially {
         BoundingVolumeRegion toRadin(double lon, double lat) const;
         
         static BoundingVolumeRegion fromCenterXY(double centerX, double centerY, double xLength, double yLength, double minHeight, double maxHeight);
-        virtual ~BoundingVolumeRegion() {}
+
+        double west = std::numeric_limits<double>::max();
+        double south = std::numeric_limits<double>::max();
+        double east = std::numeric_limits<double>::min();
+        double north = std::numeric_limits<double>::min();
+        double minHeight = std::numeric_limits<double>::max();
+        double maxHeight = std::numeric_limits<double>::min();
     };
 }

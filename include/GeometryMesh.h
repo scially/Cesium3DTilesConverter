@@ -5,12 +5,11 @@
 #include <QByteArray>
 #include <QString>
 #include <QVector>
-#include <QSharedPointer>
+
 #include <osg/Vec3f>
 #include <osg/Vec3i>
 #include <osg/Array>
 #include <osg/Geometry>
-
 
 namespace scially {
     class GeometryMesh {

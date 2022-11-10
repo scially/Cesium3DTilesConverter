@@ -2617,6 +2617,7 @@ namespace tinygltf {
         json v;
 
 #if (defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)) && not defined(TINYGLTF_NOEXCEPTION)
+
         try {
             v = json::parse(str, str + length);
 

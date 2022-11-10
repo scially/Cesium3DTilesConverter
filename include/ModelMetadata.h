@@ -2,7 +2,6 @@
 
 #include <QString>
 
-
 namespace scially {
     class ModelMetadata {
     public:

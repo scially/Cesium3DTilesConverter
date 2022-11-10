@@ -1,14 +1,17 @@
+#include <Cesium3DTiles/Batched3DModel.h>
+#include <earcut/earcut.hpp>
+#include <tiny_gltf/tiny_gltf.h>
+#include <tiny_gltf/stb_image_write.h>
 #include <GeometryMesh.h>
 #include <Utils.h>
-#include <Batched3DModel.h>
-#include <earcut.hpp>
+
+#include <ogrsf_frmts.h>
 
 #include <array>
 #include <algorithm>
 #include <osg/Vec2d>
 #include <osg/Math>
-#include <tiny_gltf.h>
-#include <stb_image_write.h>
+
 #include <DxtImage.h>
 
 namespace scially {

@@ -1,5 +1,9 @@
 #pragma once
 
+#include <tiny_gltf/tiny_gltf.h>
+#include <tiny_gltf/stb_image_write.h>
+#include <DxtImage.h>
+
 #include <QVector>
 #include <QSet>
 #include <QMap>
@@ -9,10 +13,6 @@
 #include <osgDB/ConvertUTF>
 #include <osgUtil/Optimizer>
 #include <osgUtil/SmoothingVisitor>
-
-#include <tiny_gltf.h>
-#include <stb_image_write.h>
-#include <DxtImage.h>
 
 namespace scially {
 	

@@ -1,6 +1,7 @@
 #include <OSGBConvertJob.h>
 #include <ModelMetadata.h>
 #include <TilesConvertException.h>
+
 #include <QDir>
 #include <QDebug>
 #include <QDomDocument>
@@ -11,13 +12,8 @@ namespace scially {
         // 解析XML中的坐标
         ModelMetadata metadata;
         double lon, lat;
-        try{
-            metadata.parse(input + "/metadata.xml");
-            metadata.getCoordinate(lon, lat);
-        }catch (const TilesConvertException& e){
-            qCritical() << e.what();
-            return;
-        }
+        metadata.parse(input + "/metadata.xml");
+        metadata.getCoordinate(lon, lat);
 
         // 遍历Data
         QDir dataDir(input + "/Data");
@@ -45,7 +41,7 @@ namespace scially {
             baseTile.asset.assets["gltfUpAxis"] = "Z";
 
         baseTile.asset.assets["version"] = "1.0";
-        baseTile.root.transform = TileMatrix::fromXYZ(lon, lat, height);
+        baseTile.root.transform = Transform::fromXYZ(lon, lat, height);
         baseTile.root.geometricError = 1000;
         BoundingVolumeBox mergeBox;
         for(auto iter = tasks.constBegin(); iter != tasks.constEnd(); ++iter){
@@ -54,21 +50,21 @@ namespace scially {
                 // for this child
                 RootTile childTile = task->tile.root;
                 mergeBox = mergeBox.merge(task->tile.root.boundingVolume.box.value());
-                ContentTile content;
+                Content content;
                 content.uri = "./" + task->osgbLevel.getTileName() + "/tileset.json";
                 childTile.content = content;
                 childTile.children.clear();
                 baseTile.root.children.append(childTile);
             }
         }
-        baseTile.root.boundingVolume = mergeBox;
-        QJsonDocument doc(baseTile.write().toObject());
+        baseTile.root.boundingVolume.box = mergeBox;
+
         QFile tilesetjsonFile(output + "/tileset.json");
         if(!tilesetjsonFile.open(QIODevice::WriteOnly)){
             qWarning() << "Can't not write tileset.json in " << output;
             return;
         }
-        int writeBytes = tilesetjsonFile.write(doc.toJson(QJsonDocument::Indented));
+        int writeBytes = tilesetjsonFile.write(QJsonDocument(baseTile.write()).toJson(QJsonDocument::Indented));
         if(writeBytes <= 0){
             qWarning() << "Can't not write tileset.json in " << output;
             return;

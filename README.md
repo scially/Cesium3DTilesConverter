@@ -78,7 +78,7 @@ Converter.exe --format gdal --input <GDB Path> --output <DIR>  --field height --
 图层中需要有字段来表示高度信息。
 
 # How To Build
-1. vcpkg install "osg" "osg[plugins]"
+1. vcpkg install "gdal" "osg" "osg[plugins]"
 2. 如果没有Qt5.15，可以通过以下两种方式安装：
    1. 通过Qt官网安装
    2. vcpkg install "qt5[all]"

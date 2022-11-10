@@ -1,7 +1,7 @@
+#include <Cesium3DTiles/BaseTile.h>
 #include <ShpConvert.h>
-#include <BaseTile.h>
 
-#include <QDebug>
+#include <QtDebug>
 #include <QDir>
 #include <QFile>
 
@@ -115,7 +115,7 @@ namespace scially {
                 centerX, centerY,
                 nodeBox.MaxX - nodeBox.MinX, nodeBox.MaxY - nodeBox.MinY,
                 0, maxHeight);
-            child.transform = TileMatrix::fromXYZ(centerX, centerY, 0);
+            child.transform = Transform::fromXYZ(centerX, centerY, 0);
             child.content.emplace();
             child.content->uri = QString("./tile/%1/%2/%3.b3dm")
                 .arg(root->getLevel())
@@ -136,7 +136,7 @@ namespace scially {
         rootBounding.minHeight = 0;
         rootBounding.maxHeight = layerMaxHeight;
         tile.root.boundingVolume = rootBounding;
-        QByteArray tileBuffer = jsonDump(tile.write().toObject());
+        QByteArray tileBuffer = QJsonDocument(tile.write()).toJson(); 
         QFile tileFile(output + "/tileset.json");
         if (!tileFile.open(QIODevice::WriteOnly)){
              qWarning() << "Can't write file: " << tileFile.fileName();

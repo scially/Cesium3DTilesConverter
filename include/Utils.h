@@ -5,6 +5,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include <QByteArray>
+
 #include <osg/Math>
 
 namespace scially {
@@ -54,10 +55,4 @@ namespace scially {
 		}
 		return arr;
 	}
-
-	inline QByteArray jsonDump(QJsonObject json, QJsonDocument::JsonFormat format = QJsonDocument::Compact) {
-		QJsonDocument doc(json);
-		return doc.toJson(format);
-	}
-
 }

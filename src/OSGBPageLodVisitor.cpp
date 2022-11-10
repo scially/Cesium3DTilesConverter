@@ -1,4 +1,3 @@
-#include <QString>
 #include <OSGBPageLodVisitor.h>
 
 namespace scially {

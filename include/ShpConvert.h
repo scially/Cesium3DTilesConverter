@@ -1,12 +1,13 @@
 #pragma once
 
-#include <QByteArray>
-#include <QString>
-#include <QStringView>
 #include <GDALWrapper.h>
 #include <QuadTree.h>
 #include <GeometryMesh.h>
 #include <TilesConvertException.h>
+
+#include <QByteArray>
+#include <QString>
+#include <QStringView>
 
 namespace scially {
     class ShpConvert {

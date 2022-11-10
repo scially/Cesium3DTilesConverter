@@ -1,13 +1,9 @@
 #pragma once
 
-#include <BaseObject.h>
-#include <TilesParseException.h>
-#include <QVector>
-#include <QString>
-#include <BoundingVolume.h>
-#include <ContentTile.h>
-#include <Refine.h>
-#include <TileMatrix.h>
+#include <Cesium3DTiles/BoundingVolume.h>
+#include <Cesium3DTiles/Content.h>
+#include <Cesium3DTiles/Refine.h>
+#include <Cesium3DTiles/Transform.h>
 
 namespace scially {
 
@@ -29,25 +25,18 @@ namespace scially {
     /// children       |An array of objects that define child tiles                  |RootTile[]      |
     /// --------------------------------------------------------------------------------------------------------
     /// </summary>
-    class RootTile : public BaseObject {
-    public:
-        using RootTilePtr = QSharedPointer<RootTile>;
+    struct RootTile{
+        static constexpr const char* TypeName = "root"; 
 
-        virtual QJsonValue write() override;
-        virtual void read(const QJsonValue& object) override;
-        virtual QString typeName() override {
-            return "root";
-        }
-
-        RootTile();
-        virtual ~RootTile() {}
+        QJsonObject write() const;
+        void read(const QJsonObject& object);
 
         BoundingVolume boundingVolume;
-        TileMatrix     transform;
+        Transform      transform;
         double         geometricError = 0;
         Refine         refine;
-        std::optional<ContentTile>  content;
-        QVector<RootTile>           children;
+        std::optional<Content>  content;
+        QVector<RootTile>       children;
     };
 
 }

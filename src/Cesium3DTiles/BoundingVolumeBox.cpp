@@ -1,27 +1,16 @@
-#include <BoundingVolumeBox.h>
-
+#include <Cesium3DTiles/BoundingVolumeBox.h>
 
 namespace scially {
-
-    QJsonValue BoundingVolumeBox::write() {
-        QJsonObject object;
-
+    QJsonArray BoundingVolumeBox::write() const{
         QJsonArray array;
         array.append(centerX());      array.append(centerY());      array.append(centerZ());
         array.append(halfXLength());  array.append(directionX0());  array.append(directionX1());
         array.append(directionY0());  array.append(halfYLength());  array.append(directionY1());
         array.append(directionZ0());  array.append(directionZ1());  array.append(halfZLength());
-
-        object["box"] = array;
-        return object;
+        return array;
     }
 
-    void BoundingVolumeBox::read(const QJsonValue& object) {
-        if(!object.isArray()){
-            qCritical() << "parse BoundingVolumeBox: " << object << "failed\n";
-            return;
-        }
-
+    void BoundingVolumeBox::read(const QJsonArray& object) {
         double centerX = object[0].toDouble(),        centerY = object[1].toDouble(),        centerZ = object[2].toDouble();
         double directionX0 = object[4].toDouble(),    directionX1 = object[5].toDouble(),    halfXLength = object[3].toDouble();
         double directionY0 = object[6].toDouble(),    directionY1 = object[8].toDouble(),    halfYLength = object[7].toDouble();

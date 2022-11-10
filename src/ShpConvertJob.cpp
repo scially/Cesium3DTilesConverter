@@ -1,7 +1,8 @@
 #include <ShpConvertJob.h>
 #include <ShpConvert.h>
 
-#include <QDebug>
+#include <QtDebug>
+
 namespace scially {
 	void ShpConvertJob::run() {
         try{

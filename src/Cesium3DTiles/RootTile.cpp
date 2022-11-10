@@ -1,17 +1,12 @@
-#include <RootTile.h>
+#include <Cesium3DTiles/RootTile.h>
 
 namespace scially {
-
-    RootTile::RootTile() {
-        children.clear();
-    }
-
-    QJsonValue RootTile::write() {
+    QJsonObject RootTile::write() const{
         QJsonObject object;
-        object["boundingVolume"] = boundingVolume.write();
+        object[boundingVolume.TypeName] = boundingVolume.write();
         object["geometricError"] = geometricError;
-        object["refine"] = refine.write();
-        object[transform.typeName()] = transform.write();
+        object[refine.TypeName] = refine.write();
+        object[transform.TypeName] = transform.write();
 
         if (content.has_value()) {
             object["content"] = content->write();
@@ -25,25 +20,19 @@ namespace scially {
         return object;
     }
 
-    void RootTile::read(const QJsonValue& object) {
-        if (object.isNull())
-            return;
-
-        boundingVolume.read(object["boundingVolume"]);
+    void RootTile::read(const QJsonObject& object) {
+        boundingVolume.read(object[boundingVolume.TypeName].toObject());
         geometricError = object["geometricError"].toDouble();
-        transform.read(object["transform"]);
-
+        transform.read(object[transform.TypeName].toArray());
         content.emplace();
-        content->read(object["content"]);
-
-        refine.read(object["refine"]);
+        content->read(object[content->TypeName].toObject());
+        refine.read(object[refine.TypeName].toString());
 
         QJsonArray values = object["children"].toArray();
         for (const auto& value : values) {
             RootTile r;
-            r.read(value);
+            r.read(value.toObject());
             children.append(r);
         }
-
     }
 }

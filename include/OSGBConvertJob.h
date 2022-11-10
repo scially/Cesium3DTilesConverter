@@ -1,10 +1,10 @@
 #pragma once
 
 #include <OSGBLevel.h>
+
 #include <QObject>
 #include <QRunnable>
 #include <QString>
-#include <QDebug>
 #include <QThreadPool>
 #include <QVector>
 #include <QPair>

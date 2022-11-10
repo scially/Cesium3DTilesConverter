@@ -1,10 +1,8 @@
 #pragma once
 
-#include <QJsonValue>
-#include <QJsonObject>
+#include <Cesium3DTiles/BoundingVolumeRegion.h>
+
 #include <QJsonArray>
-#include <BaseObject.h>
-#include <BoundingVolumeRegion.h>
 
 namespace scially {
     /// <summary>
@@ -16,59 +14,56 @@ namespace scially {
     /// The next three elements (indices 6, 7, and 8) define the y-axis direction and half-length. 
     /// The last three elements (indices 9, 10, and 11) define the z-axis direction and half-length.
     /// </summary>
-    class BoundingVolumeBox : public BaseObject {
-    public:
-        explicit BoundingVolumeBox(BoundingVolumeRegion r): region(r){}
-        BoundingVolumeBox() = default;
+    struct BoundingVolumeBox{
+        static constexpr const char* TypeName = "box";
 
-        double centerX() {
+        BoundingVolumeBox() = default;
+        BoundingVolumeBox(BoundingVolumeRegion r) : region(r) {}
+
+        QJsonArray write() const;
+        void read(const QJsonArray& object);
+        double centerX() const{
             return (region.east + region.west) / 2;
         }
-        double centerY() {
+        double centerY() const {
             return (region.north + region.south) / 2;
         }
-        double centerZ() {
+        double centerZ() const {
             return (region.minHeight + region.maxHeight) / 2;
         }
 
-        double directionX0 () {
+        double directionX0 () const {
             return 0;
         }
-        double directionX1 () {
+        double directionX1 () const {
             return 0;
         }
-        double halfXLength () {
+        double halfXLength () const {
             return (region.east - region.west) / 2;
         }
 
-        double directionY0() {
+        double directionY0() const {
             return 0;
         }
 
-        double directionY1() {
+        double directionY1() const {
             return 0;
         }
 
-        double halfYLength () {
+        double halfYLength () const {
             return (region.north - region.south) / 2;
         }
 
-        double directionZ0 () {
+        double directionZ0 () const {
             return 0;
         }
 
-        double directionZ1() {
+        double directionZ1() const {
             return 0;
         }
 
-        double halfZLength () {
+        double halfZLength () const {
             return (region.maxHeight - region.minHeight) / 2;
-        }
-
-        virtual QJsonValue write() override;
-        virtual void read(const QJsonValue& object) override;
-        virtual QString typeName() override {
-            return "box";
         }
 
         void setMax(const osg::Vec3d& max);
@@ -87,8 +82,6 @@ namespace scially {
         osg::Vec3d getMax() const;
         osg::Vec3d getMin() const;
 
-        virtual ~BoundingVolumeBox() {}
-    private:
         BoundingVolumeRegion region;
     };
 }

@@ -1,9 +1,10 @@
 #pragma once
 
+#include <Cesium3DTiles/RootTile.h>
+#include <Cesium3DTiles/BaseTile.h>
 #include <OSGBuildState.h>
 #include <OSGBPageLodVisitor.h>
-#include <RootTile.h>
-#include <BaseTile.h>
+
 #include <QSharedPointer>
 #include <QString>
 #include <QDir>
@@ -39,8 +40,7 @@ namespace scially {
         QString absoluteLocation() const;
 
         /// <summary>
-        /// 提取 Tile_+154_+018_L22_0000320.osgb _L后面的数字
-        /// 提取失败，返回 0
+        /// get Tile_+154_+018_L22_0000320.osgb _L level
         /// </summary>
         int getLevelNumber() const;
         QString getTileName() const;

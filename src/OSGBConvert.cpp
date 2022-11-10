@@ -1,6 +1,12 @@
 #include <OSGBConvert.h>
-#include <Batched3DModel.h>
+#include <Cesium3DTiles/Batched3DModel.h>
 #include <OSGBPageLodVisitor.h>
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#define TINYGLTF_IMPLEMENTATION
+#include <tiny_gltf/stb_image_write.h>
+#include <tiny_gltf/tiny_gltf.h>
+
 #include <osgDB/ReadFile>
 #include <osg/Image>
 #include <QJsonDocument>
@@ -12,12 +18,6 @@
 
 #include <vector>
 #include <initializer_list>
-#define STB_IMAGE_IMPLEMENTATION
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#define TINYGLTF_IMPLEMENTATION
-#include <stb_image_write.h>
-#include <tiny_gltf.h>
-
 
 namespace scially {
 
@@ -257,7 +257,7 @@ namespace scially {
                 }
             }
             model.asset.version = "2.0";
-            model.asset.generator = "hwang";
+            model.asset.generator = "Cesium3DTilesConveter";
 
             glbBuffer = QByteArray::fromStdString(gltf.Serialize(&model));
             return glbBuffer;

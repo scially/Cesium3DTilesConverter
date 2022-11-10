@@ -1,13 +1,14 @@
+#include <Cesium3DTiles/BaseTile.h>
 #include <OSGBLevel.h>
+#include <DxtImage.h>
+#include <OSGBConvert.h>
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
 #include <QDataStream>
-#include <DxtImage.h>
-#include <OSGBConvert.h>
-#include <BaseTile.h>
-#include <QDebug>
+#include <QtDebug>
 
 namespace scially {
 
@@ -97,10 +98,9 @@ namespace scially {
         tile.asset.assets["version"] = "1.0";
 
         tile.root.children.append(childTile);
-        tile.root.boundingVolume = this->region;
+        tile.root.boundingVolume.box = this->region;
         tile.root.geometricError = 1000;
-        QJsonDocument jsonDoc(tile.write().toObject());
-        QByteArray json = jsonDoc.toJson(QJsonDocument::Indented);
+
         QFile tilesetFile(output + "/" + getTileName() + "/tileset.json");
         
         if (!tilesetFile.open(QIODevice::WriteOnly)) {
@@ -108,7 +108,7 @@ namespace scially {
             return false;
         }
 
-        tilesetFile.write(json);
+        tilesetFile.write(QJsonDocument(tile.write()).toJson(QJsonDocument::Indented));
         return true;
     }
 
@@ -125,19 +125,19 @@ namespace scially {
         if (writeBytes <= 0)
             return false;
         
-        ContentTile content;
+        Content content;
         content.uri = "./" + nodeName + B3DMEXTENSION;
-        content.boundingVolume = BoundingVolumeBox(convert.region);
+        content.boundingVolume.box = BoundingVolumeBox(convert.region);
        
-        root.refine = "REPLACE";
+        root.refine.type = "REPLACE";
         root.content = content;
-        root.boundingVolume = BoundingVolumeBox(convert.region);
+        root.boundingVolume.box = BoundingVolumeBox(convert.region);
 
         for(int i = 0; i < subNodes.size(); i++){
             RootTile child;
             subNodes[i].convertTiles(child, output);
             root.children.append(child);
-            root.boundingVolume = root.boundingVolume.box->merge(child.boundingVolume.box.value());  
+            root.boundingVolume.box = root.boundingVolume.box->merge(child.boundingVolume.box.value());  
         }
 
         return true;
