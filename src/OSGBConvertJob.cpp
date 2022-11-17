@@ -3,71 +3,60 @@
 #include <TilesConvertException.h>
 
 #include <QDir>
-#include <QDebug>
-#include <QDomDocument>
 
 namespace scially {
 
     void OSGBConvertJob::run() {
-        // 解析XML中的坐标
         ModelMetadata metadata;
         double lon, lat;
-        metadata.parse(input + "/metadata.xml");
+        metadata.parse(input_ + "/metadata.xml");
         metadata.getCoordinate(lon, lat);
 
-        // 遍历Data
-        QDir dataDir(input + "/Data");
+        QDir dataDir(input_ + "/Data");
         if(!dataDir.exists()){
-            qCritical() << "Can't find Data dir in " << input;
+            qCritical() << "can't find Data in:" << input_;
             return;
         }
 
         QFileInfoList tileDirs = dataDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot , QDir::Name);
         for(auto iter = tileDirs.constBegin(); iter != tileDirs.constEnd(); iter++){
-            QString tileLocation = iter->absoluteFilePath() + "/" + iter->fileName() + OSGBLevel::OSGBEXTENSION;
-            auto task = QSharedPointer<OSGBConvertTask>::create(tileLocation, output, maxLevel);
-            task->setYUpAxis(yUpAxis);
-            tasks.append(task);
-            threadPool->start(task.get());
+            QString tileLocation = iter->absoluteFilePath() + "/" + iter->fileName() + OSGLevel::OSGBEXTENSION;
+            auto task = new OSGBConvertTask(tileLocation, output_, maxLevel_, this);
+            task->setYUpAxis(yUpAxis_);
+            tasks_.append(task);
+            threadPool_->start(task);
         }
-        threadPool->waitForDone();
+        threadPool_->waitForDone();
 
-        // 合并子节点
+        // merge children tiles
         BaseTile baseTile;
         baseTile.geometricError = 2000;
-        if(yUpAxis)
-            baseTile.asset.assets["gltfUpAxis"] = "Y";
-        else
-            baseTile.asset.assets["gltfUpAxis"] = "Z";
-
+        baseTile.asset.assets["gltfUpAxis"] = yUpAxis_ ? "Y" : "Z";
         baseTile.asset.assets["version"] = "1.0";
-        baseTile.root.transform = Transform::fromXYZ(lon, lat, height);
+        baseTile.root.transform = Transform::fromXYZ(lon, lat, height_);
         baseTile.root.geometricError = 1000;
-        BoundingVolumeBox mergeBox;
-        for(auto iter = tasks.constBegin(); iter != tasks.constEnd(); ++iter){
-            QSharedPointer<OSGBConvertTask> task = *iter;
-            if(task->isSucceed){
+        OSGBRegion mergeBox;
+        for(auto iter = tasks_.constBegin(); iter != tasks_.constEnd(); ++iter){
+            OSGBConvertTask* task = *iter;
+            if(task->isSuccess()){
                 // for this child
-                RootTile childTile = task->tile.root;
-                mergeBox = mergeBox.merge(task->tile.root.boundingVolume.box.value());
+                RootTile childTile = task->baseTile().root;
+                mergeBox = mergeBox.merge(task->region());
                 Content content;
-                content.uri = "./" + task->osgbLevel.getTileName() + "/tileset.json";
+                content.uri = "./" + task->tileName() + "/tileset.json";
                 childTile.content = content;
                 childTile.children.clear();
                 baseTile.root.children.append(childTile);
             }
         }
-        baseTile.root.boundingVolume.box = mergeBox;
+        baseTile.root.boundingVolume.box = mergeBox.toBoundingVolumeBox();
 
-        QFile tilesetjsonFile(output + "/tileset.json");
+        QFile tilesetjsonFile(output_ + "/tileset.json");
         if(!tilesetjsonFile.open(QIODevice::WriteOnly)){
-            qWarning() << "Can't not write tileset.json in " << output;
+            qCritical("can't write tileset.json in %s", output_);
             return;
         }
-        int writeBytes = tilesetjsonFile.write(QJsonDocument(baseTile.write()).toJson(QJsonDocument::Indented));
-        if(writeBytes <= 0){
-            qWarning() << "Can't not write tileset.json in " << output;
-            return;
-        }
+        
+        tilesetjsonFile.write(QJsonDocument(baseTile.write()).toJson(QJsonDocument::Indented));
     }
 }

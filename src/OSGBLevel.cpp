@@ -4,79 +4,66 @@
 #include <OSGBConvert.h>
 
 #include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QJsonArray>
-#include <QDataStream>
-#include <QtDebug>
+#include <QDir>
 
 namespace scially {
-
-    QString OSGBLevel::absoluteLocation() const {
-        return QDir(nodePath).filePath(nodeName) + OSGBEXTENSION;
-    }
-
-    QString OSGBLevel::getTileName() const {
-        int p0 = nodeName.indexOf("_L");
+    QString OSGLevel::getTileName() const {
+        int p0 = nodeName_.indexOf("_L");
         if (p0 < 0)
-            return nodeName;
-        return nodeName.left(p0);
+            return nodeName_;
+        return nodeName_.left(p0);
     }
 
-    void OSGBLevel::createDir(const QString& output) const {
-        for (int i = 0; i < subNodes.size(); i++) {
-            QDir createDir(output + '/' + subNodes[i].getTileName());
-            if (!createDir.exists()) {
-                if (!createDir.mkpath(".")){
-                    qWarning() << "Can't create dir: " << createDir.absolutePath();
-                }
+    int OSGLevel::getLevelNumber() const {
+        int p0 = nodeName_.indexOf("_L");
+        if (p0 < 0)
+            return 0;
+        int p1 = nodeName_.indexOf("_", p0 + 1);
+        if (p1 < 0)
+            return 0;
+        return nodeName_.mid(p0 + 2, p1 - p0 - 2).toInt();
+    }
 
+    void OSGLevel::createDir(const QString& output) const {
+        for (int i = 0; i < subNodes_.size(); i++) {
+            QDir createDir(output + '/' + subNodes_[i].getTileName());
+            if (!createDir.exists()) {
+                if (!createDir.mkpath("."))
+                    qWarning("can't create dir: %s", createDir.absolutePath());
             }
         }
     }
 
-    int OSGBLevel::getLevelNumber() const {
-        int p0 = nodeName.indexOf("_L");
-        if (p0 < 0)
-            return 0;
-        int p1 = nodeName.indexOf("_", p0 + 2);
-        if (p1 < 0)
-            return 0;
-        return nodeName.mid(p0 + 2, p1 - p0 - 2).toInt();
-    }
-
-    bool OSGBLevel::getAllOSGBLevels(int maxLevel) {
+    bool OSGLevel::getAllOSGBLevels(int maxLevel) {
         if (getLevelNumber() < 0 || getLevelNumber() >= maxLevel)
             return false;
 
-        OSGBPageLodVisitor lodVisitor(nodePath);
-
-        std::vector<std::string> rootOSGBLocation = { absoluteLocation().toStdString() };
-        osg::ref_ptr<osg::Node> root = osgDB::readNodeFiles(rootOSGBLocation);
-
-        if (root == nullptr)
+        OSGBPageLodVisitor lodVisitor(nodePath_);
+        osg::ref_ptr<osg::Node> root = osgDB::readNodeFile(nodeLocation_.toStdString());
+        if (root == nullptr) {
+            qWarning() << "can't read osgb file:" << nodeLocation_;
             return false;
-
+        }
+            
         root->accept(lodVisitor);
-
         for (int i = 0; i < lodVisitor.subNodeNames.size(); i++) {
-            OSGBLevel subLevel(lodVisitor.subNodeNames[i]);
-            subLevel.setYUpAxis(yUpAxis);
+            OSGLevel subLevel(lodVisitor.subNodeNames[i]);
+            subLevel.setYUpAxis(yUpAxis_);
             if (subLevel.getAllOSGBLevels(maxLevel)) {
-                subNodes.append(subLevel);
+                subNodes_.append(subLevel);
             }
         }
         return true;
     }
 
-    bool OSGBLevel::convertTiles(BaseTile &tile, const QString& output, int maxLevel) {
-        //
+    bool OSGLevel::convertTiles(BaseTile &tile, const QString& output, int maxLevel) {
         if (!getAllOSGBLevels(maxLevel)) {
             return false;
         }
 
         createDir(output);
 
+        // convert tiles and update this region
         RootTile childTile;
         if(!convertTiles(childTile, output)){
             return false;
@@ -85,75 +72,68 @@ namespace scially {
         //update geometry error
         updateGeometryError(childTile);
 
-
-        // update this region
-        this->region = childTile.boundingVolume.box.value();
-
         // update root tile
         tile.geometricError = 2000;
-        if(yUpAxis)
-            tile.asset.assets["gltfUpAxis"] = "Y";
-        else
-            tile.asset.assets["gltfUpAxis"] = "Z";
+        tile.asset.assets["gltfUpAxis"] = yUpAxis_ ? "Y" : "Z";
         tile.asset.assets["version"] = "1.0";
 
         tile.root.children.append(childTile);
-        tile.root.boundingVolume.box = this->region;
+        tile.root.boundingVolume.box = this->region_.toBoundingVolumeBox();
         tile.root.geometricError = 1000;
 
         QFile tilesetFile(output + "/" + getTileName() + "/tileset.json");
         
         if (!tilesetFile.open(QIODevice::WriteOnly)) {
-            qCritical() << "Can't Write tileset.json in " << tilesetFile.fileName();
+            qWarning() << "can't Write tileset.json in" << tilesetFile.fileName();
             return false;
         }
 
-        tilesetFile.write(QJsonDocument(tile.write()).toJson(QJsonDocument::Indented));
-        return true;
+        return tilesetFile.write(QJsonDocument(tile.write()).toJson(QJsonDocument::Indented)) > 0;
     }
 
-    bool OSGBLevel::convertTiles(RootTile &root, const QString& output) {
-        OSGBConvert convert(absoluteLocation());
-        convert.yUpAxis = yUpAxis;
+    bool OSGLevel::convertTiles(RootTile &root, const QString& output) {
+        OSGBConvert convert(nodeLocation_);
+        convert.setYUpAxis(yUpAxis_);
 
-        QByteArray b3dmBuffer = convert.toB3DM();
-        if (b3dmBuffer.isEmpty())
+        QByteArray b3dmBuffer;
+        if (!convert.toB3DM(b3dmBuffer))
             return false;
-        //
-        QString outputLocation = QDir(output + '/' + getTileName()).absolutePath();
-        int writeBytes = convert.writeB3DM(b3dmBuffer, outputLocation);
-        if (writeBytes <= 0)
+
+        QString outputLocation = QDir::cleanPath(output + '/' + getTileName());
+        
+        if(!convert.writeB3DM(b3dmBuffer, outputLocation))
             return false;
         
         Content content;
-        content.uri = "./" + nodeName + B3DMEXTENSION;
-        content.boundingVolume.box = BoundingVolumeBox(convert.region);
+        content.uri = "./" + nodeName_ + B3DMEXTENSION;
+        content.boundingVolume.box = convert.region().toBoundingVolumeBox();
        
         root.refine.type = "REPLACE";
         root.content = content;
-        root.boundingVolume.box = BoundingVolumeBox(convert.region);
+        root.boundingVolume.box = convert.region().toBoundingVolumeBox();
 
-        for(int i = 0; i < subNodes.size(); i++){
+        region_ = convert.region();
+
+        for(int i = 0; i < subNodes_.size(); i++){
             RootTile child;
-            subNodes[i].convertTiles(child, output);
-            root.children.append(child);
-            root.boundingVolume.box = root.boundingVolume.box->merge(child.boundingVolume.box.value());  
+            if (subNodes_[i].convertTiles(child, output)) {
+                root.children.append(child);
+                region_ = region_.merge(subNodes_[i].region());
+            }
         }
-
+        root.boundingVolume.box = region_.toBoundingVolumeBox();
         return true;
     }
 
-    void OSGBLevel::updateGeometryError(RootTile &root){
+    void OSGLevel::updateGeometryError(RootTile &root){
         if(root.children.isEmpty()){
             root.geometricError = 0;
             return;
         }
-        else{
-            for(auto& tile : root.children)
-                updateGeometryError(tile);
-            root.geometricError = root.children[0].boundingVolume.box->geometricError() * 2;
-        }
-
+        
+        for(auto& tile : root.children)
+            updateGeometryError(tile);
+        
+        root.geometricError = root.children[0].boundingVolume.box->geometricError() * 2;
     }
-
 }

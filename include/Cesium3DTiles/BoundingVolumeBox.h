@@ -17,71 +17,24 @@ namespace scially {
     struct BoundingVolumeBox{
         static constexpr const char* TypeName = "box";
 
-        BoundingVolumeBox() = default;
-        BoundingVolumeBox(BoundingVolumeRegion r) : region(r) {}
-
         QJsonArray write() const;
         void read(const QJsonArray& object);
-        double centerX() const{
-            return (region.east + region.west) / 2;
-        }
-        double centerY() const {
-            return (region.north + region.south) / 2;
-        }
-        double centerZ() const {
-            return (region.minHeight + region.maxHeight) / 2;
-        }
+        double geometricError() const noexcept;
+		
+        double centerX = 0;
+        double centerY = 0;
+        double centerZ = 0;
 
-        double directionX0 () const {
-            return 0;
-        }
-        double directionX1 () const {
-            return 0;
-        }
-        double halfXLength () const {
-            return (region.east - region.west) / 2;
-        }
+        double directionX0 = 0;
+        double directionX1 = 0;
+        double halfXLength = 0;
 
-        double directionY0() const {
-            return 0;
-        }
+        double directionY0 = 0;
+        double directionY1 = 0;
+        double halfYLength = 0;
 
-        double directionY1() const {
-            return 0;
-        }
-
-        double halfYLength () const {
-            return (region.north - region.south) / 2;
-        }
-
-        double directionZ0 () const {
-            return 0;
-        }
-
-        double directionZ1() const {
-            return 0;
-        }
-
-        double halfZLength () const {
-            return (region.maxHeight - region.minHeight) / 2;
-        }
-
-        void setMax(const osg::Vec3d& max);
-        void setMin(const osg::Vec3d& min);
-        void setMax(const osg::Vec3f& max);
-        void setMin(const osg::Vec3f& min);
-
-        void mergeMax(const osg::Vec3d& max);
-        void mergeMin(const osg::Vec3d& min);
-        void mergeMax(const osg::Vec3f& max);
-        void mergeMin(const osg::Vec3f& min);
-
-        BoundingVolumeBox merge(BoundingVolumeBox bounding) const;
-
-        double geometricError() const;
-        osg::Vec3d getMax() const;
-        osg::Vec3d getMin() const;
-
-        BoundingVolumeRegion region;
+        double directionZ0 = 0;
+        double directionZ1 = 0;
+        double halfZLength = 0;
     };
 }

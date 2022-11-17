@@ -17,41 +17,44 @@
 ##  命令行格式
 
 ```sh
-Converter.exe --format <FORMAT> --input <INPUT> --output <OUTPUT> [OPTIONS] 
+Converter.exe --format <FORMAT> [OPTIONS] <INPUT> <OUTPUT> 
 ```
 
 ## 示例命令
 
 ```sh
 # from osgb dataset
-Converter.exe --format osgb -input <OSGB Path> --output <Out Path>  --yUpAxis true
+Converter -f OSGB --yUpAxis  <OSGB Path> <OUTPUT DIR> 
 
 # from single shp file
-Converter.exe --format gdal --input <Shapefile Path> --output <DIR>  --field height --layer <Shapefile Name>
+Converter -f GDAL --field height <Shapefile Path> <OUTPUT DIR>
 
 # from gdb file
-Converter.exe --format gdal --input <GDB Path> --output <DIR>  --field height --layer <Layer Name>
+Converter -f GDAL --field height --layer <Layer Name>  <GDB Path> <OUTPUT DIR>
 ```
 
 ## 参数说明
-- `--format <FORMAT>` 输入数据格式。
-
-  `FORMAT` 可选：OSGB, GDAL
-
-  `可选：OSGB` 为倾斜摄影格式数据, `GDAL` 为GDAL支持的面(Polygon)数据
-
-- `--input <PATH>` 输入数据的目录，osgb数据截止到 `<DIR>/Data` 目录的上一级，GDAL参考GDAL数据格式。
-
-- `--output <DIR>` 输出目录。OSGB转换的3DTiles输出的数据文件位于 `<DIR>/Data` 目录, GDAL转换的3DTiles输出的数据文件位于`<DIR>/Tile`目录，`tileset.json`位于`<DIR>`根目录。
-
-- `--field` 高度字段。指定GDAL数据集中的高度属性字段，此项为转换 GDAL 时的必须参数。
-
-- `--offset` OSGB高度偏移字段。
-- `--thread` 处理线程数量（仅对OSGB生效）
-- `--yUpAxis` 是否将gltf模型转为y轴朝上
-
-  `yUpAxis` 可选： true, false  
-  如果是用`Cesium for Unreal`加载数据，需要启用yUpAxis
+```
+Options:
+  -?, -h, --help           Displays help on commandline options.
+  
+  -f, --format <format>    OSGB or GDAL(required), OSGB 为倾斜摄影格式数据, GDAL 为GDAL支持的面(Polygon)数据
+  
+  -l, --level <level>      OSGB max level, OSGB处理到的最大级别
+  
+  -F, --field <field>      height field name(required for gdal), 指定GDAL数据集中的高度属性字段，此项为转换 GDAL 时的必须参数。
+  
+  -L, --layer <layer>      layer name(required when input isn't shapefile)
+  
+  -t, --thread <thread>    thread number, 处理线程数量
+  
+  -y, --yUpAxis            y up axis, 是否将gltf模型转为y轴朝上（仅对OSGB生效）,如果是用Cesium for Unreal，需要指定yUpAxis
+  
+  -H, --height <height>    height offset(default value 0), OSGB高度偏移字段
+  
+  <INPUT PATH> 输入数据的目录，OSGB数据截止到 `<DIR>/Data` 目录的上一级，GDAL参考GDAL数据格式。
+  <OUTPUT DIR> 输出目录。OSGB转换的3DTiles输出的数据文件位于 <DIR>/Data`目录, GDAL转换的3DTiles输出的数据文件位于<DIR>/Tile目录，tileset.json位于<DIR>根目录。
+```
 
 # 数据要求及说明
 

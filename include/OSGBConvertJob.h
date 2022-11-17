@@ -1,15 +1,12 @@
 #pragma once
 
 #include <OSGBLevel.h>
+#include <TilesConvertException.h>
 
-#include <QObject>
 #include <QRunnable>
-#include <QString>
 #include <QThreadPool>
 #include <QVector>
-#include <QPair>
-#include <QSharedPointer>
-#include <QDomDocument>
+#include <QtDebug>
 
 namespace scially {
     class OSGBConvertTask;
@@ -17,68 +14,61 @@ namespace scially {
     class OSGBConvertJob: public QObject{
         Q_OBJECT
     public:
-        OSGBConvertJob(const QString& input, const QString &output)
-            :input(input), output(output), threadPool(new QThreadPool) {}
+        OSGBConvertJob(const QString& input, const QString &output, QObject* parent = nullptr)
+            :input_(input), output_(output), QObject(parent) {
+            threadPool_ = new QThreadPool(this);
+        }
 
-        void setMaxThread(int thread){
-            maxThread = thread;
-            threadPool->setMaxThreadCount(maxThread);
+        void setThread(int thread){
+            threadPool_->setMaxThreadCount(thread);
         }
 
         void run();
 
-        virtual ~OSGBConvertJob() {
-            if(threadPool != nullptr)
-                delete threadPool;
-        }
+        void setHeight(double h) {height_ = h; }
+        void setMaxLevel(int level){ maxLevel_ = level; }
+        void setYUpAxis(bool yUpAxis){yUpAxis_ = yUpAxis; }
 
-        void setHeight(double h) {height = h;}
-        void setMaxLevel(int level){ maxLevel = level; }
-        void setYUpAxis(bool y){yUpAxis = y;}
     private:
-        QString input;
-        QString output;
-        double height = 0;
-        bool yUpAxis = false;
-        QThreadPool *threadPool;
-        int maxThread = 4;
-        int maxLevel = std::numeric_limits<int>::max();
-        QVector<QSharedPointer<OSGBConvertTask>> tasks;
+        QString input_;
+        QString output_;
+        double height_ = 0;
+        bool yUpAxis_ = false;
+        QThreadPool * threadPool_;
+        int maxLevel_ = std::numeric_limits<int>::max();
+        QVector<OSGBConvertTask*> tasks_;
     };
 
     class OSGBConvertTask: public QObject, public QRunnable{
         Q_OBJECT
     public:
-        OSGBConvertTask(const QString& input, const QString& output, int maxLevel = std::numeric_limits<int>::max())
-            :osgbLevel(input), output(output), maxLevel(maxLevel){
+        OSGBConvertTask(const QString& input, const QString& output, 
+                        int maxLevel = OSGLevel::MAXLEVEL, QObject* parent = nullptr)
+            :osgbLevel_(input), output_(output), maxLevel_(maxLevel), QObject(parent){
             setAutoDelete(false);
-
         };
 
         virtual void run() override {
-            qInfo() << "Start process tile: " << osgbLevel.nodeName;
-            try{
-                isSucceed = osgbLevel.convertTiles(tile, output, maxLevel);
-            }catch(...){
-                qCritical() << "Unkown error";
-            }
+            qInfo() << "start process tile:" << osgbLevel_.nodeName();
 
-            if(isSucceed){
-                qInfo() << "Finish process tile: " << osgbLevel.nodeName;
-            }else{
-                qInfo() << "Not finish process tile: " << osgbLevel.nodeName;
-            }
-
+            success_ = osgbLevel_.convertTiles(tile_, output_, maxLevel_);
+            if (success_)
+                qInfo() << "finish process tile:" << osgbLevel_.nodeName();
+            else
+                qCritical() << "error process tile" << osgbLevel_.nodeName();
         }
-        void setYUpAxis(bool y) {
-            osgbLevel.setYUpAxis(y);
-        }
+        
+        void setYUpAxis(bool y) noexcept { osgbLevel_.setYUpAxis(y); }
 
-        OSGBLevel osgbLevel;
-        bool isSucceed;
-        BaseTile tile;
+        OSGBRegion region() const noexcept { return osgbLevel_.region(); }
+        bool isSuccess() const { return success_; }
+        BaseTile baseTile() const { return tile_; }
+        QString tileName() const { return osgbLevel_.getTileName(); }
     private:
-        QString output;
-        int maxLevel;
+        OSGLevel osgbLevel_;
+        bool success_ = false;
+        BaseTile tile_;
+        QString output_;
+        int maxLevel_;
     };
 }

@@ -31,8 +31,10 @@ namespace scially {
         }
 
         int heightIndex = layer.GetLayerDefn()->GetFieldIndex(heightField.toStdString().data());
-        if (heightIndex == -1)
-            throw TilesConvertException(heightField + "not found in layer");
+        if (heightIndex == -1) {
+            qCritical() << heightField << "not found in layer";
+            return;
+        }
 
         BaseTile tile;
         double layerMaxHeight = 0;
@@ -90,7 +92,7 @@ namespace scially {
                     }
                 }
                 else {
-                    qWarning() << "Only support Polygon(MultiPolygon)";
+                    qWarning() << "only support Polygon(MultiPolygon)";
                 }
             }
             QByteArray b3dmBuffer = meshes.toB3DM(true);
@@ -100,13 +102,13 @@ namespace scially {
                 arg(root->getRow()).
                 arg(root->getCol());
             if (!b3dmFile.open(QIODevice::WriteOnly)){
-                qWarning() << "Can't write file: " << b3dmFile.fileName();
+                qCritical() << "can't write file:" << b3dmFile.fileName();
                 return;
             }
 
             int writeBytes = b3dmFile.write(b3dmBuffer);
             if (writeBytes <= 0){
-                qWarning() << "Can't write file: " << b3dmFile.fileName();
+                qCritical() << "can't write file:" << b3dmFile.fileName();
                 return;
             }
 
@@ -139,12 +141,12 @@ namespace scially {
         QByteArray tileBuffer = QJsonDocument(tile.write()).toJson(); 
         QFile tileFile(output + "/tileset.json");
         if (!tileFile.open(QIODevice::WriteOnly)){
-             qWarning() << "Can't write file: " << tileFile.fileName();
+            qCritical() << "can't write file:" << tileFile.fileName();
              return;
         }
         int writeBytes = tileFile.write(tileBuffer);
         if (writeBytes <= 0){
-            qWarning() << "Can't write file: " << tileFile.fileName();
+            qCritical() << "can't write file:" << tileFile.fileName();
             return;
         }
     }

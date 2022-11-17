@@ -14,4 +14,6 @@ namespace scially {
     private:
         QString err;
     };
+
+   
 }

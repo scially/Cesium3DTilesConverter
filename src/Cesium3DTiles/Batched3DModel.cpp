@@ -23,11 +23,16 @@ namespace scially {
         // batch json and batch binary
         {
             QJsonObject batchJson;
-            batchJson["batchId"] = arrayToQJsonArray(batchID.begin(), batchID.end());
-            batchJson["name"] = arrayToQJsonArray(names.begin(), names.end());
+            QJsonArray batchIDArray, namesArray;
+            std::copy(batchID.begin(), batchID.end(), std::back_inserter(batchIDArray));
+            std::copy(names.begin(), names.end(), std::back_inserter(namesArray));
+            batchJson["batchId"] = batchIDArray;
+            batchJson["name"] = namesArray;
 
             if (withHeight) {
-                batchJson["height"] = arrayToQJsonArray(heights.begin(), heights.end());
+                QJsonArray heightArray; 
+                std::copy(heights.begin(), heights.end(), std::back_inserter(heightArray));
+                batchJson["height"] = heightArray;
             }
 
             batch = QJsonDocument(batchJson).toJson(QJsonDocument::Compact);

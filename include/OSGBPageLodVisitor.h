@@ -32,7 +32,7 @@ namespace scially {
         QString                             path;
         QVector<osg::Geometry*>             geometryArray;
         QSet<osg::Texture*>                 textureArray;
-        QMap<osg::Geometry*, osg::Texture*> textureMap;  // 记录 mesh 和 texture 的关系，暂时认为一个模型最多只有一个texture
+        QMap<osg::Geometry*, osg::Texture*> textureMap;
         QVector<QString>                    subNodeNames;
     };
 }

@@ -12,11 +12,7 @@ namespace scially {
     class GDALDriverWrapper {
     public:
         GDALDriverWrapper() {
-#ifdef _WIN32
-            CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "NO");
-#else
             CPLSetConfigOption("GDAL_FILENAME_IS_UTF8", "YES");
-#endif
             std::string basePath = qApp->applicationDirPath().toStdString();
             gdalData = basePath + "/gdal_data";
             projData = basePath + "/proj_data";

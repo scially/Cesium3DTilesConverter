@@ -1,15 +1,8 @@
 #pragma once
 
-#include <QJsonValue>
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QJsonDocument>
-#include <QByteArray>
-
 #include <osg/Math>
 
 namespace scially {
-
 	/************************************* MATH Utils *****************************************************/
 	constexpr double METERIC = 0.01;
 
@@ -43,16 +36,5 @@ namespace scially {
 
 	inline float lonToMeter(float diff, float lat) {
 		return osg::DegreesToRadians(diff) / 0.000000156785 * std::cos(osg::DegreesToRadians(lat));
-	}
-
-	
-	/************************************* Json Utils *****************************************************/
-	template<typename Iter>
-	QJsonArray arrayToQJsonArray(Iter begin, Iter end) {
-		QJsonArray arr; 
-		for (auto iter = begin; iter != end; iter++) {
-			arr.append(*iter);
-		}
-		return arr;
 	}
 }

@@ -1,45 +1,44 @@
 #pragma once
 
-#include <Cesium3DTiles/BoundingVolumeRegion.h>
-#include <Cesium3DTiles/BoundingVolumeBox.h>
-
+#include <OSGBRegion.h>
 #include <OSGBuildState.h>
 #include <OSGBPageLodVisitor.h>
-#include <QSharedPointer>
-#include <QString>
-#include <QDir>
-#include <QVector>
 
+#include <QFileInfo>
+#include <QDir>
 
 namespace scially {
     class OSGBConvert {
     public:
         OSGBConvert() {}
         OSGBConvert(const QString& name, const QString& path) :
-            nodeName(name), nodePath(path) {}
-        OSGBConvert(const QString& absoluteLocation) {
-            QDir location(absoluteLocation);
-            nodeName = location.dirName();
-            location.cdUp();
-            nodePath = location.absolutePath();
+            nodeName_(name), nodePath_(path) {
+            nodeLocation_ = QDir::cleanPath(path + "/" + name + ".osgb");
         }
 
-        //double geometricError = 0;
-        BoundingVolumeRegion region;
+        OSGBConvert(const QString& absoluteLocation) : nodeLocation_(absoluteLocation){
+            QFileInfo location(nodeLocation_);
+            nodeName_ = location.baseName();
+            nodePath_ = location.path();
+        }
 
         bool writeB3DM(const QByteArray& buffer, const QString& outLocation);
-        QByteArray toB3DM();
+        bool toB3DM(QByteArray& buffer);
 
-        bool yUpAxis = false;
-
+        void setYUpAxis(bool yUpAxis) noexcept { yUpAxis_ = yUpAxis;  }
+        OSGBRegion region() const noexcept { return region_;  }
+        bool yUpAxis() const noexcept { return yUpAxis_; }
+        QString nodeName() const noexcept { return nodeName_; }
+        QString nodePath() const noexcept { return nodePath_; }
     private:
         tinygltf::Material makeColorMaterialFromRGB(double r, double g, double b);
-        QByteArray convertGLB();
-        QString absoluteLocation() const;
+        bool convertGLB(QByteArray& buffer);
 
-        QString              nodeName;
-        QString              nodePath;
-
+        OSGBRegion region_;
+        bool yUpAxis_ = false;
+        QString nodeName_;
+        QString nodePath_;
+        QString nodeLocation_;
     };
 }
 

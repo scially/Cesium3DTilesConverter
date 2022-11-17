@@ -5,12 +5,7 @@
 
 namespace scially {
 	void ShpConvertJob::run() {
-        try{
-            ShpConvert convert(input, layerName, height);
-            convert.convertTiles(output);
-        }catch(...){
-            qCritical() << "Unkown error";
-        }
-
+		ShpConvert convert(input, layerName, height);
+		convert.convertTiles(output);
 	}
 }

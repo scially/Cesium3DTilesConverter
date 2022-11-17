@@ -9,53 +9,35 @@
 
 #include <osgDB/ReadFile>
 #include <osg/Image>
+
+#include <QDir>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QJsonArray>
-#include <QDataStream>
-#include <QDebug>
-
-#include <vector>
-#include <initializer_list>
+#include <QtDebug>
 
 namespace scially {
-
-    QString OSGBConvert::absoluteLocation() const {
-        return QDir(nodePath).filePath(nodeName);
-    }
-
     bool OSGBConvert::writeB3DM(const QByteArray &buffer, const QString& outLocation) {
-
-        if (buffer.isEmpty()) {
-            qWarning() << "B3DM buffer is empty...\n";
-            return false;
-        }
-
-        //
-        QFile b3dmFile(outLocation + "/" + nodeName.replace(".osgb", ".b3dm"));
+        QFile b3dmFile(outLocation + "/" + nodeName_ + ".b3dm");
         if (!b3dmFile.open(QIODevice::ReadWrite)) {
-            qWarning() << "Can't open file [" << b3dmFile.fileName() << "]\n";
+            qWarning() << "can't write file" << b3dmFile.fileName();
             return false;
         }
         int writeBytes = b3dmFile.write(buffer);
 
         if (writeBytes <= 0) {
-            qWarning() << "Can't write file [" << b3dmFile.fileName() << "]\n";
+            qWarning() << "can't write file" << b3dmFile.fileName();
             return false;
         }
         return true;
     }
 
-    QByteArray OSGBConvert::toB3DM() {
-        QByteArray b3dmBuffer;
-        QDataStream b3dmStream(&b3dmBuffer, QIODevice::WriteOnly);
-        b3dmStream.setByteOrder(QDataStream::LittleEndian);
-
-        QByteArray glbBuffer = convertGLB();
-
-        if (glbBuffer.isEmpty())
-            return QByteArray();
+    bool OSGBConvert::toB3DM(QByteArray& buffer) {
+        QByteArray glbBuffer;
+        if (!convertGLB(glbBuffer)) {
+            return false;
+        }
 
         Batched3DModel b3dm;
         b3dm.glbBuffer = glbBuffer;
@@ -63,24 +45,22 @@ namespace scially {
         b3dm.batchID = { 0 };
         b3dm.names = {"mesh_0"};
 
-        return b3dm.write();
+        buffer =  b3dm.write();
+        return true;
     }
 
-    QByteArray OSGBConvert::convertGLB() {
-        QByteArray glbBuffer;
-
-        std::vector<std::string> rootOSGBLocation = { absoluteLocation().toStdString() };
-        osg::ref_ptr<osg::Node> root = osgDB::readNodeFiles(rootOSGBLocation);
+    bool OSGBConvert::convertGLB(QByteArray& glbBuffer) {
+        osg::ref_ptr<osg::Node> root = osgDB::readNodeFile(nodeLocation_.toStdString());
         if (!root.valid()) {
-            qWarning() << "Read OSGB File [" << absoluteLocation() << "] Fail...\n";
-            return QByteArray();
+            qWarning() << "fail read osgb file" << nodeLocation_;
+            return false;
         }
 
-        OSGBPageLodVisitor lodVisitor(nodePath);
+        OSGBPageLodVisitor lodVisitor(nodePath_);
         root->accept(lodVisitor);
         if (lodVisitor.geometryArray.empty()) {
-            qWarning() << "Read OSGB File [" << absoluteLocation() << "] geometries is Empty...\n";
-            return QByteArray();
+            qWarning() << "empty geometry in osgb file" << nodeLocation_;
+            return false;
         }
 
         osgUtil::SmoothingVisitor sv;
@@ -129,12 +109,13 @@ namespace scially {
                 }
             }
         }
+
         // empty geometry or empty vertex-array
         if (model.meshes[0].primitives.empty())
-            return QByteArray();
+            return false;
 
-        region.setMax(osgState.pointMax);
-        region.setMin(osgState.pointMin);
+        region_.setMax(osgState.pointMax);
+        region_.setMin(osgState.pointMin);
 
         // image
         {
@@ -200,7 +181,7 @@ namespace scially {
             {
                 tinygltf::Node node;
                 node.mesh = 0;
-                if(yUpAxis){
+                if(yUpAxis_){
                     // z-UpAxis to y-UpAxis
                     node.matrix = {1,0,0,0,
                                    0,0,-1,0,
@@ -260,10 +241,8 @@ namespace scially {
             model.asset.generator = "Cesium3DTilesConveter";
 
             glbBuffer = QByteArray::fromStdString(gltf.Serialize(&model));
-            return glbBuffer;
+            return true;
         }
-
-
     }
 
     tinygltf::Material OSGBConvert::makeColorMaterialFromRGB(double r, double g, double b) {
