@@ -11,7 +11,7 @@
 提供了如下的子工具：
 
 - `OSGB(OpenSceneGraph Binary)` 转 `3DTiles`
-- `GDAL数据集` 转 `3DTiles`
+- `GDAL数据集` 转 `3DTiles`, 支持任意坐标系
 
 # 用法说明
 
