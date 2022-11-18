@@ -1,0 +1,8 @@
+#pragma once
+
+#define PROJECT_VERSION_MAJOR @Cesium3DTilesConverter_VERSION_MAJOR@
+#define PROJECT_VERSION_MINOR @Cesium3DTilesConverter_VERSION_MINOR@
+#define PROJECT_VERSION_PATCH @Cesium3DTilesConverter_VERSION_PATCH@
+
+#cmakedefine PROJECT_VERSION "${Cesium3DTilesConverter_VERSION}"
+#cmakedefine PROJECT_NAME "${PROJECT_NAME}"

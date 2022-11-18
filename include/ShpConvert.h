@@ -13,14 +13,21 @@ namespace scially {
     class ShpConvert {
     public:
         ShpConvert(const QString &fileName, const QString &layerName, const QString &heightField)
-            :fileName(fileName), layerName(layerName), heightField(heightField)
+            :fileName_(fileName), layerName_(layerName), heightField_(heightField)
         {}
 
-        void convertTiles(const QString& output);
-
+        bool convertTiles(const QString& output);
+        bool initQuadTree(QuadTree& root);
     private:
-        QString fileName;
-        QString layerName;
-        QString heightField;
+        bool getAllFeatures();
+
+        OGRLayerWrapper layer_;
+        OGREnvelope extent_;
+        QMap<GIntBig, OGRFeatureWrapper> iFeature_;
+        GDALDatasetWrapper ds_;
+		
+        QString fileName_;
+        QString layerName_;
+        QString heightField_;
     };
 }

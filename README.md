@@ -1,4 +1,5 @@
 # About Project
+
 基于C++17、Qt5的3DTiles 转换工具集。
 
 # 简介
@@ -17,20 +18,20 @@
 ##  命令行格式
 
 ```sh
-Converter.exe --format <FORMAT> [OPTIONS] <INPUT> <OUTPUT> 
+Converter -f <FORMAT> [OPTIONS] <INPUT> <OUTPUT> 
 ```
 
 ## 示例命令
 
 ```sh
 # from osgb dataset
-Converter -f OSGB --yUpAxis  <OSGB Path> <OUTPUT DIR> 
+Converter -f OSGB --yUpAxis  <OSGB> <OUTPUT> 
 
-# from single shp file
-Converter -f GDAL --field height <Shapefile Path> <OUTPUT DIR>
+# from shp file
+Converter -f GDAL --field height <Shapefile> <OUTPUT>
 
 # from gdb file
-Converter -f GDAL --field height --layer <Layer Name>  <GDB Path> <OUTPUT DIR>
+Converter -f GDAL --field height --layer <Layer> <GDB> <OUTPUT>
 ```
 
 ## 参数说明
@@ -52,8 +53,9 @@ Options:
   
   -H, --height <height>    height offset(default value 0), OSGB高度偏移字段
   
-  <INPUT PATH> 输入数据的目录，OSGB数据截止到 `<DIR>/Data` 目录的上一级，GDAL参考GDAL数据格式。
-  <OUTPUT DIR> 输出目录。OSGB转换的3DTiles输出的数据文件位于 <DIR>/Data`目录, GDAL转换的3DTiles输出的数据文件位于<DIR>/Tile目录，tileset.json位于<DIR>根目录。
+  <INPUT> 输入数据的目录，OSGB数据截止到 `<DIR>/Data` 目录的上一级，GDAL参考GDAL数据格式。
+
+  <OUTPUT> 输出目录。OSGB转换的3DTiles输出的数据文件位于 <DIR>/Data`目录, GDAL转换的3DTiles输出的数据文件位于<DIR>/Tile目录，tileset.json位于<DIR>根目录。
 ```
 
 # 数据要求及说明

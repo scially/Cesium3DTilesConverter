@@ -6,75 +6,95 @@
 #include <QFile>
 
 namespace scially {
+    bool ShpConvert::getAllFeatures() {
+        OGRSpatialReference wgsSRS;
+        wgsSRS.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+        wgsSRS.importFromEPSG(4326);
 
-    void ShpConvert::convertTiles(const QString& output) {
-        QuadTree tree;
-        GDALDatasetWrapper ds = GDALDatasetWrapper::open(fileName.toStdString().data(), 1);
-        OGRLayerWrapper layer = ds.GetLayerByName(layerName.toStdString().data());
-
-        layer.ResetReading();
-        tree.setEnvelope(layer.GetExtent());
+        if (!ds_.open(fileName_, 1)) {
+            qCritical() << "can't open" << fileName_;
+            return false;
+        }
         
-        OGRFeatureWrapper feature = layer.GetNextFeature();
-        OGREnvelope layerEnvelope = layer.GetExtent();
-        
+        layer_ = ds_.GetLayerByName(layerName_);
+        if (!layer_.isValid()) {
+            qCritical() << "can't load layer" << layerName_ << "in" << fileName_;
+            return false;
+        }
+        layer_.ResetReading();
+        OGRFeatureWrapper feature = layer_.GetNextFeature();
         while (feature.isValid()) {
-            OGREnvelope envelope;
             OGRGeometry* geometry = feature.GetGeometryRef();
-            if (geometry == nullptr)
-                continue;
+            OGRErr err = geometry->transformTo(&wgsSRS);
+            if (err != OGRERR_NONE) {
+                qCritical() << "can't transform geometry to WGS84";
+                return false;
+            }
 
-            geometry->getEnvelope(&envelope);
-          
-            tree.add(feature.GetFID(), envelope);
-            feature = layer.GetNextFeature();
+            OGREnvelope extent;
+            geometry->getEnvelope(&extent);
+            if (!extent_.IsInit()) {
+                extent_ = extent;
+            }
+            else {
+                extent_.Merge(extent);
+            }
+            iFeature_[feature.GetFID()] = feature;
+            feature = layer_.GetNextFeature();
+        }
+        return true;
+    }
+
+    bool ShpConvert::initQuadTree(QuadTree& tree) {
+        if (!getAllFeatures()) {
+            return false;
         }
 
-        int heightIndex = layer.GetLayerDefn()->GetFieldIndex(heightField.toStdString().data());
+        tree.setEnvelope(extent_);
+
+        QMap<GIntBig, OGRFeatureWrapper>::iterator iter = iFeature_.begin();
+        while (iter != iFeature_.end()) {
+            OGREnvelope extent;
+            auto geometry = iter.value().GetGeometryRef();
+            geometry->getEnvelope(&extent);
+            tree.add(iter.key(), extent);
+            ++iter;
+        }
+        return true;
+    }
+
+    bool ShpConvert::convertTiles(const QString& output) {
+        QuadTree tree;
+        if (!initQuadTree(tree)) {
+            return false;
+        }
+            
+        int heightIndex = layer_.GetLayerDefn()->GetFieldIndex(heightField_.toStdString().data());
         if (heightIndex == -1) {
-            qCritical() << heightField << "not found in layer";
-            return;
+            qCritical() << heightField_ << "not found in layer" << layerName_;
+            return false;
         }
 
         BaseTile tile;
         double layerMaxHeight = 0;
-        tree.traverse([&layer, &output, &tile, &layerMaxHeight, heightIndex](QuadTree* root) {
-            OGREnvelope nodeBox;
-            
-            // Calc All Geometry Envelope
-            {
-                for (int i = 0; i < root->geomsSize(); i++) {
-                    int fid = root->getGeomFID(i);
-                    OGRFeatureWrapper feature = layer.GetFeature(fid);
-                    OGRGeometry* geometry = feature.GetGeometryRef();
-                    OGREnvelope envelope;
-                    geometry->getEnvelope(&envelope);
-                    if (nodeBox.IsInit()) {
-                        nodeBox.Merge(envelope);
-                    }
-                    else {
-                        nodeBox = envelope;
-                    }
-                }
-            }
-          
+        tree.traverse([this, &output, &tile, &layerMaxHeight, heightIndex](QuadTree* root) {
             // Build 3D Model per geometry
-            double centerX = (nodeBox.MinX + nodeBox.MaxX) / 2;
-            double centerY = (nodeBox.MinY + nodeBox.MaxY) / 2;
-            double boxWidth =  (nodeBox.MaxX - nodeBox.MinX);
-            double boxHeight = (nodeBox.MaxY - nodeBox.MinY);
+            double centerX =   (extent_.MinX + extent_.MaxX) / 2;
+            double centerY =   (extent_.MinY + extent_.MaxY) / 2;
+            double boxWidth =  (extent_.MaxX - extent_.MinX);
+            double boxHeight = (extent_.MaxY - extent_.MinY);
             double maxHeight = 0;
             QDir outputLocation = QString("%1/tile/%2/%3").
                 arg(output).
-                arg(root->getLevel()).
-                arg(root->getRow());
+                arg(root->level()).
+                arg(root->row());
             if (!outputLocation.exists())
                 outputLocation.mkpath(".");
 
             GeometryMesh meshes;
-            for (int i = 0; i < root->geomsSize(); i++) {
-                int fid = root->getGeomFID(i);
-                OGRFeatureWrapper feature = layer.GetFeature(fid);
+            for (int i = 0; i < root->geomSize(); i++) {
+                int fid = root->geomFID(i);
+                OGRFeatureWrapper feature = iFeature_[fid];
                 OGRGeometry* geometry = feature.GetGeometryRef();
                 double height = feature.GetFieldAsDouble(heightIndex);
                 maxHeight = std::max(height, maxHeight);
@@ -98,31 +118,31 @@ namespace scially {
             QByteArray b3dmBuffer = meshes.toB3DM(true);
             QFile b3dmFile = QString("%1/tile/%2/%3/%4.b3dm").
                 arg(output).
-                arg(root->getLevel()).
-                arg(root->getRow()).
-                arg(root->getCol());
+                arg(root->level()).
+                arg(root->row()).
+                arg(root->col());
             if (!b3dmFile.open(QIODevice::WriteOnly)){
-                qCritical() << "can't write file:" << b3dmFile.fileName();
+                qCritical() << "can't write file" << b3dmFile.fileName();
                 return;
             }
 
             int writeBytes = b3dmFile.write(b3dmBuffer);
             if (writeBytes <= 0){
-                qCritical() << "can't write file:" << b3dmFile.fileName();
+                qCritical() << "can't write file" << b3dmFile.fileName();
                 return;
             }
 
             RootTile child;
             child.boundingVolume = BoundingVolumeRegion::fromCenterXY(
                 centerX, centerY,
-                nodeBox.MaxX - nodeBox.MinX, nodeBox.MaxY - nodeBox.MinY,
+                boxWidth, boxHeight,
                 0, maxHeight);
             child.transform = Transform::fromXYZ(centerX, centerY, 0);
             child.content.emplace();
             child.content->uri = QString("./tile/%1/%2/%3.b3dm")
-                .arg(root->getLevel())
-                .arg(root->getRow())
-                .arg(root->getCol());
+                .arg(root->level())
+                .arg(root->row())
+                .arg(root->col());
             tile.root.children.append(child);
         });
 
@@ -131,10 +151,10 @@ namespace scially {
         tile.geometricError = 200;
         tile.root.geometricError = 200;
         BoundingVolumeRegion rootBounding;
-        rootBounding.west = osg::DegreesToRadians(layerEnvelope.MinX);
-        rootBounding.east = osg::DegreesToRadians(layerEnvelope.MaxX);
-        rootBounding.south = osg::DegreesToRadians(layerEnvelope.MinY);
-        rootBounding.north = osg::DegreesToRadians(layerEnvelope.MaxY);
+        rootBounding.west = osg::DegreesToRadians(extent_.MinX);
+        rootBounding.east = osg::DegreesToRadians(extent_.MaxX);
+        rootBounding.south = osg::DegreesToRadians(extent_.MinY);
+        rootBounding.north = osg::DegreesToRadians(extent_.MaxY);
         rootBounding.minHeight = 0;
         rootBounding.maxHeight = layerMaxHeight;
         tile.root.boundingVolume = rootBounding;
@@ -142,12 +162,13 @@ namespace scially {
         QFile tileFile(output + "/tileset.json");
         if (!tileFile.open(QIODevice::WriteOnly)){
             qCritical() << "can't write file:" << tileFile.fileName();
-             return;
+             return false;
         }
         int writeBytes = tileFile.write(tileBuffer);
         if (writeBytes <= 0){
             qCritical() << "can't write file:" << tileFile.fileName();
-            return;
+            return false;
         }
-    }
+        return true;
+    } 
 }

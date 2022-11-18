@@ -1,11 +1,11 @@
 #pragma once
 
 #include <ogrsf_frmts.h>
-
 #include <functional>
 
 #include <QVector>
 #include <QString>
+#include <QSharedPointer>
 
 namespace scially {
 
@@ -13,51 +13,44 @@ namespace scially {
     public:
         QuadTree() = default;
         QuadTree(double minX, double maxX, double minY, double maxY);
-        QuadTree(const OGREnvelope &e): envelope(e) {}
+        QuadTree(OGREnvelope e): envelope_(e) {}
 
-        bool add(int id, const OGREnvelope& box);
-        
-        void setNo(int r, int c, int l){
-            row  = r;
-            col  = c;
-            level = l;
+        bool add(int id, OGREnvelope box) noexcept;
+        void setNo(int r, int c, int l) noexcept {
+            row_  = r;
+            col_  = c;
+            level_ = l;
         }
-        void setEnvelope(const OGREnvelope &e){
-            envelope.MinX = e.MinX;
-            envelope.MaxX = e.MaxX;
-            envelope.MinY = e.MinY;
-            envelope.MaxY = e.MaxY;
+        void setEnvelope(OGREnvelope e) noexcept {          
+            envelope_.MinX = e.MinX;
+            envelope_.MaxX = e.MaxX;
+            envelope_.MinY = e.MinY;
+            envelope_.MaxY = e.MaxY;    
         }
 
         void traverse(std::function<void(QuadTree*)> f){
-            if(!geoms.isEmpty())
+            if(!geoms_.isEmpty())
                 f(this);
             
-            for(auto iter = nodes.begin(); iter != nodes.end(); iter++){
+            for(auto iter = nodes_.begin(); iter != nodes_.end(); iter++){
                 (*iter)->traverse(f);
             }
         }
 
-        int geomsSize() const { return geoms.size(); }
-        int getGeomFID(int i) const { return geoms.at(i); }
-        int getRow() const { return row; }
-        int getCol() const { return col; }
-        int getLevel() const { return level; }
-        virtual ~QuadTree() {
-            for(auto iter = nodes.begin(); iter != nodes.end(); iter++){
-                if(*iter != nullptr)
-                    delete *iter;
-            }
-        }
-
+        int geomSize() const noexcept{ return geoms_.size(); }
+        int geomFID(int i) const noexcept { return geoms_.at(i); }
+        int row() const noexcept { return row_; }
+        int col() const noexcept { return col_; }
+        int level() const noexcept { return level_; }
+       
     private:
-        void split();
+        void split() noexcept;
 
-        OGREnvelope envelope;
-        QVector<QuadTree*> nodes;
-        int row = 0;
-        int col = 0;
-        int level = 0;
-        QVector<int> geoms;
+        OGREnvelope envelope_;
+        QVector<QSharedPointer<QuadTree>> nodes_;
+        int row_ = 0;
+        int col_ = 0;
+        int level_ = 0;
+        QVector<int> geoms_;
     };
 }

@@ -1,5 +1,10 @@
 ﻿cmake_minimum_required (VERSION 3.8)
-project(Cesium3DTilesConverter VERSION 3.0.0)
+project(Cesium3DTilesConverter VERSION 2.1.0)
+
+configure_file (
+    "${PROJECT_SOURCE_DIR}/include/Config.h.in"
+    "${PROJECT_SOURCE_DIR}/include/Config.h"
+)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_STANDARD 17)

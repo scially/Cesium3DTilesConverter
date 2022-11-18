@@ -1,3 +1,4 @@
+#include <Config.h>
 #include <OSGBConvertJob.h>
 #include <ShpConvertJob.h>
 #include <GDALWrapper.h>
@@ -8,8 +9,10 @@
 
 int main(int argc, char** argv){
     QCoreApplication app(argc, argv);
-    scially::GDALDriverWrapper init;
+    app.setApplicationVersion(PROJECT_VERSION);
+    app.setApplicationName(PROJECT_NAME);
 
+    scially::GDALDriverWrapper init;
     scially::CommandLineParse cmd;
     try {
         cmd.parse();

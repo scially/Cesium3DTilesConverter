@@ -1,7 +1,7 @@
 #pragma once
 
 #include <GDALWrapper.h>
-#include <OGRException.h>
+
 #include <osg/Math>
 namespace scially {
 

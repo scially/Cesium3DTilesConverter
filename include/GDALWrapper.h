@@ -1,11 +1,10 @@
 #pragma once
 
-#include <OGRException.h>
-
 #include <ogrsf_frmts.h>
 
-#include <QDebug>
 #include <QCoreApplication>
+#include <QtDebug>
+#include <QException>
 #include <QSharedPointer>
 
 namespace scially {
@@ -29,53 +28,103 @@ namespace scially {
         std::string projData;
     };
 
+    class OGRException : QException {
+    public:
+        OGRException(const QString& err) : err_(err) {}
+        OGRException(OGRErr err) {
+            switch (err) {
+            case OGRERR_NOT_ENOUGH_DATA:
+                err_ = "[gdal/ogr] not enough data";
+                break;
+            case OGRERR_NOT_ENOUGH_MEMORY:
+                err_ = "[gdal/ogr] not enough memory";
+                break;
+            case OGRERR_UNSUPPORTED_GEOMETRY_TYPE:
+                err_ = "[gdal/ogr] unsupported geometry type";
+                break;
+            case OGRERR_UNSUPPORTED_OPERATION:
+                err_ = "[gdal/ogr] unsupported operation";
+                break;
+            case OGRERR_CORRUPT_DATA:
+                err_ = "[gdal/ogr] corrupt data";
+                break;
+            case OGRERR_FAILURE:
+                err_ = "[gdal/ogr] failure";
+                break;
+            case OGRERR_UNSUPPORTED_SRS:
+                err_ = "[gdal/ogr] unsupported srs";
+                break;
+            case OGRERR_INVALID_HANDLE:
+                err_ = "[gdal/ogr] invalid handle";
+                break;
+            case OGRERR_NON_EXISTING_FEATURE:
+                err_ = "[gdal/ogr] non existing feataure";
+                break;
+            default:
+                err_ = "[gdal/ogr] unkonwn error";
+            }
+        }
+        virtual void raise() const override {
+            throw* this;
+        }
+        virtual OGRException* clone() const override {
+            return new OGRException(*this);
+        }
+
+        QString error() const noexcept {
+            return err_;
+        }
+
+    private:
+        QString err_;
+    };
 
     class OGRFeatureWrapper;
     class OGRLayerWrapper;
     class GDALDatasetWrapper;
 
-
     class OGRFeatureWrapper {
     public:
         friend class OGRLayerWrapper;
 
+        OGRFeatureWrapper() = default;
         OGRGeometry* GetGeometryRef() {
-            return feature->GetGeometryRef();
+            return feature_->GetGeometryRef();
         }
 
         double GetFieldAsDouble(GIntBig fid) {
-            return feature->GetFieldAsDouble(fid);
+            return feature_->GetFieldAsDouble(fid);
         }
 
         bool isValid() const {
-            return feature != nullptr;
+            return feature_ != nullptr;
         }
 
         GIntBig GetFID() {
-            return feature->GetFID();
+            return feature_->GetFID();
         }
 
     private:
         explicit OGRFeatureWrapper(OGRFeature* f) {
-            feature = QSharedPointer<OGRFeature>(f, &OGRFeature::DestroyFeature);
+            feature_.reset(f);
         }
 
-        QSharedPointer<OGRFeature> feature;
+        QSharedPointer<OGRFeature> feature_;
     };
-
 
     class OGRLayerWrapper {
     public:
         friend class GDALDatasetWrapper;
-
+		
+        OGRLayerWrapper() = default;
         OGRFeatureWrapper GetNextFeature() {
-            OGRFeature* feature = layer->GetNextFeature();
+            OGRFeature* feature = layer_->GetNextFeature();
             return OGRFeatureWrapper(feature);
         }
 
         OGREnvelope GetExtent(int bForce = 1) {
             OGREnvelope envelope;
-            OGRErr err = layer->GetExtent(&envelope, bForce);
+            OGRErr err = layer_->GetExtent(&envelope, bForce);
             if (err != OGRERR_NONE)
                 throw OGRException(err);
 
@@ -83,10 +132,7 @@ namespace scially {
         }
 
         OGRFeatureWrapper GetFeature(GIntBig fid) {
-            OGRFeature* feature = layer->GetFeature(fid);
-            if (feature == nullptr) {
-                throw OGRException(QString("No feature ") + fid + "in Layer");
-            }
+            OGRFeature* feature = layer_->GetFeature(fid);
             return OGRFeatureWrapper(feature);
         }
 
@@ -95,48 +141,45 @@ namespace scially {
         }
 
         void ResetReading() {
-            layer->ResetReading();
+            layer_->ResetReading();
         }
 
         OGRSpatialReference* GetSpatialRef() {
-            return layer->GetSpatialRef();
+            return layer_->GetSpatialRef();
         }
 
         OGRFeatureDefn* GetLayerDefn() {
-            return layer->GetLayerDefn();
+            return layer_->GetLayerDefn();
         }
 
     private:
-        explicit OGRLayerWrapper(OGRLayer* layer) : layer(layer) {}
-        OGRLayer* layer;  // will auto dispose when ds close.
+        explicit OGRLayerWrapper(OGRLayer* layer) : layer_(layer) {}
+        OGRLayer* layer_;  // will auto dispose when ds close.
     };
 
     class GDALDatasetWrapper {
     public:
         friend class OGRLayerWrapper;
-        static inline GDALDatasetWrapper open(const char* pszFilename,
-            unsigned int nOpenFlags,
-            const char* const* papszAllowedDrivers = nullptr,
-            const char* const* papszOpenOptions = nullptr,
-            const char* const* papszSiblingFiles = nullptr) {
-            GDALDataset* dataset = (GDALDataset*)GDALOpenEx(pszFilename,
+        GDALDatasetWrapper() = default;
+		
+        bool open(const QString &fileName, unsigned int nOpenFlags) {
+            GDALDataset* dataset = (GDALDataset*)GDALOpenEx(fileName.toStdString().c_str(),
                 nOpenFlags,
-                papszAllowedDrivers,
-                papszOpenOptions,
-                papszSiblingFiles);
-            if (dataset == nullptr)
-                throw OGRException(QString("Can't open dataset %1").arg(pszFilename));
-
-            return GDALDatasetWrapper(dataset);
+                nullptr,
+                nullptr,
+                nullptr);
+            ds_.reset(dataset);
+            return ds_ != nullptr;
         }
 
         OGRLayerWrapper GetLayer(int iLayer) {
-            OGRLayer* layer = ds->GetLayer(iLayer);
+            OGRLayer* layer = ds_->GetLayer(iLayer);
             return OGRLayerWrapper(layer);
         }
 
-        OGRLayerWrapper GetLayerByName(const char* nLayer) {
-            OGRLayer* layer = ds->GetLayerByName(nLayer);
+        OGRLayerWrapper GetLayerByName(const QString& nLayer) {
+            OGRLayer* layer = ds_->GetLayerByName(nLayer.toStdString().c_str());
+            
             return OGRLayerWrapper(layer);
         }
         bool isValid() const {
@@ -145,15 +188,17 @@ namespace scially {
 
     private:
         struct GDALDatasetDeleteWrapper {
-            void operator() (GDALDataset* dataset) {
+            void operator()(GDALDataset* dataset) {
                 if (dataset != nullptr)
                     GDALClose(dataset);
             }
         };
-        // dataset 将被 GDALDatasetWrapper 接管
-        explicit GDALDatasetWrapper(GDALDataset* dataset) {
-            ds = QSharedPointer<GDALDataset>(dataset, GDALDatasetDeleteWrapper());
+
+        GDALDatasetWrapper(GDALDataset* dataset) {
+            Q_ASSERT(dataset != nullptr);
+            ds_.reset(dataset, GDALDatasetDeleteWrapper());
         }
-        QSharedPointer<GDALDataset> ds;
+		
+        QSharedPointer<GDALDataset> ds_;
     };
 }
