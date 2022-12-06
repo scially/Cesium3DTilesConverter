@@ -46,7 +46,7 @@ namespace scially {
         }
         else if(srs.left(4) == "EPSG"){
             if(srsOrigin.isEmpty()){
-                throw TilesConvertException("Don't find ModelMetaData::SRSOrigin node in metadata.xml");
+                throw TilesConvertException("can't find SRSOrigin node in metadata.xml");
             }
             QString epsg = srs.mid(5);
             QStringList coordinates = srsOrigin.split(",");
@@ -59,12 +59,12 @@ namespace scially {
             convert.setSourceSrs(epsg, CoordinateConvert::EPSG);
             convert.setTargetSrs("4326", CoordinateConvert::EPSG);
             convert.transform();
-            lat = convert.targetX;
-            lon = convert.targetY;
+            lon = convert.targetX;
+            lat = convert.targetY;
         }
         else{// maybe wkt
             if(srsOrigin.isEmpty()){
-                throw TilesConvertException("Don't find ModelMetaData::SRSOrigin node in metadata.xml");
+                throw TilesConvertException("can't find SRSOrigin node in metadata.xml");
             }
             QStringList coordinates = srsOrigin.split(",");
             if(coordinates.size() < 2){
@@ -76,8 +76,8 @@ namespace scially {
             convert.setSourceSrs(srs, CoordinateConvert::WKT);
             convert.setTargetSrs("4326", CoordinateConvert::EPSG);
             convert.transform();
-            lat = convert.targetX;
-            lon = convert.targetY;
+            lon = convert.targetX;
+            lat = convert.targetY;
         }
     }
 }

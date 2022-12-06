@@ -35,7 +35,9 @@ namespace scially {
 		default:
 			break;
 		}
-
+		
+		srs.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
+		
 		if (err != OGRERR_NONE)
 			throw OGRException(err);
 	}
