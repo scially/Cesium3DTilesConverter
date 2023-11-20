@@ -54,9 +54,9 @@ Options:
 ```
 # Build Version
 
-|gdal|openscenegraph|qt|
+| gdal | openscenegraph | qt |
 | :----: | :----: | :----: |
-|3.7.0|3.6.5|5.15|
+| 3.7.0 | 3.6.5 | 5.15 |
 
 # How To Build(for Windows)
 1. vcpkg install "gdal" "osg" "osg[plugins]"
