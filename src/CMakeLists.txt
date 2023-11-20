@@ -1,0 +1,7 @@
+add_subdirectory(Cesium3DTiles)
+add_subdirectory(CesiumReadWrite)
+add_subdirectory(CesiumGLTF)
+add_subdirectory(CesiumMath)
+add_subdirectory(OSGConvert)
+add_subdirectory(Commons)
+add_subdirectory(ConvertApp)

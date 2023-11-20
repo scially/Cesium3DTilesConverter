@@ -1,0 +1,8 @@
+#pragma once
+
+#define SCIALLY_PROJECT_VERSION_MAJOR @Cesium3DTilesConverter_VERSION_MAJOR@
+#define SCIALLY_PROJECT_VERSION_MINOR @Cesium3DTilesConverter_VERSION_MINOR@
+#define SCIALLY_PROJECT_VERSION_PATCH @Cesium3DTilesConverter_VERSION_PATCH@
+
+constexpr const char* SCIALLY_PROJECT_VERSION = "${Cesium3DTilesConverter_VERSION}";
+constexpr const char* SCIALLY_PROJECT_NAME = "${PROJECT_NAME}";

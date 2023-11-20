@@ -1,9 +1,11 @@
 #pragma once
 
-#include <Cesium3DTiles/BoundingVolume.h>
-#include <Cesium3DTiles/Content.h>
-#include <Cesium3DTiles/Refine.h>
-#include <Cesium3DTiles/Transform.h>
+#include "BoundingVolume.h"
+#include "Content.h"
+#include "RootTile.h"
+
+#include <optional>
+#include <QVector>
 
 namespace scially {
 
@@ -25,16 +27,20 @@ namespace scially {
     /// children       |An array of objects that define child tiles                  |RootTile[]      |
     /// --------------------------------------------------------------------------------------------------------
     /// </summary>
-    struct RootTile{
+    struct RootTile final{
         static constexpr const char* TypeName = "root"; 
 
-        QJsonObject write() const;
-        void read(const QJsonObject& object);
+        BoundingVolume  boundingVolume;
+        QVector<double> transform = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+        double          geometricError = 0;
+        
+        /// <summary>
+        /// Refinement determines the process by which a lower resolution parent tile renders
+        /// when its higher resolution children are selected to be rendered.
+        /// Permitted refinement types are replacement ("REPLACE") and additive ("ADD")
+        /// </summary>
+        QString  refine;
 
-        BoundingVolume boundingVolume;
-        Transform      transform;
-        double         geometricError = 0;
-        Refine         refine;
         std::optional<Content>  content;
         QVector<RootTile>       children;
     };

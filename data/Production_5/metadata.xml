@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ModelMetadata version="1">
+    <!--Spatial Reference System-->
+    <SRS>PROJCS["ZS7CCGCS2000 / 3-degree Gauss-Kruger CM 113.22E",
+    GEOGCS["China Geodetic Coordinate System 2000",
+        DATUM["China_2000",
+            SPHEROID["CGCS2000",6378137,298.257222101,
+                AUTHORITY["EPSG","1024"]],
+            AUTHORITY["EPSG","1043"]],
+        PRIMEM["Greenwich",0,
+            AUTHORITY["EPSG","8901"]],
+        UNIT["degree",0.0174532925199433,
+            AUTHORITY["EPSG","9122"]],
+        AUTHORITY["EPSG","4490"]],
+    PROJECTION["Transverse_Mercator"],
+    PARAMETER["latitude_of_origin",0],
+    PARAMETER["central_meridian",113.366666666666666666666667],
+    PARAMETER["scale_factor",1],
+    PARAMETER["false_easting",500000],
+    PARAMETER["false_northing",90],
+    UNIT["metre",1,
+        AUTHORITY["EPSG","9001"]],
+    AUTHORITY["EPSG","4547"]]</SRS>
+    <!--Origin in Spatial Reference System-->
+    <SRSOrigin>501027.524000,2488718.808000,0.000000</SRSOrigin>
+</ModelMetadata>

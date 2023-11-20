@@ -1,20 +1,18 @@
 # About Project
 
-基于C++17、Qt5的3DTiles 转换工具集。
+基于C++17、Qt5的3DTiles转换工具。
 
 # 简介
 
-3DTiles 转换工具集, 快速将OSGB、Shp、GDB等格式转为Cesium 3DTiles。
+3DTiles转换工具, 快速将OSGB转为Cesium 3DTiles。
 
 这是一个基于c++ 17 和 Qt5.15 项目。
 
-提供了如下的子工具：
-
-- `OSGB(OpenSceneGraph Binary)` 转 `3DTiles`
-- `GDAL数据集` 转 `3DTiles`, 支持任意坐标系
+提供 `OSGB(OpenSceneGraph Binary)` 转 `3DTiles`
 
 # 用法说明
 
+简化命令行传入参数，默认采用GLTF2.0格式(y轴向上),多线程并行。
 ##  命令行格式
 
 ```sh
@@ -25,37 +23,16 @@ Converter -f <FORMAT> [OPTIONS] <INPUT> <OUTPUT>
 
 ```sh
 # from osgb dataset
-Converter -f OSGB --yUpAxis  <OSGB> <OUTPUT> 
-
-# from shp file
-Converter -f GDAL --field height <Shapefile> <OUTPUT>
-
-# from gdb file
-Converter -f GDAL --field height --layer <Layer> <GDB> <OUTPUT>
+Converter -f OSGB -i <OSGB> -o <OUTPUT> 
 ```
 
 ## 参数说明
 ```
 Options:
-  -?, -h, --help           Displays help on commandline options.
-  
-  -f, --format <format>    OSGB or GDAL(required), OSGB 为倾斜摄影格式数据, GDAL 为GDAL支持的面(Polygon)数据
-  
-  -l, --level <level>      OSGB max level, OSGB处理到的最大级别
-  
-  -F, --field <field>      height field name(required for gdal), 指定GDAL数据集中的高度属性字段，此项为转换 GDAL 时的必须参数。
-  
-  -L, --layer <layer>      layer name(required when input isn't shapefile)
-  
-  -t, --thread <thread>    thread number, 处理线程数量
-  
-  -y, --yUpAxis            y up axis, 是否将gltf模型转为y轴朝上（仅对OSGB生效）,如果是用Cesium for Unreal，需要指定yUpAxis
-  
-  -H, --height <height>    height offset(default value 0), OSGB高度偏移字段
-  
-  <INPUT> 输入数据的目录，OSGB数据截止到 `<DIR>/Data` 目录的上一级，GDAL参考GDAL数据格式。
-
-  <OUTPUT> 输出目录。OSGB转换的3DTiles输出的数据文件位于 <DIR>/Data`目录, GDAL转换的3DTiles输出的数据文件位于<DIR>/Tile目录，tileset.json位于<DIR>根目录。
+  -?, -h, --help         displays help on commandline options.
+  -f, --format <format>  OSGB or Vector(required), OSGB 为倾斜摄影格式数据, Vector为GDAL支持的面(Polygon)数据
+  -i, --input  <INPUT>   输入数据的目录，OSGB数据截止到 `<DIR>/Data` 目录的上一级，GDAL参考GDAL数据格式。
+  -o, --ouput  <OUTPUT>  输出目录。OSGB转换的3DTiles输出的数据文件位于 <DIR>/Data`目录, GDAL转换的3DTiles输出的数据文件位于<DIR>/Tile目录，tileset.json位于<DIR>根目录。
 ```
 
 # 数据要求及说明
@@ -75,14 +52,12 @@ Options:
   ├ metadata.xml
   └ Data/Tile_000_000/Tile_000_000.osgb
 ```
+# Build Version
+|gdal|openscenegraph|qt|
+|---|---|---|---|---|
+|3.7.0|3.6.5|5.15|
 
-### GDAL
-
-目前仅支持GDAL格式的面数据，可用于建筑物轮廓批量生成3DTiles.
-
-图层中需要有字段来表示高度信息。
-
-# How To Build
+# How To Build(for Windows)
 1. vcpkg install "gdal" "osg" "osg[plugins]"
 2. 如果没有Qt5.15，可以通过以下两种方式安装：
    1. 通过Qt官网安装
@@ -91,5 +66,4 @@ Options:
 4. 将OSGPlugins-${Version}文件夹复制到编译目录下
 
 # Reference
-1. 3dtiles [https://github.com/fanvanzh/3dtiles](https://github.com/fanvanzh/3dtiles)
-2. 3dtiles specification [https://github.com/CesiumGS/3d-tiles](https://github.com/CesiumGS/3d-tiles)
+1. 3dtiles specification [https://github.com/CesiumGS/3d-tiles](https://github.com/CesiumGS/3d-tiles)

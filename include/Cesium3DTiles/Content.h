@@ -1,9 +1,9 @@
 #pragma once
 
-#include <Cesium3DTiles/BoundingVolume.h>
+#include "BoundingVolume.h"
 
-#include <QJsonValue>
-#include <QJsonObject>
+#include <optional>
+#include <QString>
 
 namespace scially {
     /// <summary>
@@ -18,12 +18,9 @@ namespace scially {
     /// </summary>
     struct Content {
         static constexpr const char* TypeName = "content";
-       
-        QJsonObject write() const;
-        void read(const QJsonObject& object);
 
-        BoundingVolume boundingVolume;
         QString uri;
+        std::optional<BoundingVolume> boundingVolume;
     };
 
 }

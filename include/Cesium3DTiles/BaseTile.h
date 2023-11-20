@@ -1,10 +1,7 @@
 #pragma once
 
-#include <Cesium3DTiles/AssetProperties.h>
-#include <Cesium3DTiles/RootTile.h>
-
-#include <QJsonObject>
-#include <QJsonDocument>
+#include "Asset.h"
+#include "RootTile.h"
 
 namespace scially {
     /// <summary>
@@ -19,11 +16,8 @@ namespace scially {
     /// root           |A tile in a 3D Tiles tileset.      |ContentTile     |Required
     /// -----------------------------------------------------------------------------
     /// </summary>
-    struct BaseTile{
-        QJsonObject write() const;
-        void read(const QJsonObject& object);
-    
-        AssetProperties asset;
+    struct BaseTile{  
+        Asset asset;
         double geometricError;
         RootTile root;
     };
