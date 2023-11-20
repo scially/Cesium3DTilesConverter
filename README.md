@@ -66,5 +66,9 @@ Options:
 3. Visual Studio选择CMakeLists.txt，导入工程，编译
 4. 将OSGPlugins-${Version}文件夹复制到编译目录下
 
+# TODO
+1. 目前只迁移了OSGB的转换转换工作，后面进行GDAL转换代码迁移
+2. 根节点合并
+
 # Reference
 1. 3dtiles specification [https://github.com/CesiumGS/3d-tiles](https://github.com/CesiumGS/3d-tiles)
