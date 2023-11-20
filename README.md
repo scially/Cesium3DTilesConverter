@@ -55,7 +55,7 @@ Options:
 # Build Version
 
 |gdal|openscenegraph|qt|
-|---|---|---|---|---|
+| :----: | :----: | :----: |
 |3.7.0|3.6.5|5.15|
 
 # How To Build(for Windows)
