@@ -26,9 +26,7 @@ namespace scially {
 		if (split.length() >= 3) {
 			mYIndex = split[2].toInt();
 		}
-		if (split.length() >= 4) {
-			mZIndex = split[3].toInt();
-		}
+		
 		return loadRoot();
 	}
 

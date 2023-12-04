@@ -9,13 +9,13 @@ namespace scially {
 
 		TileStorageDisk(const QString& folder) : mFolder(folder) {}
 		
-		virtual bool saveJson(const QString& file, const QJsonObject& content) override;
-		virtual bool saveFile(const QString& file, const QByteArray&  content) override;
+		virtual bool saveJson(const QString& file, const QJsonObject& content) const override;
+		virtual bool saveFile(const QString& file, const QByteArray&  content) const override;
 
-		virtual bool exists(const QString& file) override;
+		virtual bool exists(const QString& file) const override;
 	private:
-        QString cleanPath(const QString& path);
-        bool ensurePath(const QString& path);
+        QString cleanPath(const QString& path) const;
+        bool ensurePath(const QString& path) const;
 
 		QString mFolder;
 	};

@@ -19,6 +19,10 @@ namespace scially {
 		const osg::Vec3d& tileCenter,
 		const SpatialTransform& transform);
 
+	QList<CesiumMesh> OSGBtoCesiumMesh(
+		osg::Node& osgNode,
+		const osg::Vec3d& tileCenter,
+		const SpatialTransform& transform);
 
 	class OSGParseVisitor: public osg::NodeVisitor {
 	public:

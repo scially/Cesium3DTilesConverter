@@ -1,6 +1,6 @@
 # About Project
 
-基于C++17、Qt5的3DTiles转换工具。
+基于C++17、Qt5的3DTiles转换工具, 全网支持唯一根节点合并的开源工具
 
 # 简介
 
@@ -23,16 +23,17 @@ Converter -f <FORMAT> [OPTIONS] <INPUT> <OUTPUT>
 
 ```sh
 # from osgb dataset
-Converter -f OSGB -i <OSGB> -o <OUTPUT> 
+Converter -f OSGB -m true -i <OSGB> -o <OUTPUT> 
 ```
 
 ## 参数说明
 ```
 Options:
-  -?, -h, --help         displays help on commandline options.
-  -f, --format <format>  OSGB or Vector(required), OSGB 为倾斜摄影格式数据, Vector为GDAL支持的面(Polygon)数据
-  -i, --input  <INPUT>   输入数据的目录，OSGB数据截止到 `<DIR>/Data` 目录的上一级，GDAL参考GDAL数据格式。
-  -o, --ouput  <OUTPUT>  输出目录。OSGB转换的3DTiles输出的数据文件位于 <DIR>/Data`目录, GDAL转换的3DTiles输出的数据文件位于<DIR>/Tile目录，tileset.json位于<DIR>根目录。
+  -?, -h, --help           displays help on commandline options.
+  -f, --format <format>    OSGB or Vector(required), OSGB 为倾斜摄影格式数据, Vector为GDAL支持的面(Polygon)数据
+  -m, --merge <true/false> 根节点合并开关选项
+  -i, --input  <INPUT>     输入数据的目录，OSGB数据截止到 `<DIR>/Data` 目录的上一级，GDAL参考GDAL数据格式。
+  -o, --ouput  <OUTPUT>    输出目录。OSGB转换的3DTiles输出的数据文件位于 <DIR>/Data`目录, GDAL转换的3DTiles输出的数据文件位于<DIR>/Tile目录，tileset.json位于<DIR>根目录。
 ```
 
 # 数据要求及说明
@@ -68,7 +69,7 @@ Options:
 
 # TODO
 1. 目前只迁移了OSGB的转换转换工作，后面进行GDAL转换代码迁移
-2. 根节点合并
+2. 初步实现了根节点合并，目前只做到了Vertex简化，后面加入纹理简化
 
 # Reference
 1. 3dtiles specification [https://github.com/CesiumGS/3d-tiles](https://github.com/CesiumGS/3d-tiles)

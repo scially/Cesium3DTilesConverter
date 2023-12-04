@@ -17,7 +17,7 @@ namespace scially {
 		osg::Vec3d center;
         QList<CesiumMesh> meshes;
 	private:
-		void toB3DM(const QByteArray& glb, QByteArray& buffer) const;
+		QByteArray toB3DM(const QByteArray& glb) const;
 	};
 	
 }

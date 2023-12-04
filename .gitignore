@@ -16,3 +16,4 @@ vsxmake*
 app
 vcpkg_installed
 build
+binary

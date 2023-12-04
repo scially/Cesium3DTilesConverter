@@ -2,8 +2,8 @@
 include(QtRuntimeLibraryFunction)
 
 set(TESTS 
-	TestOSGFolder.cpp
 	TestOSGLodVisitor.cpp
+	TestOSGMergTopIndex.cpp
 	TestOSGParseVisitor.cpp)
 
 foreach(TESTSRC ${TESTS})

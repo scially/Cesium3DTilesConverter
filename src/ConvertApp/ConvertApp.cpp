@@ -34,6 +34,11 @@ int main(int argc, char** argv) {
         
         if(!dataFolder.toB3DMPerTile(options))
             return -1;
+
+        if (parser.mergeTop) {
+            if (!dataFolder.mergeTop(options))
+                return -1;
+        }
     }
 
     qInfo() << "finish convert in" << beginTime.secsTo(QTime::currentTime()) << "s";

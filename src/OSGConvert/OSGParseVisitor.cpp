@@ -224,4 +224,14 @@ namespace scially {
 		model->accept(loader);
 		return loader.meshes;
 	}
+
+	QList<CesiumMesh> OSGBtoCesiumMesh(
+		osg::Node& osgNode,
+		const osg::Vec3d& tileCenter,
+		const SpatialTransform& transform) {
+
+		OSGParseVisitor loader(tileCenter, &transform);
+		osgNode.accept(loader);
+		return loader.meshes;
+	}
 }

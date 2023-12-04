@@ -1,14 +1,20 @@
-#include <OSGConvert/OSGFolder.h>
 #include <CesiumReadWrite/BaseTileReadWriter.h>
 #include <Commons/OSGUtil.h>
+#include <OSGConvert/OSGFolder.h>
+#include <OSGConvert/OSGMergeTopIndex.h>
+
+#include <osg/BoundingBox>
+#include <osgDB/ReadFile>
 
 #include <QDir>
+#include <QSet>
 #include <QDomDocument>
+#include <QtConcurrent>
 #include <QtDebug>
 #include <QThreadPool>
-#include <QtConcurrent>
-#include <osgDB/ReadFile>
-#include <osg/BoundingBox>
+
+#include <algorithm>
+#include <iterator>
 
 namespace scially {
 	bool OSGFolder::load(const OSGConvertOption& options) {
@@ -27,18 +33,20 @@ namespace scially {
 		osg::BoundingBoxd osgBound;
 
 		for (const auto& tileFolder : tileFolders) {
-			OSGTile tile(
+			OSGTile::Ptr tile{ 
+				new OSGTile(
 				tileFolder.absoluteFilePath(),
 				options.MinGeometricError,
 				options.SplitPixel,
-				options.skipPerTile);
+				options.skipPerTile)
+			};
 
-			if (!tile.init()) {
+			if (!tile->init()) {
 				qWarning() << "load" << tileFolder.fileName() << "failed";
 				continue;
 			}
 			mTiles.append(tile);
-			osgBound.expandBy(tile.boungdingBox());
+			osgBound.expandBy(tile->boungdingBox());
 		}
 
 		if (mTiles.isEmpty())
@@ -60,12 +68,12 @@ namespace scially {
 	
 		QList<QFuture<bool>> workFutures;
 		QList<TileNode::Ptr> tree;
-		for (OSGTile& tile : mTiles) {
-			QFuture<bool> f = QtConcurrent::run(&threadPool, [this, &tile, &tree]() {
-				qInfo() << tile.tileName() << "tile start convert to b3dm";
+		foreach (auto tile, mTiles) {
+			QFuture<bool> f = QtConcurrent::run(&threadPool, [this, tile, &tree]() {
+				qInfo() << tile->tileName() << "tile start convert to b3dm";
 			
-				if (tile.toB3DM(*mSTS, *mStorage)) {
-                    return tile.saveJson(mOutSRS, *mStorage);
+				if (tile->toB3DM(*mSTS, *mStorage)) {
+                    return tile->saveJson(mOutSRS, *mStorage);
 				}
 				else {
 					return false;
@@ -93,8 +101,8 @@ namespace scially {
 		osg::BoundingBoxd mergeBoundingBox;
 		RootTile root;
 
-		foreach(const OSGTile & tile, mTiles) {
-			auto b3dmIndex = tile.b3dms();
+		foreach(auto tile, mTiles) {
+			auto b3dmIndex = tile->mB3DMIndexNode;
 			if (b3dmIndex == nullptr)
 				continue;
 
@@ -112,6 +120,71 @@ namespace scially {
 		b.root = root;
 		b.geometricError = root.geometricError;
 		return b;
+	}
+
+	bool OSGFolder::mergeTop(const OSGConvertOption& options) const {
+		int32_t minx = std::numeric_limits<int32_t>::max();
+		int32_t miny = std::numeric_limits<int32_t>::max();
+	
+		int32_t maxx = std::numeric_limits<int32_t>::min();
+		int32_t maxy = std::numeric_limits<int32_t>::min();
+	
+		QList<MergeTileNode::Ptr> nodes;
+
+		for(const auto& tile: mTiles) {
+			if (!tile->mB3DMIndexNode)
+				continue;
+
+			MergeTileNode::Ptr node{ new MergeTileNode(tile) };
+			nodes.push_back(node);
+			
+			minx = std::min(minx, node->xIndex());
+			miny = std::min(miny, node->yIndex());
+				   
+			maxx = std::max(maxx, node->xIndex());
+			maxy = std::max(maxy, node->yIndex());
+		}
+
+		int32_t maxIndex = std::max({ maxx - minx, maxy - miny}); 
+
+		if (maxIndex <= 0) {
+			return false;
+		}
+		
+		int32_t maxZ = static_cast<int32_t>(std::log2(maxIndex) + 1) + 1; // z start from 1
+		
+		// buiding pyramid index
+		QList<MergeTileNode::Ptr> topNodes = MergeTileNodeBuilder::BuildPyramidIndex(nodes, maxZ);
+		
+		// constrution
+		MergeTileNodeBuilder::GenerateOSGNodeInPyramid(topNodes, maxZ);
+		auto mergeB3dmTiles = MergeTileNodeBuilder::MergeOSGToB3DM(topNodes, *mSTS, *mStorage, options.SplitPixel);
+
+		if (mergeB3dmTiles.isEmpty()) {
+			return false;
+		}
+
+		osg::BoundingBoxd mergeBoundingBox;
+		RootTile root;
+
+		for(const auto& tile: mergeB3dmTiles) {
+			mergeBoundingBox.expandBy(tile->boundingBox());
+			RootTile r = tile->toRootTile();
+			root.children.append(r);
+		}
+
+		root.boundingVolume.box = osgBoundingToCesiumBoundBox(mergeBoundingBox);
+		root.geometricError = osgBoundingSize(mergeBoundingBox);
+		root.refine = "REPLACE";
+		root.transform = osgMatrixToCesiumTransform(mOutSRS.originENU());
+
+		BaseTile b;
+		b.root = root;
+		b.geometricError = root.geometricError;
+		
+		BaseTileReadWriter brw;
+		const QJsonObject obj = brw.writeToJson(b);
+		return mStorage->saveJson("tileset.json", obj);
 	}
 
 	bool OSGFolder::loadMetaData(const QString& input) {
@@ -155,5 +228,15 @@ namespace scially {
         mInSRS = SpatialReference::create(srs, mOrigin);
 
         return mInSRS != nullptr;
+	}
+
+	QList<OSGTile::Ptr> OSGFolder::tiles() const {
+		QList<OSGTile::Ptr> validTile;
+		std::copy_if(mTiles.begin(), mTiles.end(), 
+			std::back_inserter(validTile), 
+			[](const OSGTile::Ptr& p) {
+				return p->mB3DMIndexNode != nullptr;
+			});
+		return validTile;
 	}
 }

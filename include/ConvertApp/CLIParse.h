@@ -17,6 +17,7 @@ namespace scially {
         Format format;
         QString input;
         QString output;
+        bool mergeTop = false;
 
         CLIParse() {
             mParser.setSingleDashWordOptionMode(QCommandLineParser::ParseAsLongOptions);
@@ -30,6 +31,10 @@ namespace scially {
                 {
                     QStringList() << "f" << "format",
                     "OSGB or Vector(required)", "format"
+                },
+                {
+                    QStringList() << "m" << "merge",
+                    "OSGB Top Merge", "top merge", "false"
                 },
                 {
                     QStringList() << "i" << "input",
@@ -70,6 +75,9 @@ namespace scially {
 
     private:
         bool parseOSGB() {
+            if (mParser.isSet("merge")) {
+                mergeTop = mParser.value("merge") == "true";
+            }
             return parseIO();
         }
 

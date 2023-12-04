@@ -14,13 +14,16 @@ namespace scially {
 	public:
 		bool load(const OSGConvertOption& options);
 		bool toB3DMPerTile(const OSGConvertOption& options);
+		bool mergeTile() const;
+		bool mergeTop(const OSGConvertOption& options) const;
 
+		QList<OSGTile::Ptr> tiles() const;
 	private:
 		bool loadMetaData(const QString& input);
-		bool mergeTile() const;
+		
 		BaseTile toBaseTile() const;
 
-		QList<OSGTile> mTiles;
+		QList<OSGTile::Ptr> mTiles;
         SpatialReference::Ptr mInSRS;
         SpatialReferenceMatrix mOutSRS;
 		SpatialTransform::Ptr mSTS;

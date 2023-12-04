@@ -312,11 +312,12 @@ namespace scially {
 			return false;
 		}
 		
-		toB3DM(gltfBuffer, buffer);
+		buffer = toB3DM(gltfBuffer);
 		return true;
 	}
 
-	void CesiumB3DM::toB3DM(const QByteArray& glb, QByteArray& buffer) const{
+	QByteArray CesiumB3DM::toB3DM(const QByteArray& glb) const{
+		QByteArray buffer;
 		QDataStream dataStream(&buffer, QIODevice::WriteOnly);
 		dataStream.setByteOrder(QDataStream::LittleEndian);
 
@@ -369,5 +370,6 @@ namespace scially {
 		
 		dataStream.writeRawData(featureTableJsonByte.data(), featureTableJsonByte.size());
 		dataStream.writeRawData(glb.data(), glb.size());
+		return buffer;
 	}
 }

@@ -11,14 +11,14 @@ namespace scially {
 	private slots:
 		void initTestCase(){
 			node = osgDB::readRefNodeFile("data/Production_5/Data/Tile_+000_+012/Tile_+000_+012.osgb");
-			Q_ASSERT(node != nullptr);
+			QVERIFY(node != nullptr);
 		}
 
 		void testCase1() {
 			OSGLodVisitor visitor;
 			node->accept(visitor);
-			Q_ASSERT(visitor.vertexCount > 0);
-			Q_ASSERT(visitor.children.size() > 0);
+			QVERIFY(visitor.vertexCount > 0);
+			QVERIFY(visitor.children.size() > 0);
 		}
 
 	private:

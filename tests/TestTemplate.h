@@ -3,6 +3,7 @@
 #include <Commons/GDALRegister.h>
 
 #include <QtTest/QtTest>
+#include <QtDebug>
 
 #define TESTTEMPLAGE_MAIN(TestObject) \
 int main(int argc, char *argv[]) \

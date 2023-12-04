@@ -1,8 +1,9 @@
 #pragma once
 
 #include <QList>
-#include <QVector>
 #include <QString>
+#include <QVector>
+
 #include <osg/BoundingBox>
 #include <osg/NodeVisitor>
 

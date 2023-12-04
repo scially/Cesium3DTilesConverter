@@ -25,14 +25,13 @@ namespace scially {
 		double geometricError = 0;
 		osg::BoundingBoxd boundingBox;
 		QList<TileNode::Ptr> nodes;
-
-		TileNode() {}
-		
+	
 		TileNode(const QString& tileName, const QString& fileName)
 			: mTileName(tileName)
 			, mFileName(fileName) {
 
 		}
+		virtual ~TileNode() {}
 
 		QString relativePath(const QString& suffix) const noexcept { 
 			return mTileName + "/" + fileName(suffix);
@@ -46,7 +45,9 @@ namespace scially {
 
 		RootTile toRootTile(bool withChilden) const;
 
-	private:
+	protected:
+		TileNode() {}
+
 		QString mTileName;
 		QString mFileName;
 	};

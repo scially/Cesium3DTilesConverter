@@ -6,7 +6,7 @@
 #include <QJsonDocument>
 
 namespace scially {
-	bool TileStorageDisk::saveJson(const QString& file, const QJsonObject& content) {
+	bool TileStorageDisk::saveJson(const QString& file, const QJsonObject& content) const {
 		QJsonDocument doc(content);
 		#if NDEBUG
 		QByteArray json = doc.toJson(QJsonDocument::Compact);
@@ -16,7 +16,7 @@ namespace scially {
 		return saveFile(file, json);
 	}
 
-	bool TileStorageDisk::saveFile(const QString& file, const QByteArray& content) {
+	bool TileStorageDisk::saveFile(const QString& file, const QByteArray& content) const {
         QString outPath = cleanPath(file);
         ensurePath(outPath);
 
@@ -30,11 +30,11 @@ namespace scially {
 		return r > 0;
 	}
 
-	bool TileStorageDisk::exists(const QString& file) {
+	bool TileStorageDisk::exists(const QString& file) const {
         return QDir(cleanPath(file)).exists();
 	}
 
-    QString TileStorageDisk::cleanPath(const QString& path){
+    QString TileStorageDisk::cleanPath(const QString& path) const {
         QString outPath;
         if (QDir::isAbsolutePath(path)) {
             outPath = path;
@@ -46,7 +46,7 @@ namespace scially {
         return outPath;
     }
 
-    bool TileStorageDisk::ensurePath(const QString& path){
+    bool TileStorageDisk::ensurePath(const QString& path) const{
 		auto parentPath = QDir::cleanPath(QDir(path).filePath(QStringLiteral("..")));
 		return QDir().mkpath(parentPath);
     }
