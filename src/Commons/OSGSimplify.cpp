@@ -81,5 +81,7 @@ namespace scially {
 
 		OSGImageVisitor oiv(ratio);
 		mSNode->accept(oiv);
+
+		return true;
 	}
 }
