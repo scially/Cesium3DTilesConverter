@@ -7,7 +7,7 @@
 
 namespace scially {
 	
-	QSharedPointer<SpatialReference> SpatialReference::create(const QString& inSrs, const osg::Vec3d& origin){
+	SpatialReference::Ptr SpatialReference::CreateSpatialReference(const QString& inSrs, const osg::Vec3d& origin){
 		if (inSrs.isEmpty())
 			return nullptr;
 
@@ -23,6 +23,7 @@ namespace scially {
 		}
 		return nullptr;
 	}
+
 
 	osg::Vec3d SpatialReferenceProj::toWorld(osg::Vec3d v) const
 	{

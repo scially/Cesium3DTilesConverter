@@ -12,9 +12,8 @@ namespace scially {
 	class SpatialReference {
 	public:
 		using Ptr = QSharedPointer<SpatialReference>;
-
-		static SpatialReference::Ptr create(const QString& inSrs, const osg::Vec3d& origin);
-
+		static SpatialReference::Ptr CreateSpatialReference(const QString& inSrs, const osg::Vec3d& origin);
+		
 		virtual osg::Vec3d toWorld(osg::Vec3d v) const = 0;
 		virtual osg::Vec3f toWorldNormal(osg::Vec3d v, osg::Vec3f n) const = 0;
 
@@ -54,4 +53,6 @@ namespace scially {
     protected:
         osg::Matrixd mENUMatrix;
 	};
+
+	
 }

@@ -1,11 +1,13 @@
-# Cesium3DTilesConveter:Overview
-[简体中文](README_zh_CN.md)  [English](README.md)
+[中文总览](README_zh_CN.md)
+[English](README.md)
 
-The Cesium3DTilesConveter based on C++17 and Qt supports the conversion of oblique photography model and vector data in multiple coordinate systems. It is also the only open source tool in the github that supports the oblique photography model pyramid reconstruction.
+# About Project
+
+基于C++17、Qt的3DTiles转换工具，支持多种坐标系的倾斜模型、矢量数据转换，也是全网唯一支持倾斜模型金字塔重建的开源工具
 
 # 简介
 
-3DTiles转换工具，快速将OSGB、Vector转为Cesium 3DTiles。
+3DTiles转换工具，快速将OSGB转为Cesium 3DTiles。
 
 这是一个基于c++ 17 和 Qt5.15 项目。
 

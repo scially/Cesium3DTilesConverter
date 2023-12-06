@@ -1,9 +1,12 @@
 #pragma once
 
+#include <OSGConvert/OSGConvertOption.h>
+#include <OSGConvert/OSGNode.h>
 #include <CesiumGLTF/CesiumB3DM.h>
 #include <OSGConvert/OSGIndex.h>
 #include <OSGConvert/OSGLodVisitor.h>
 #include <CesiumMath/SpatialReference.h>
+#include <CesiumMath/SpatialTransform.h>
 #include <Commons/TileStorage.h>
 
 #include <QString>
@@ -17,45 +20,74 @@
 
 namespace scially {
 
-	class OSGTile: public QEnableSharedFromThis<OSGTile> {
+	class OSGTile: public OSGIndexNode, public QEnableSharedFromThis<OSGTile> {
 	public:
 		using Ptr = QSharedPointer<OSGTile>;
-		friend class OSGFolder;
 		friend class MergeTileNode;
+		
+		static OSGTile::Ptr ReadRefTileNode(const QString& tileFolder, const OSGConvertOption& options);
 
-		OSGTile(const QString& tileFolder
-			, double minGeometricError
-			, uint32_t splitPixel = 512
-			, bool skipPerTile = false)
-			: mTileFolder(tileFolder)
-			, mSplitPixel(splitPixel)
-			, mMinGeometricError(minGeometricError)
-			, mSkipPerTile(skipPerTile)
-		{
+		// inherit OSGNode
+		// property
+		virtual QString name() { 
+			return "OSGTile"; 
+		}
+		
+		virtual QString fileName() const {
+			return mFileName;
 		}
 
-		virtual ~OSGTile() {}
-
-		bool init();
+		virtual QString tileName() const {
+			return mTileName;
+		}
 		
-		bool toB3DM(
-			const SpatialTransform& transform, 
-			TileStorage& storage);
-		
-		bool saveJson(const SpatialReference& srs, TileStorage& storage) const;
+		virtual QString filePath() const {
+			return mTileFolder;
+		}
 
-		osg::BoundingBoxd boungdingBox() const { return mBoundingBox; }
-		QString tileName() const { return mTileName; }
-		int32_t xIndex() const { return mXIndex; }
-		int32_t yIndex() const { return mYIndex; }
-		int32_t zIndex() const { return mZIndex; }
-		QString rootTileFilePath() const { return mTileFolder + "/" + mTileName + ".osgb"; }
-	
+		// child nodes
+		virtual size_t size() const {
+			return nodes.size();
+		}
+
+		virtual OSGNode* node(size_t i) const {
+			return nodes[i].get();
+		}
+
+		virtual osg::BoundingBoxd boungdingBox() const override {
+			return mBoundingBox;
+		}
+
+		virtual int32_t xIndex() const override {
+			return mXIndex;
+		}
+
+		virtual int32_t yIndex() const override {
+			return mYIndex;
+		}
+
+		virtual int32_t zIndex() const override {
+			return mZIndex;
+		}
+
+		// convert
+		virtual QSharedPointer<OSGIndexNode> toB3DM(
+			const SpatialTransform& targetSRS,
+			const TileStorage& storage) const override;
+		// end inherit
+
+		// class OSGTile
+		OSGTile() = default;
+		virtual ~OSGTile() = default;
+
+		bool buildIndex(); 
+		bool saveJson(const TileStorage& storage) const;
+
+		QString rootTileFilePath() const { 
+			return mTileFolder + "/" + mTileName + ".osgb";
+		}
+
 	private:
-		bool loadRoot();
-		bool buildIndex();
-
-	protected:
 		QString mTileFolder;
 		QString mTileName;
 		QString mFileName;
@@ -64,13 +96,10 @@ namespace scially {
 		int32_t mZIndex = 1;
 		
 		osg::BoundingBoxd mBoundingBox;
+		double mGeometricError = 0;
 
-		// convert options
-		double mMinGeometricError;
-		bool mSkipPerTile;
-		uint32_t mSplitPixel;
-
-		TileNode::Ptr mOSGIndexNode = nullptr;
+		QList<OSGTile::Ptr> nodes;
+	
 		TileNode::Ptr mB3DMIndexNode = nullptr;
 	};
 }

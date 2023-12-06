@@ -1,4 +1,5 @@
 #include <OSGConvert/OSGTile.h>
+#include <OSGConvert/OSGFolder.h>
 #include <OSGConvert/OSGLodVisitor.h>
 #include <CesiumGLTF/CesiumB3DM.h>
 #include <Commons/OSGUtil.h>
@@ -12,46 +13,40 @@
 #include <osg/BoundingBox>
 
 namespace scially {
-	bool OSGTile::init()
-	{
-		QDir tileDir(mTileFolder);
-		mTileName = tileDir.dirName();
-		mFileName = tileDir.dirName();
+	OSGTile::Ptr OSGTile::ReadRefTileNode(const QString& tileFolder, const OSGConvertOption& options) {
+		OSGTile::Ptr tile{ new OSGTile };
+		tile->mTileFolder = tileFolder;
+
+		QDir tileDir(tile->mTileFolder);
+		tile->mTileName = tileDir.dirName();
+		tile->mFileName = tileDir.dirName();
 		//Tile_+018_+019
-		QStringList split = mTileName.split("_");
+		QStringList split = tile->mTileName.split("_");
 
 		if (split.length() >= 2) {
-			mXIndex = split[1].toInt();
+			tile->mXIndex = split[1].toInt();
 		}
 		if (split.length() >= 3) {
-			mYIndex = split[2].toInt();
+			tile->mYIndex = split[2].toInt();
 		}
-		
-		return loadRoot();
+
+		tile->mOSGNode = osgDB::readRefNodeFile(tile->rootTileFilePath().toStdString());
+
+		if (tile->mOSGNode == nullptr) {
+			qCritical() << tile->rootTileFilePath() << "load failed";
+			return nullptr;
+		}
+
+		return tile;
 	}
 
-	bool OSGTile::loadRoot() {
-		auto rootNode = osgDB::readRefNodeFile(rootTileFilePath().toStdString());
-
-		if (rootNode == nullptr) {
-			qCritical() << rootTileFilePath() << "load failed";
-			return false;
-		}
-
+	bool OSGTile::buildIndex() {
 		OSGLodVisitor visitor;
-		rootNode->accept(visitor);
+		mOSGNode->accept(visitor);
 
 		mBoundingBox = visitor.boundingBox;
 		if (!mBoundingBox.valid())
 			return false;
-
-		return buildIndex();
-	}
-
-	bool OSGTile::buildIndex() {
-		if (mSkipPerTile) {
-			mMinGeometricError = (mBoundingBox._max - mBoundingBox._min).length2() / mSplitPixel;
-		}
 
 		mOSGIndexNode = buildOSGTileNodeTree(
 			mTileFolder,
@@ -61,17 +56,19 @@ namespace scially {
 		return mOSGIndexNode != nullptr;
 	}
 
-	bool OSGTile::toB3DM(const SpatialTransform& transform, TileStorage& storage) {
+	QSharedPointer<OSGIndexNode> OSGTile::toB3DM(
+		const SpatialTransform& transfrom,
+		const TileStorage& storage) {
         mB3DMIndexNode = OSGBToB3DM(
 			mTileFolder,
 			mOSGIndexNode, 
-			transform, 
-			storage, 
+			transfrom,
+			storage,
 			mSplitPixel);
-		return mB3DMIndexNode != nullptr;
+		return mB3DMIndexNode;
 	}
 
-	bool OSGTile::saveJson(const SpatialReference &srs, TileStorage& storage) const {
+	bool OSGTile::saveJson(const TileStorage& storage) const {
 		RootTile r = mB3DMIndexNode->toRootTile(true);
 		BaseTile b;
 		b.root = r;
@@ -86,7 +83,7 @@ namespace scially {
 		}
 
 		// for debug
-		r.transform = osgMatrixToCesiumTransform(srs.originENU());
+		r.transform = osgMatrixToCesiumTransform(mOutSRS.originENU());
 		b.root = r;
 		b.geometricError = osgBoundingSize(mB3DMIndexNode->boundingBox);
 		outTilesetName = mB3DMIndexNode->tileName() + "/tileset.json";
@@ -96,4 +93,5 @@ namespace scially {
 		}
 		return true;
 	}
+
 }

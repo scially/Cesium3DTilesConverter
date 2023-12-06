@@ -17,47 +17,92 @@
 #include <iterator>
 
 namespace scially {
-	bool OSGFolder::load(const OSGConvertOption& options) {
-		QString metadataPath = options.input + "/metadata.xml";
-		if (!loadMetaData(metadataPath))
-			return false;
+	OSGFolder::Ptr OSGFolder::ReadRefFolderNode(const OSGConvertOption& options) {
+		OSGFolder::Ptr folderNode{ new OSGFolder };
+		folderNode->mDataPath = options.input;
 
-		mStorage = TileStorage::create(options.output);
-		if (mStorage == nullptr) {
-			return false;
+		QString metadataPath = folderNode->mDataPath + "/metadata.xml";
+		folderNode->mInSRS = ReadMetaData(metadataPath);
+		if (nullptr == folderNode->mInSRS)
+			return nullptr;
+
+		folderNode->mStorage = TileStorage::create(options.output);
+		if (folderNode->mStorage == nullptr) {
+			return nullptr;
 		}
-
+		
 		QDir dataDir(options.input + "/Data");
 		auto tileFolders = dataDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs);
 
 		osg::BoundingBoxd osgBound;
 
 		for (const auto& tileFolder : tileFolders) {
-			OSGTile::Ptr tile{ 
-				new OSGTile(
-				tileFolder.absoluteFilePath(),
-				options.MinGeometricError,
-				options.SplitPixel,
-				options.skipPerTile)
-			};
-
-			if (!tile->init()) {
+			OSGTile::Ptr tileNode = OSGTile::ReadRefTileNode(tileFolder.absolutePath(), options);
+			
+			if (tileNode && !tileNode->buildIndex()) {
 				qWarning() << "load" << tileFolder.fileName() << "failed";
 				continue;
 			}
-			mTiles.append(tile);
-			osgBound.expandBy(tile->boungdingBox());
+
+			folderNode->append(tileNode);
+			osgBound.expandBy(tileNode->boungdingBox());
 		}
 
-		if (mTiles.isEmpty())
-			return false;
+		if (folderNode->mTiles.isEmpty())
+			return nullptr;
 
-        const osg::Vec3d osgCenter = mInSRS->toWorld(osgBound.center());
 
-        mOutSRS.initWithCartesian3(osgCenter);
+		const osg::Vec3d osgCenter = folderNode->mInSRS->toWorld(osgBound.center());
+		folderNode->mOutSRS.initWithCartesian3(osgCenter);
 
-        mSTS = SpatialTransform::create(*mInSRS, mOutSRS);
-		return mSTS != nullptr;
+		folderNode->mSTS = SpatialTransform::create(*folderNode->mInSRS, folderNode->mOutSRS);
+		if (folderNode->mSTS == nullptr)
+			return nullptr;
+
+		return folderNode;
+	}
+
+	SpatialReference::Ptr OSGFolder::ReadMetaData(const QString& input) {
+		QFile metaDataFile(input);
+		if (!metaDataFile.exists()) {
+			qCritical() << "can't find metadata.xml";
+			return nullptr;
+		}
+
+		QDomDocument metaDataDom;
+		if (!metaDataDom.setContent(&metaDataFile)) {
+			qCritical() << "can't parse metadata.xml file";
+			return nullptr;
+		}
+
+		QDomElement rootElement = metaDataDom.documentElement();
+		if (rootElement.tagName() != "ModelMetadata") {
+			qCritical() << "not find ModelMetaData node in metadata.xml";
+			return nullptr;
+		}
+
+		QDomNodeList srsNodes = rootElement.elementsByTagName("SRS");
+		QDomNodeList originNodes = rootElement.elementsByTagName("SRSOrigin");
+
+		if (srsNodes.isEmpty()) {
+			qCritical() << "not find SRS node in metadata.xml";
+			return nullptr;
+		}
+
+		QString srs = srsNodes.at(0).toElement().text();
+		osg::Vec3d origin = { 0, 0, 0 };
+
+		if (!originNodes.isEmpty()) {
+			auto origins = originNodes.at(0).toElement().text().split(',');
+
+			origin.x() = origins[0].toDouble();
+			origin.y() = origins[1].toDouble();
+			if (origins.size() > 2) {
+				origin.z() = origins[2].toDouble();
+			}
+		}
+
+		return SpatialReference::CreateSpatialReference(srs, origin);
 	}
 
 	bool OSGFolder::toB3DMPerTile(const OSGConvertOption& options) {
@@ -73,7 +118,7 @@ namespace scially {
 				qInfo() << tile->tileName() << "tile start convert to b3dm";
 			
 				if (tile->toB3DM(*mSTS, *mStorage)) {
-                    return tile->saveJson(mOutSRS, *mStorage);
+                    return tile->saveJson(*mStorage);
 				}
 				else {
 					return false;
@@ -185,58 +230,5 @@ namespace scially {
 		BaseTileReadWriter brw;
 		const QJsonObject obj = brw.writeToJson(b);
 		return mStorage->saveJson("tileset.json", obj);
-	}
-
-	bool OSGFolder::loadMetaData(const QString& input) {
-		QFile metaDataFile(input);
-		if (!metaDataFile.exists()) {
-			qCritical() << "can't find metadata.xml file";
-			return false;
-		}
-
-		QDomDocument metaDataDom;
-		if (!metaDataDom.setContent(&metaDataFile)) {
-			qCritical() << "can't parse metadata.xml file";
-		}
-
-		QDomElement rootElement = metaDataDom.documentElement();
-		if (rootElement.tagName() != "ModelMetadata") {
-			qCritical() << "not find ModelMetaData node in metadata.xml";
-		}
-
-		QDomNodeList srsNodes = rootElement.elementsByTagName("SRS");
-		QDomNodeList originNodes = rootElement.elementsByTagName("SRSOrigin");
-
-		if (srsNodes.isEmpty()) {
-			qCritical() << "not find SRS node in metadata.xml";
-			return false;
-		}
-
-		QString srs = srsNodes.at(0).toElement().text();
-
-		if (!originNodes.isEmpty()) {
-			QString origin = originNodes.at(0).toElement().text();
-			auto origins = origin.split(',');
-
-			mOrigin.x() = origins[0].toDouble();
-			mOrigin.y() = origins[1].toDouble();
-			if (origins.size() > 2) {
-				mOrigin.z() = origins[2].toDouble();
-			}
-		}
-
-        mInSRS = SpatialReference::create(srs, mOrigin);
-
-        return mInSRS != nullptr;
-	}
-
-	QList<OSGTile::Ptr> OSGFolder::tiles() const {
-		QList<OSGTile::Ptr> validTile;
-		std::copy_if(mTiles.begin(), mTiles.end(), 
-			std::back_inserter(validTile), 
-			[](const OSGTile::Ptr& p) {
-				return p->mB3DMIndexNode != nullptr;
-			});
-		return validTile;
 	}
 }

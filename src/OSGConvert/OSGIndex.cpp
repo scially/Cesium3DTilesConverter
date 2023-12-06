@@ -162,7 +162,7 @@ namespace scially {
 		const QString tileFolder,
 		TileNode::Ptr osgb,
 		const SpatialTransform& transform,
-		TileStorage& storage,
+		const TileStorage& storage,
 		double splitPixel)
 	{
 		double geometricError = osgBoundingSize(osgb->boundingBox) / splitPixel;

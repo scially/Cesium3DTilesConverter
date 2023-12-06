@@ -1,5 +1,6 @@
 #pragma once
 
+#include <OSGConvert/OSGNode.h>
 #include <Cesium3DTiles/RootTile.h>
 
 #include <QString>
@@ -15,7 +16,7 @@ namespace scially {
     // for TileNode and TileNodeView, use Pointer as child node type?
 	// Tile_+001_+001/Tile_+001_+001.osgb
     //   mTileName      mFileName    suffix
-	class TileNode: public QEnableSharedFromThis<TileNode> {
+	class TileNode: public OSGNode, public QEnableSharedFromThis<TileNode> {
 	public:
 		using Ptr = QSharedPointer<TileNode>;
 		
@@ -61,6 +62,6 @@ namespace scially {
 		const QString tileFolder,
 		TileNode::Ptr osgb,
 		const SpatialTransform& transform,
-		TileStorage& storage,
+		const TileStorage& storage,
 		double splitPixel);
 }
