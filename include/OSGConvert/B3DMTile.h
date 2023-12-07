@@ -1,5 +1,6 @@
 #pragma once
 
+#include <OSGConvert/OSGConvertOption.h>
 #include <OSGConvert/OSGNode.h>
 #include <CesiumGLTF/CesiumB3DM.h>
 #include <OSGConvert/OSGLodVisitor.h>
@@ -18,37 +19,30 @@
 
 namespace scially {
 
-	class OSGTile: public OSGIndexNode, public QEnableSharedFromThis<OSGTile> {
+	class B3DMTile: public OSGIndexNode, public QEnableSharedFromThis<B3DMTile> {
 	public:
-		using Ptr = QSharedPointer<OSGTile>;
-
+		using Ptr = QSharedPointer<B3DMTile>;
+		friend class MergeTileNode;
+		
 		// inherit OSGNode
 		// property
-		virtual QString name() { 
-			return "OSGTile"; 
+		virtual QString name() override { 
+			return "B3DMTile"; 
 		}
 
 		// convert
 		virtual QSharedPointer<OSGIndexNode> toB3DM(
 			const SpatialTransform& transform,
-			const TileStorage& storage) override;
+			const TileStorage& storage) override {
+			return nullptr;
+		}
 		// end inherit
 
 		// class OSGTile
-		OSGTile(
-			const QString& tileFolder,
-			const QString& fileName, 
-			const QString& tileName);
-		
-		virtual ~OSGTile() = default;
-		
-		bool skipOSGLOD() const {
-			return mSkipOSGLod;
-		}
-		
-		bool buildIndex();
-		
+		B3DMTile() = default;
+		virtual ~B3DMTile() = default;
+
 	private:
-		bool mSkipOSGLod = false;
+	
 	};
 }

@@ -208,23 +208,6 @@ namespace scially {
 		return rmesh;
 	}
 
-
-    QList<CesiumMesh> OSGBtoCesiumMesh(
-		const QString& osgFile,
-		const osg::Vec3d& tileCenter,
-		const SpatialTransform& transform)
-	{
-		OSGParseVisitor loader(tileCenter, &transform);
-		auto model = osgDB::readRefNodeFile(osgFile.toStdString());
-		if (!model) {
-			qCritical() << "osg load file failed:" << osgFile;
-			return {};
-		}
-
-		model->accept(loader);
-		return loader.meshes;
-	}
-
 	QList<CesiumMesh> OSGBtoCesiumMesh(
 		osg::Node& osgNode,
 		const osg::Vec3d& tileCenter,

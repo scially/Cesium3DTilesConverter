@@ -1,11 +1,4 @@
-#include <Cesium3DTiles/RootTile.h>
-#include <CesiumMath/SpatialTransform.h>
-#include <OSGConvert/OSGTile.h>
-
-#include <QList>
-#include <QSharedPointer>
-
-#include <osg/Node>
+#include <OSGConvert/OSGNode.h>
 
 #include <algorithm>
 #include <iterator>
@@ -15,35 +8,32 @@ namespace scially {
 	//    t     z = 1
 	//  t   t   z = 2
 	//t  t t  t z = 3 
-	// TODO:
-	// rebuild:
-	// MergeTileNode -> TileNode -> VirtualNode £¨OSGTile¡¢OSGFolder)
-	class MergeTileNode : public QEnableSharedFromThis<MergeTileNode> {
+	class MergeTileNode : public OSGIndexNode, public QEnableSharedFromThis<MergeTileNode> {
 	public:
 		using Ptr = QSharedPointer<MergeTileNode>;
-		friend class MergeTileNodeBuilder;
 		
-		MergeTileNode(OSGTile::Ptr osgTile);
-		MergeTileNode(int32_t x, int32_t y, int32_t z);
-		virtual ~MergeTileNode() {}
+		// inherit from OSGIndexNode
+		virtual QString name() const override {
+			return "MergeTileNode";
+		}
+
+		virtual QSharedPointer<OSGIndexNode> toB3DM(
+			const SpatialTransform& transform,
+			const TileStorage& storage)
+			override;
+		
+		MergeTileNode::MergeTileNode(int32_t x, int32_t y, int32_t z)
+		{
+			mXIndex = x;
+			mYIndex = y;
+			mZIndex = z;
+			mFileName = QString("Top_%1").arg(mZIndex);
+			mTileName = QString("%1_%2").arg(mXIndex).arg(mYIndex);
+		}
+		
+		virtual ~MergeTileNode() = default;
 
 		bool parentIndex(uint32_t z, int32_t& x, int32_t& y) const;
-
-		const int32_t& xIndex() const { return mXIndex; }
-		const int32_t& yIndex() const { return mYIndex; }
-		const int32_t& zIndex() const { return mZIndex; }
-		const QString& tileName() const { return mTileName; }
-		const QString& fileName() const { return mFileName; }
-		const double& geometricError() const { return mGeometricError; }
-		const osg::BoundingBoxd& boundingBox() const { return mBoundingBox; }
-		const QList<MergeTileNode::Ptr>& nodes() const { return mNodes; }
-
-		int32_t& xIndex() { return mXIndex; }
-		int32_t& yIndex() { return mYIndex; }
-		int32_t& zIndex() { return mZIndex; }
-		double& geometricError() { return mGeometricError; }
-		osg::BoundingBoxd& boundingBox() { return mBoundingBox; }
-	    QList<MergeTileNode::Ptr>& nodes() { return mNodes; }
 
 		QString relativePath(const QString& suffix) const {
 			return QString("top/top_%1_%2_%3%4")
@@ -53,29 +43,12 @@ namespace scially {
 				.arg(suffix);
 		}
 
-		// convert to b3dm
-		MergeTileNode::Ptr toB3DM(
-			const SpatialTransform& transform,
-			const TileStorage& storage,
-			double splitPixel);
-
 		RootTile toRootTile() const;
 
 		bool operator== (const MergeTileNode& node);
 		
 	private:
-		osg::ref_ptr<osg::Node> mOSGNode;
-		QList<MergeTileNode::Ptr> mNodes;
 
-		OSGTile::Ptr mOSGTile;
-	
-		osg::BoundingBoxd mBoundingBox;
-		double mGeometricError = 0;
-		int32_t mXIndex;
-		int32_t mYIndex;
-		int32_t mZIndex;
-		QString mTileName;
-		QString mFileName;
 	};
 
 	class MergeTileNodeBuilder {
@@ -95,8 +68,7 @@ namespace scially {
 		static QList<MergeTileNode::Ptr> MergeOSGToB3DM(
 			const QList<MergeTileNode::Ptr>& topNodes,
 			const SpatialTransform& transform,
-			TileStorage& storage,
-			double splitPixel);
+			TileStorage& storage);
 		
 	private:
 		// read and simplyf osg node

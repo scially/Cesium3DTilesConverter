@@ -17,36 +17,12 @@
 #include <tuple>
 
 namespace scially {
-	
-	MergeTileNode::MergeTileNode(OSGTile::Ptr osgTile): mOSGTile(osgTile) {
-		Q_ASSERT(osgTile != nullptr);
-
-		mXIndex = osgTile->xIndex();
-		mYIndex = osgTile->yIndex();
-		mZIndex = osgTile->zIndex();
-
-		mFileName = QString("Top_%1").arg(mZIndex);
-		mTileName = QString("Top_%1_%2").arg(mXIndex).arg(mYIndex);
-
-		if (mOSGTile) {
-			mBoundingBox = mOSGTile->mB3DMIndexNode->boundingBox;
-			mGeometricError = mOSGTile->mB3DMIndexNode->geometricError;
-		}
-	}
-
-	MergeTileNode::MergeTileNode(int32_t x, int32_t y, int32_t z)
-		:mXIndex(x), mYIndex(y), mZIndex(z){
-		mFileName = QString("Top_%1").arg(mZIndex);
-		mTileName = QString("%1_%2").arg(mXIndex).arg(mYIndex);
-	}
-
 	bool MergeTileNode::operator== (const MergeTileNode& node) {
 		return mXIndex == node.mXIndex
 			&& mYIndex == node.mYIndex
 			&& mZIndex == node.mZIndex;
 	}
 
-	
 	bool MergeTileNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
 		if (z >= mZIndex) {
 			qWarning() << "try to new level zoom";
@@ -61,8 +37,7 @@ namespace scially {
 
 	MergeTileNode::Ptr MergeTileNode::toB3DM(
 		const SpatialTransform& transform,
-		const TileStorage& storage,
-		double splitPixel) {
+		const TileStorage& storage) {
 
 		if (mOSGTile != nullptr) {
 			MergeTileNode::Ptr leafNode{

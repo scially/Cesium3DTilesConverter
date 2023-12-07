@@ -1,5 +1,6 @@
 #include <CesiumReadWrite/BaseTileReadWriter.h>
 #include <Commons/OSGUtil.h>
+#include <OSGConvert/B3DMTile.h>
 #include <OSGConvert/OSGFolder.h>
 #include <OSGConvert/OSGMergeTopIndex.h>
 
@@ -17,49 +18,49 @@
 #include <iterator>
 
 namespace scially {
-	OSGFolder::Ptr OSGFolder::ReadRefFolderNode(const OSGConvertOption& options) {
-		OSGFolder::Ptr folderNode{ new OSGFolder };
-		folderNode->mDataPath = options.input;
+	bool OSGFolder::load(const QString& output) {
+		QString metadataPath = mDataPath + "/metadata.xml";
+		mInSRS = ReadMetaData(metadataPath);
+		if (nullptr == mInSRS)
+			return false;
 
-		QString metadataPath = folderNode->mDataPath + "/metadata.xml";
-		folderNode->mInSRS = ReadMetaData(metadataPath);
-		if (nullptr == folderNode->mInSRS)
-			return nullptr;
-
-		folderNode->mStorage = TileStorage::create(options.output);
-		if (folderNode->mStorage == nullptr) {
-			return nullptr;
+		mStorage = TileStorage::create(output);
+		if (mStorage == nullptr) {
+			return false;
 		}
 		
-		QDir dataDir(options.input + "/Data");
+		QDir dataDir(tileFolder() + "/Data");
 		auto tileFolders = dataDir.entryInfoList(QDir::NoDotAndDotDot | QDir::Dirs);
 
 		osg::BoundingBoxd osgBound;
 
 		for (const auto& tileFolder : tileFolders) {
-			OSGTile::Ptr tileNode = OSGTile::ReadRefTileNode(tileFolder.absolutePath(), options);
+			QString tn = tileFolder.fileName();  // tileName;
+			QString fn = tileFolder.fileName();  // fileName;
 			
-			if (tileNode && !tileNode->buildIndex()) {
+			auto tileNode = QSharedPointer<OSGTile>::create(tileFolder, fn, tn);
+			
+			if (!tileNode->buildIndex()) {
 				qWarning() << "load" << tileFolder.fileName() << "failed";
 				continue;
 			}
 
-			folderNode->append(tileNode);
-			osgBound.expandBy(tileNode->boungdingBox());
+			mNodes.append(tileNode);
+			osgBound.expandBy(tileNode->boundingBox());
 		}
 
-		if (folderNode->mTiles.isEmpty())
-			return nullptr;
+		if (size() == 0)
+			return false;
 
 
-		const osg::Vec3d osgCenter = folderNode->mInSRS->toWorld(osgBound.center());
-		folderNode->mOutSRS.initWithCartesian3(osgCenter);
+		const osg::Vec3d osgCenter = mInSRS->toWorld(osgBound.center());
+		mOutSRS.initWithCartesian3(osgCenter);
 
-		folderNode->mSTS = SpatialTransform::create(*folderNode->mInSRS, folderNode->mOutSRS);
-		if (folderNode->mSTS == nullptr)
-			return nullptr;
+		mSTS = SpatialTransform::create(*mInSRS, mOutSRS);
+		if (mSTS == nullptr)
+			return false;
 
-		return folderNode;
+		return true;
 	}
 
 	SpatialReference::Ptr OSGFolder::ReadMetaData(const QString& input) {
@@ -105,20 +106,22 @@ namespace scially {
 		return SpatialReference::CreateSpatialReference(srs, origin);
 	}
 
-	bool OSGFolder::toB3DMPerTile(const OSGConvertOption& options) {
+	bool OSGFolder::toB3DM(uint32_t thread, bool topMerge) {
 		QThreadPool threadPool;
-		if (options.thread != 0) {
-			threadPool.setMaxThreadCount(options.thread);
+		if (thread != 0) {
+			threadPool.setMaxThreadCount(thread);
 		}
 	
 		QList<QFuture<bool>> workFutures;
-		QList<TileNode::Ptr> tree;
-		foreach (auto tile, mTiles) {
-			QFuture<bool> f = QtConcurrent::run(&threadPool, [this, tile, &tree]() {
+		for (size_t i = 0; i < size(); i++) {
+			auto tile = node<OSGTile>(i);
+			QFuture<bool> f = QtConcurrent::run(&threadPool, [this, tile]() {
 				qInfo() << tile->tileName() << "tile start convert to b3dm";
 			
-				if (tile->toB3DM(*mSTS, *mStorage)) {
-                    return tile->saveJson(*mStorage);
+				auto b3dm = tile->toB3DM(*mSTS, *mStorage);
+				if(b3dm) {
+					mLinks[tile.get()] = b3dm.get();
+                    return b3dm->saveJson(*mStorage, mOutSRS.originENU());
 				}
 				else {
 					return false;
@@ -130,9 +133,14 @@ namespace scially {
 		for (auto& worker : workFutures) {
 			worker.waitForFinished();
 		}
+		qInfo() << "all tile process finished";
+		
+		bool r = mergeTile();
+		if (r && topMerge) {
+			return mergeTop();
+		}
 
-		qInfo() << "all tile process finished, start merge";
-		return mergeTile();
+		return r;	
 	}
 
 	bool OSGFolder::mergeTile() const {
@@ -146,12 +154,12 @@ namespace scially {
 		osg::BoundingBoxd mergeBoundingBox;
 		RootTile root;
 
-		foreach(auto tile, mTiles) {
-			auto b3dmIndex = tile->mB3DMIndexNode;
-			if (b3dmIndex == nullptr)
+		for (size_t i = 0; i < size(); i++) {
+			auto b3dmIndex = mLinks[node<OSGIndexNode>(i).get()];
+			if (!b3dmIndex)
 				continue;
 
-			mergeBoundingBox.expandBy(b3dmIndex->boundingBox);
+			mergeBoundingBox.expandBy(b3dmIndex->boundingBox());
 			RootTile r = b3dmIndex->toRootTile(false);
 			root.children.append(r);
 		}
@@ -167,7 +175,7 @@ namespace scially {
 		return b;
 	}
 
-	bool OSGFolder::mergeTop(const OSGConvertOption& options) const {
+	bool OSGFolder::mergeTop() const {
 		int32_t minx = std::numeric_limits<int32_t>::max();
 		int32_t miny = std::numeric_limits<int32_t>::max();
 	
@@ -176,8 +184,9 @@ namespace scially {
 	
 		QList<MergeTileNode::Ptr> nodes;
 
-		for(const auto& tile: mTiles) {
-			if (!tile->mB3DMIndexNode)
+		for (size_t i = 0; i < size(); i++) {
+			auto b3dmIndex = mLinks[node<OSGIndexNode>(i).get()];
+			if (!b3dmIndex)
 				continue;
 
 			MergeTileNode::Ptr node{ new MergeTileNode(tile) };
