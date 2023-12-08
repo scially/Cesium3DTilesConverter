@@ -19,5 +19,4 @@ namespace scially {
 	private:
 		QByteArray toB3DM(const QByteArray& glb) const;
 	};
-	
 }

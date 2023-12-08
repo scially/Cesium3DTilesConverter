@@ -1,19 +1,33 @@
 #pragma once
 
 #include <Cesium3DTiles/RootTile.h>
-#include <CesiumReadWrite/BaseTileReadWriter.h>
+#include <CesiumGLTF/CesiumB3DM.h>
 #include <CesiumMath/SpatialReference.h>
 #include <CesiumMath/SpatialTransform.h>
+#include <CesiumReadWrite/BaseTileReadWriter.h>
 #include <Commons/OSGUtil.h>
 #include <Commons/TileStorage.h>
+#include <OSGConvert/OSGParseVisitor.h>
 
+#include <QList>
 #include <QSharedPointer>
 #include <QString>
-#include <QList>
 
 #include <osg/Node>
 
 namespace scially {
+
+	#if __cplusplus == 202002L
+		using remove_cvrf = std::remove_cvref_t;
+	#else
+		template<class T>
+		struct remove_cvref
+		{
+			typedef std::remove_cv_t<std::remove_reference_t<T>> type;
+		};
+		template< class T >
+		using remove_cvref_t = typename remove_cvref<T>::type;
+	#endif
 
 	constexpr double SPLIT_PIXEL = 512;
 
@@ -25,6 +39,12 @@ namespace scially {
 		// property
 		virtual QString name() const { 
 			return "OSGNode"; 
+		}
+
+		template <typename T>
+		bool isSameKindAs(const OSGNode* obj) const {
+			using NCVRT = remove_cvref_t<T>;
+			return dynamic_cast<const NCVRT*>(obj) != nullptr;
 		}
 
 		QString fileName() const {
@@ -71,12 +91,12 @@ namespace scially {
 			return mNodes.size();
 		}
 
-		template <typename T>
+		template <typename T = OSGNode>
 		QSharedPointer<T> node(size_t i) const {
 			return mNodes[i].dynamicCast<T>();
 		}
 
-		template <typename T>
+		template <typename T = OSGNode>
 		QList<QSharedPointer<T>> nodes() const {
 			QList<QSharedPointer<T>> ns;
 			for (const auto& node : mNodes) {
@@ -103,7 +123,7 @@ namespace scially {
 		virtual QString name() const override { 
 			return "OSGIndexNode"; 
 		}
-	
+
 		int32_t xIndex() const {
 			return mXIndex;
 		}
@@ -149,13 +169,11 @@ namespace scially {
 		}
 
 		// convert
-		virtual QSharedPointer<OSGIndexNode> toB3DM(
-			const SpatialTransform& transform, 
-			const TileStorage& storage) { 
-			return nullptr;
-		}
+		QSharedPointer<OSGIndexNode> toB3DM(
+			const SpatialTransform& transform,
+			const TileStorage& storage);
 
-		template <typename T>
+		template <typename T = OSGIndexNode>
 		QList<QSharedPointer<T>> firstSplitedChild() {
 			QList<QSharedPointer<T>> splitNodes;
 			
@@ -174,7 +192,7 @@ namespace scially {
 			return splitNodes;
 		}
 
-		template <typename T>
+		template <typename T = OSGIndexNode >
 		QList<QSharedPointer<T>> collectChildrenMatchGeometricError(double geometricError) {
 
 			QList<QSharedPointer<T>>  matchNodes;
@@ -206,55 +224,14 @@ namespace scially {
 			return matchNodes;
 		}
 
-		RootTile toRootTile(bool withChilden) const {
-			RootTile root;
-			root.geometricError = geometricError() * 16;
-			root.refine = "REPLACE";
-			root.boundingVolume.box = osgBoundingToCesiumBoundBox(boundingBox());
+		RootTile toRootTile(bool withChilden) const;
 
-			// child node to 3dtiles content
-			if (withChilden) {
-				for (size_t i = 0; i < size(); i++) {
-					RootTile r = node<OSGIndexNode>(i)->toRootTile(withChilden);
-					root.children.append(r);
-				}
-			}
+		bool saveJson(const TileStorage& storage, const osg::Matrixd& transform) const;
 
-			root.content.emplace();
-			if (withChilden) {
-				root.content.value().uri = fileName() + ".b3dm";
-			}
-			else {
-				root.content.value().uri = tileName() + "/" + fileName() + ".json";
-			}
-
-			return root;
-		}
-
-		bool saveJson(const TileStorage& storage, const osg::Matrixd& transform) const {
-			RootTile r = toRootTile(true);
-			BaseTile b;
-			b.root = r;
-			b.geometricError = r.geometricError;
-
-			BaseTileReadWriter brw;
-
-			QString outTilesetName = tileName() + '/' + fileName() + ".json";
-			if (!storage.saveJson(outTilesetName, brw.writeToJson(b))) {
-				qCritical() << "save json " << outTilesetName << "failed";
-				return false;
-			}
-
-			// for debug
-			r.transform = osgMatrixToCesiumTransform(transform);
-			b.root = r;
-			b.geometricError = osgBoundingSize(boundingBox());
-			outTilesetName = tileName() + "/tileset.json";
-			if (!storage.saveJson(outTilesetName, brw.writeToJson(b))) {
-				qCritical() << "save json " << outTilesetName << "failed";
-				return false;
-			}
-			return true;
+		virtual bool operator== (const OSGIndexNode& node) {
+			return mXIndex == node.mXIndex
+				&& mYIndex == node.mYIndex
+				&& mZIndex == node.mZIndex;
 		}
 
 	protected:

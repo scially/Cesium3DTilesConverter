@@ -9,7 +9,7 @@
 
 3DTiles转换工具，快速将OSGB转为Cesium 3DTiles。
 
-这是一个基于c++ 17 和 Qt5.15 项目。
+这是一个基于c++17的项目。
 
 提供 `OSGB(OpenSceneGraph Binary)` 转 `3DTiles`
 
