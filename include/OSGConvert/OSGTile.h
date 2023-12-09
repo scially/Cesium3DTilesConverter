@@ -27,11 +27,6 @@ namespace scially {
 		virtual QString name() { 
 			return "OSGTile"; 
 		}
-
-		// convert
-		virtual QSharedPointer<OSGIndexNode> toB3DM(
-			const SpatialTransform& transform,
-			const TileStorage& storage) override;
 		// end inherit
 
 		// class OSGTile

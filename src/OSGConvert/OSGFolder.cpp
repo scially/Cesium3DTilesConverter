@@ -2,10 +2,7 @@
 #include <Commons/OSGUtil.h>
 #include <OSGConvert/B3DMTile.h>
 #include <OSGConvert/OSGFolder.h>
-#include <OSGConvert/OSGMergeTopIndex.h>
-
-#include <osg/BoundingBox>
-#include <osgDB/ReadFile>
+#include <OSGConvert/OSGVirtualTile.h>
 
 #include <QDir>
 #include <QSet>
@@ -15,11 +12,10 @@
 #include <QThreadPool>
 
 #include <algorithm>
-#include <iterator>
 
 namespace scially {
 	bool OSGFolder::load(const QString& output) {
-		QString metadataPath = mDataPath + "/metadata.xml";
+        QString metadataPath = mTileFolder + "/metadata.xml";
 		mInSRS = ReadMetaData(metadataPath);
 		if (nullptr == mInSRS)
 			return false;
@@ -120,7 +116,7 @@ namespace scially {
 			
 				auto b3dm = tile->toB3DM(*mSTS, *mStorage);
 				if(b3dm) {
-					mLinks[tile.get()] = b3dm.get();
+                    mLinks[tile.get()] = b3dm;
                     return b3dm->saveJson(*mStorage, mOutSRS.originENU());
 				}
 				else {
@@ -181,22 +177,21 @@ namespace scially {
 	
 		int32_t maxx = std::numeric_limits<int32_t>::min();
 		int32_t maxy = std::numeric_limits<int32_t>::min();
-	
-		QList<MergeTileNode::Ptr> nodes;
+
+        QList<QSharedPointer<OSGIndexNode>> nodes;
 
 		for (size_t i = 0; i < size(); i++) {
 			auto b3dmIndex = mLinks[node<OSGIndexNode>(i).get()];
 			if (!b3dmIndex)
 				continue;
 
-			MergeTileNode::Ptr node{ new MergeTileNode(tile) };
-			nodes.push_back(node);
+            nodes.push_back(b3dmIndex);
 			
-			minx = std::min(minx, node->xIndex());
-			miny = std::min(miny, node->yIndex());
+            minx = std::min(minx, b3dmIndex->xIndex());
+            miny = std::min(miny, b3dmIndex->yIndex());
 				   
-			maxx = std::max(maxx, node->xIndex());
-			maxy = std::max(maxy, node->yIndex());
+            maxx = std::max(maxx, b3dmIndex->xIndex());
+            maxy = std::max(maxy, b3dmIndex->yIndex());
 		}
 
 		int32_t maxIndex = std::max({ maxx - minx, maxy - miny}); 
@@ -208,7 +203,7 @@ namespace scially {
 		int32_t maxZ = static_cast<int32_t>(std::log2(maxIndex) + 1) + 1; // z start from 1
 		
 		// buiding pyramid index
-		QList<MergeTileNode::Ptr> topNodes = MergeTileNodeBuilder::BuildPyramidIndex(nodes, maxZ);
+        auto topNodes = OSGPyramidBuilder::BuildPyramidIndex(nodes, maxZ);
 		
 		// constrution
 		MergeTileNodeBuilder::GenerateOSGNodeInPyramid(topNodes, maxZ);

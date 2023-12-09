@@ -60,6 +60,6 @@ namespace scially {
 		SpatialTransform::Ptr mSTS;
 		TileStorage::Ptr mStorage;
 
-		QMap<OSGIndexNode*, OSGIndexNode*> mLinks; // osgb to b3dm link
+        QMap<OSGIndexNode*, QSharedPointer<OSGIndexNode>> mLinks; // osgb to b3dm link
 	};
 }

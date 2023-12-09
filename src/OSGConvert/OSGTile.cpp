@@ -46,7 +46,7 @@ namespace scially {
 
 		if (!lodVisitor.isValid()) {
 			qCritical() << "osg bounding box is not valid:" << tileName();
-			return nullptr;
+            return false;
 		}
 		mBoundingBox = lodVisitor.boundingBox;
 		

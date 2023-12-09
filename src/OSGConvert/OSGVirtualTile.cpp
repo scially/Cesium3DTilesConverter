@@ -17,21 +17,11 @@
 #include <tuple>
 
 namespace scially {
-	bool OSGVirtualTile::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
-		if (z >= mZIndex) {
-			qWarning() << "try to new level zoom";
-			return false;
-		}
-			
-		x = mXIndex >> (mZIndex - z);
-		y = mYIndex >> (mZIndex - z);
-
-		return true;
-	}
-
-	QList<OSGVirtualTile::Ptr> OSGVirtualTileBuilder::BuildPyramidIndex(const QList<OSGVirtualTile::Ptr>& nodes, int32_t maxZ) {
-		QQueue<OSGVirtualTile::Ptr> nodeQueue;
-		QList<OSGVirtualTile::Ptr> topNodes;
+    QList<QSharedPointer<OSGIndexNode>> OSGPyramidBuilder::BuildPyramidIndex(
+        const QList<QSharedPointer<OSGIndexNode>>& nodes, int32_t maxZ)
+    {
+        QQueue<QSharedPointer<OSGIndexNode>> nodeQueue;
+        QList<QSharedPointer<OSGIndexNode>> topNodes;
 
 		QMap<std::tuple<int32_t, int32_t, int32_t>, OSGVirtualTile::Ptr> buildCache;
 
@@ -69,7 +59,7 @@ namespace scially {
 		return topNodes;
 	}
 
-	void OSGVirtualTileBuilder::GenerateOSGNodeInPyramid(const QList<OSGVirtualTile::Ptr>& topNodes, int32_t maxZ) {
+    void OSGPyramidBuilder::GenerateOSGNodeInPyramid(const QList<OSGVirtualTile::Ptr>& topNodes, int32_t maxZ) {
 		
 		if (maxZ == 1) {
 			return;
@@ -82,7 +72,7 @@ namespace scially {
 	//    t     z = 1 1 / pyramid = ratio
 	//  t   t   z = 2 1 / pyramid * 2 = ratio
 	//t  t t  t z = 3 1 / pyramid * 3 = ratio ( ratio = 1 )
-	void OSGVirtualTileBuilder::GenerateOSGNodeInPyramidFromBottomToUp(
+    void OSGPyramidBuilder::GenerateOSGNodeInPyramidFromBottomToUp(
 		const QList<OSGVirtualTile::Ptr>& topNodes,
 		uint32_t maxZ, 
 		uint32_t z) {
@@ -96,7 +86,7 @@ namespace scially {
 					maxZ, 
 					z + 1);
 
-				osg::ref_ptr<osg::Group> group = new osg::Group;
+                auto group = osg::dynamic_pointer_cast<osg::Group>(topNode->osgNode());
 
 				double maxGeometricError = 0;
 				osg::BoundingBoxd box;
@@ -113,14 +103,14 @@ namespace scially {
 				OSGSimplify simp(*group);
 				simp.simplify(1.0 / maxZ);
 
-				node->mOSGNode = group;
-				node->mGeometricError = maxGeometricError * 2;
-				node->mBoundingBox = box;
+
+                topNode->geometricError() = maxGeometricError * 2;
+                topNode->boundingBox() = box;
 			}
 		}
 	}
 
-	QList<OSGVirtualTile::Ptr> OSGVirtualTileBuilder::MergeOSGToB3DM(
+    QList<OSGVirtualTile::Ptr> OSGPyramidBuilder::MergeOSGToB3DM(
 		const QList<OSGVirtualTile::Ptr>& topNodes,
 		const SpatialTransform& transform,
 		TileStorage& storage,

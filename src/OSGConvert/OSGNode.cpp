@@ -2,6 +2,19 @@
 #include <OSGConvert/B3DMTile.h>
 
 namespace scially {
+
+bool OSGIndexNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
+        if (z >= mZIndex) {
+            qWarning() << "try to new level zoom";
+            return false;
+        }
+
+        x = mXIndex >> (mZIndex - z);
+        y = mYIndex >> (mZIndex - z);
+
+        return true;
+    }
+
 	RootTile OSGIndexNode::toRootTile(bool withChilden) const {
 		RootTile root;
 		root.geometricError = geometricError() * 16;

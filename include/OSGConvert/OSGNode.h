@@ -91,12 +91,12 @@ namespace scially {
 			return mNodes.size();
 		}
 
-		template <typename T = OSGNode>
+        template <typename T>
 		QSharedPointer<T> node(size_t i) const {
 			return mNodes[i].dynamicCast<T>();
 		}
 
-		template <typename T = OSGNode>
+        template <typename T>
 		QList<QSharedPointer<T>> nodes() const {
 			QList<QSharedPointer<T>> ns;
 			for (const auto& node : mNodes) {
@@ -148,6 +148,8 @@ namespace scially {
 			return mZIndex;
 		}
 
+        virtual bool parentIndex(uint32_t z, int32_t& x, int32_t& y) const;
+
 		osg::ref_ptr<osg::Node> osgNode() const {
 			return mOSGNode;
 		}
@@ -182,7 +184,7 @@ namespace scially {
 			}
 
 			if (size() == 1) {
-				return node(0)->firstSplitedChild<T>();
+                return node<OSGIndexNode>(0)->firstSplitedChild<T>();
 			}
 
 			for (size_t i = 0; i < size(); i++) {
@@ -205,8 +207,8 @@ namespace scially {
 			double maxAllNodesGeometricError = 0;
 
 			for (size_t i = 0; i < size(); i++) {
-				if (node(i)->geometricError() > maxAllNodesGeometricError) {
-					maxAllNodesGeometricError = node(i)->geometricError();
+                if (node<OSGIndexNode>(i)->geometricError() > maxAllNodesGeometricError) {
+                    maxAllNodesGeometricError = node<OSGIndexNode>(i)->geometricError();
 				}
 			}
 
@@ -217,7 +219,7 @@ namespace scially {
 			}
 
 			for (size_t i = 0; i < size(); i++) {
-				auto childMatchNodes = node(i)->collectChildrenMatchGeometricError<T>(geometricError);
+                auto childMatchNodes = node<OSGIndexNode>(i)->collectChildrenMatchGeometricError<T>(geometricError);
 				matchNodes.append(childMatchNodes);
 			}
 

@@ -31,8 +31,6 @@ namespace scially {
 		
 		virtual ~OSGVirtualTile() = default;
 
-		bool parentIndex(uint32_t z, int32_t& x, int32_t& y) const;
-
 		virtual QString relativePath(const QString& suffix) const override {
 			return QString("top/top_%1_%2_%3%4")
 				.arg(zIndex())
@@ -42,11 +40,11 @@ namespace scially {
 		}
 	};
 
-	class OSGVirtualTileBuilder {
+    class OSGPyramidBuilder {
 	public:
-		static QList<OSGVirtualTile::Ptr>
+        static QList<QSharedPointer<OSGIndexNode>>
 			BuildPyramidIndex(
-				const QList<OSGVirtualTile::Ptr>& nodes,
+                const QList<QSharedPointer<OSGIndexNode>>& nodes,
 				int32_t maxZ);
 
 		// read and simplyf all z level osg node
