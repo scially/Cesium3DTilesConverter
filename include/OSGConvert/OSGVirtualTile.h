@@ -1,7 +1,7 @@
 #include <OSGConvert/OSGNode.h>
+#include <OSGConvert/B3DMTile.h>
 
-#include <algorithm>
-#include <iterator>
+#include <osg/Group>
 
 namespace scially {
 	// pyramid
@@ -40,32 +40,31 @@ namespace scially {
 		}
 	};
 
+    QPointerList<OSGIndexNode> BuildPyramidIndex(
+        const QPointerList<B3DMTile>& nodes, int32_t maxZ);
+
     class OSGPyramidBuilder {
 	public:
-        static QList<QSharedPointer<OSGIndexNode>>
-			BuildPyramidIndex(
-                const QList<QSharedPointer<OSGIndexNode>>& nodes,
-				int32_t maxZ);
 
 		// read and simplyf all z level osg node
 		static void
 			GenerateOSGNodeInPyramid(
-				const QList<OSGVirtualTile::Ptr>& topNodes,
+                const QList<QSharedPointer<OSGIndexNode>>& topNodes,
 				int32_t maxZ);
 		
 		// convert to b3dm
-		static QList<OSGVirtualTile::Ptr> MergeOSGToB3DM(
-			const QList<OSGVirtualTile::Ptr>& topNodes,
+        static QList<QSharedPointer<OSGIndexNode>> MergeOSGToB3DM(
+            const QList<QSharedPointer<OSGIndexNode>>& topNodes,
 			const SpatialTransform& transform,
-			TileStorage& storage);
+            const TileStorage& storage);
 		
 	private:
 		// read and simplyf osg node
 		static void
 			GenerateOSGNodeInPyramidFromBottomToUp(
-				const QList<OSGVirtualTile::Ptr>& nodes,
-				uint32_t maxZ,
-				uint32_t z);
+            const QPointerList<OSGIndexNode>& topNodes,
+            uint32_t maxZ,
+            uint32_t z);
 	};
 
 }

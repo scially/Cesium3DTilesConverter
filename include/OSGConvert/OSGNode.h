@@ -16,6 +16,8 @@
 #include <osg/Node>
 
 namespace scially {
+    template <typename T>
+    using QPointerList = QList<QSharedPointer<T>>;
 
 	#if __cplusplus == 202002L
 		using remove_cvrf = std::remove_cvref_t;

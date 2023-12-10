@@ -178,7 +178,7 @@ namespace scially {
 		int32_t maxx = std::numeric_limits<int32_t>::min();
 		int32_t maxy = std::numeric_limits<int32_t>::min();
 
-        QList<QSharedPointer<OSGIndexNode>> nodes;
+        QPointerList<OSGIndexNode> nodes;
 
 		for (size_t i = 0; i < size(); i++) {
 			auto b3dmIndex = mLinks[node<OSGIndexNode>(i).get()];
