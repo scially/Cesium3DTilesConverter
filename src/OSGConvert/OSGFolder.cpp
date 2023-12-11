@@ -203,7 +203,7 @@ namespace scially {
 		int32_t maxZ = static_cast<int32_t>(std::log2(maxIndex) + 1) + 1; // z start from 1
 		
 		// buiding pyramid index
-        auto topNodes = OSGPyramidBuilder::BuildPyramidIndex(nodes, maxZ);
+        auto topNodes = BuildPyramidIndex(nodes, maxZ);
 		
 		// constrution
 		MergeTileNodeBuilder::GenerateOSGNodeInPyramid(topNodes, maxZ);

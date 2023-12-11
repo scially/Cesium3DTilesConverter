@@ -40,8 +40,8 @@ namespace scially {
 		}
 	};
 
-    QPointerList<OSGIndexNode> BuildPyramidIndex(
-        const QPointerList<B3DMTile>& nodes, int32_t maxZ);
+	QPointerList<OSGIndexNode>
+		BuildPyramidIndex(const QPointerList<OSGIndexNode>& nodes, int32_t maxZ);
 
     class OSGPyramidBuilder {
 	public:

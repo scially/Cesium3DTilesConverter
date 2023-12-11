@@ -73,20 +73,28 @@ namespace scially {
 			return mTileFolder;
 		}
 
-		virtual QString relativePath(const QString& suffix) const {
+		virtual QString relativeNodePath(const QString& suffix) const {
 			return tileName() + "/" + fileName() + suffix;
 		}
 
-		QString absolutePath(const QString& suffix) const {
+		QString absoluteNodePath(const QString& suffix) const {
 			return tileFolder() 
 				+ "/" 
-				+ relativePath(suffix);
+				+ relativeNodePath(suffix);
 		}
 
-		QString absolutePath(const QString& folder, const QString& suffix) const {
+		QString absoluteNodePath(const QString& folder, const QString& suffix) const {
 			return folder
 				+ "/"
-				+ relativePath(suffix);
+				+ relativeNodePath(suffix);
+		}
+
+		QString absolutePath() const {
+			return tileFolder() + "/" + tileName();
+		}
+
+		QString relativePath() const {
+			return tileName();
 		}
 
 		size_t size() const {
@@ -112,7 +120,7 @@ namespace scially {
 		}
 
 	protected:
-		QList<QSharedPointer<OSGNode>> mNodes;
+		QPointerList<OSGNode> mNodes;
 
 		QString mTileFolder;
 		QString mTileName;

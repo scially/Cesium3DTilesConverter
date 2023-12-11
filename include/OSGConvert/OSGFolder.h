@@ -1,6 +1,7 @@
 #pragma once
 
 #include <OSGConvert/OSGTile.h>
+#include <OSGConvert/B3DMTile.h>
 #include <Cesium3DTiles/BaseTile.h>
 #include <CesiumMath/SpatialReference.h>
 #include <CesiumMath/SpatialTransform.h>
@@ -60,6 +61,6 @@ namespace scially {
 		SpatialTransform::Ptr mSTS;
 		TileStorage::Ptr mStorage;
 
-        QMap<OSGIndexNode*, QSharedPointer<OSGIndexNode>> mLinks; // osgb to b3dm link
+        QMap<OSGIndexNode*, QSharedPointer<B3DMTile>> mLinks; // osgb to b3dm link
 	};
 }
