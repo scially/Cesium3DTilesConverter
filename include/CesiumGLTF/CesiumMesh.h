@@ -18,6 +18,12 @@ namespace scially {
 	class CesiumMesh {
 	public:
 		using Ptr = QSharedPointer<CesiumMesh>;
+		static QByteArray toGltfBinaryWithNoPack(
+			const QList<CesiumMesh>& meshes, 
+			const osg::Vec3d& center);
+		static QByteArray toB3DM(
+			const QByteArray& glb, 
+			const osg::Vec3d& center);
 
 		struct VertexData {
 			QString name;
@@ -47,6 +53,7 @@ namespace scially {
 		osg::Matrixd tileCoordinateSystemToWorld;
 
 	private:
+		
 		void nanToZero();
 	};
 }

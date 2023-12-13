@@ -1,13 +1,11 @@
 #pragma once
 
 #include <Cesium3DTiles/RootTile.h>
-#include <CesiumGLTF/CesiumB3DM.h>
 #include <CesiumMath/SpatialReference.h>
 #include <CesiumMath/SpatialTransform.h>
-#include <CesiumReadWrite/BaseTileReadWriter.h>
 #include <Commons/OSGUtil.h>
 #include <Commons/TileStorage.h>
-#include <OSGConvert/OSGParseVisitor.h>
+#include <Cesium3DTiles/BaseTile.h>
 
 #include <QList>
 #include <QSharedPointer>
@@ -73,8 +71,8 @@ namespace scially {
 			return mTileFolder;
 		}
 
-		virtual QString relativeNodePath(const QString& suffix) const {
-			return tileName() + "/" + fileName() + suffix;
+		QString relativeNodePath(const QString& suffix) const {
+			return fileName() + "/" + tileName() + suffix;
 		}
 
 		QString absoluteNodePath(const QString& suffix) const {
@@ -90,11 +88,11 @@ namespace scially {
 		}
 
 		QString absolutePath() const {
-			return tileFolder() + "/" + tileName();
+			return tileFolder() + "/" + fileName();
 		}
 
 		QString relativePath() const {
-			return tileName();
+			return fileName();
 		}
 
 		size_t size() const {
@@ -107,8 +105,8 @@ namespace scially {
 		}
 
         template <typename T>
-		QList<QSharedPointer<T>> nodes() const {
-			QList<QSharedPointer<T>> ns;
+		QPointerList<T> nodes() const {
+			QPointerList<T> ns;
 			for (const auto& node : mNodes) {
 				ns.append(node.dynamicCast<T>());
 			}
@@ -178,6 +176,10 @@ namespace scially {
 
 		double& geometricError() {
 			return mGeometricError;
+		}
+
+		osg::ref_ptr<osg::Node>& osgNode() {
+			return mOSGNode;
 		}
 
 		// convert
@@ -256,4 +258,5 @@ namespace scially {
 		osg::BoundingBoxd mBoundingBox;
 		double mGeometricError = 0;
 	};
+
 }

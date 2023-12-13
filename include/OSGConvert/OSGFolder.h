@@ -1,11 +1,9 @@
 #pragma once
 
-#include <OSGConvert/OSGTile.h>
-#include <OSGConvert/B3DMTile.h>
-#include <Cesium3DTiles/BaseTile.h>
 #include <CesiumMath/SpatialReference.h>
 #include <CesiumMath/SpatialTransform.h>
 #include <Commons/TileStorage.h>
+#include <OSGConvert/OSGTile.h>
 
 namespace scially {
 	// oblique photography datasets
@@ -31,7 +29,7 @@ namespace scially {
 			return mInSRS.get();
 		}
 
-		SpatialReferenceMatrix outSRS() const {
+		const SpatialReferenceMatrix& outSRS() const {
 			return mOutSRS;
 		}
 
@@ -48,19 +46,15 @@ namespace scially {
 		}
 
 		bool load(const QString& output);
-		bool toB3DM(uint32_t thread, bool topMerge = false);
-
-	private:
-		BaseTile toBaseTile() const;
 		
-		bool mergeTile() const;
-		bool mergeTop() const;
+		QPointerList<OSGIndexNode> to3DTiles(uint32_t thread);
 
+	private:	
         SpatialReference::Ptr  mInSRS;
 		SpatialReferenceMatrix mOutSRS;
 		SpatialTransform::Ptr mSTS;
 		TileStorage::Ptr mStorage;
 
-        QMap<OSGIndexNode*, QSharedPointer<B3DMTile>> mLinks; // osgb to b3dm link
+        QPointerList<OSGIndexNode> mB3dms; // osgb to b3dm link
 	};
 }

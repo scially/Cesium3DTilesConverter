@@ -1,4 +1,3 @@
-#include <CesiumGLTF/CesiumB3DM.h>
 #include <Commons/OSGUtil.h>
 #include <OSGConvert/B3DMTile.h>
 #include <OSGConvert/OSGFolder.h>
@@ -31,7 +30,7 @@ namespace scially {
 			mYIndex = split[2].toInt();
 		}
 
-		mOSGNode = osgDB::readRefNodeFile(absolutePath(".osgb").toStdString());
+		mOSGNode = osgDB::readRefNodeFile(absoluteNodePath(".osgb").toStdString());
 
 		// maybe throw exception if mOSGNode is null
 		// TODO

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <OSGConvert/OSGNode.h>
-#include <CesiumGLTF/CesiumB3DM.h>
 #include <OSGConvert/OSGLodVisitor.h>
 #include <CesiumMath/SpatialReference.h>
 #include <CesiumMath/SpatialTransform.h>

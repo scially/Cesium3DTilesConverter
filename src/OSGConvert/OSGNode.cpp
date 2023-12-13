@@ -1,18 +1,22 @@
 #include <OSGConvert/OSGNode.h>
+
+#include <CesiumReadWrite/BaseTileReadWriter.h>
 #include <OSGConvert/B3DMTile.h>
+#include <OSGConvert/OSGParseVisitor.h>
 
 namespace scially {
-bool OSGIndexNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
-        if (z >= mZIndex) {
-            qWarning() << "try to new level zoom";
-            return false;
-        }
+	
+	bool OSGIndexNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
+		if (z >= mZIndex) {
+			qWarning() << "try to new level zoom";
+			return false;
+		}
 
-        x = mXIndex >> (mZIndex - z);
-        y = mYIndex >> (mZIndex - z);
+		x = mXIndex >> (mZIndex - z);
+		y = mYIndex >> (mZIndex - z);
 
-        return true;
-    }
+		return true;
+	}
 
 	RootTile OSGIndexNode::toRootTile(bool withChilden) const {
 		RootTile root;
@@ -30,10 +34,10 @@ bool OSGIndexNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
 
 		root.content.emplace();
 		if (withChilden) {
-			root.content.value().uri = fileName() + ".b3dm";
+			root.content.value().uri = tileName() + ".b3dm";
 		}
 		else {
-			root.content.value().uri = tileName() + "/" + fileName() + ".json";
+			root.content.value().uri = fileName() + "/" + tileName() + ".json";
 		}
 
 		return root;
@@ -47,9 +51,9 @@ bool OSGIndexNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
 
 		BaseTileReadWriter brw;
 
-		QString outTilesetName = tileName() + '/' + fileName() + ".json";
+		QString outTilesetName = relativeNodePath(".json");
 		if (!storage.saveJson(outTilesetName, brw.writeToJson(b))) {
-			qCritical() << "save json " << outTilesetName << "failed";
+			qCritical() << "save json" << outTilesetName << "failed";
 			return false;
 		}
 
@@ -69,7 +73,7 @@ bool OSGIndexNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
 		const SpatialTransform& transform,
 		const TileStorage& storage) {
 
-		if (!isSameKindAs<B3DMTile>(this))
+		if (isSameKindAs<B3DMTile>(this))
 			return sharedFromThis();
 
 		double geometricError = osgBoundingSize(mBoundingBox) / SPLIT_PIXEL;
@@ -82,12 +86,11 @@ bool OSGIndexNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
 			return nullptr;
 
 		osg::Vec3d tileCenter = transform.transform(mBoundingBox.center());
+		QList<CesiumMesh> tileMeshes;
 
-		CesiumB3DM::Ptr b3dm(new CesiumB3DM);
-		b3dm->center = tileCenter;
 		double maxGeometricError = 0;
-		
-		for(const auto& node: osgIndexNodes) {
+
+		for (const auto& node : osgIndexNodes) {
 			if (node->mOSGNode == nullptr)
 				continue;
 
@@ -96,11 +99,11 @@ bool OSGIndexNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
 				tileCenter,
 				transform);
 
-			b3dm->meshes.append(meshes);
+			tileMeshes.append(meshes);
 			maxGeometricError = std::max(maxGeometricError, node->geometricError());
 		}
 
-		if (b3dm->meshes.isEmpty()) {
+		if (tileMeshes.isEmpty()) {
 			return nullptr;
 		}
 
@@ -111,11 +114,11 @@ bool OSGIndexNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
 		b3dmTopNode->yIndex() = yIndex();
 		b3dmTopNode->zIndex() = zIndex();
 		b3dmTopNode->geometricError() = maxGeometricError;
+		b3dmTopNode->osgNode() = osgNode();
+		QString outFileName = b3dmTopNode->relativeNodePath(".b3dm");
 
-		QString outFileName = b3dmTopNode->relativePath(".b3dm");
-
-		QByteArray b3dmBuffer;
-		if (!b3dm->toGltfBinaryWithNoPack(b3dmBuffer)) {
+		QByteArray b3dmBuffer = CesiumMesh::toGltfBinaryWithNoPack(tileMeshes, tileCenter);
+		if (b3dmBuffer.isEmpty()) {
 			qCritical() << "fialed convert meshes to b3dm buffer";
 			return nullptr;
 		}
@@ -125,11 +128,11 @@ bool OSGIndexNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
 		}
 
 
-		for (const auto& mesh : b3dm->meshes) {
+		for (const auto& mesh : tileMeshes) {
 			b3dmTopNode->boundingBox().expandBy(mesh.boundingBox());
 		}
 
-		// Attention!
+		// Attention
 		b3dmTopNode->boundingBox().xMin() += tileCenter.x();
 		b3dmTopNode->boundingBox().yMin() += tileCenter.y();
 		b3dmTopNode->boundingBox().zMin() += tileCenter.z();

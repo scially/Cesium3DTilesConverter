@@ -25,20 +25,7 @@ int main(int argc, char** argv) {
     }
     else if (parser.format == scially::CLIParse::OSGB)
     {
-        scially::OSGConvertOption options;
-        options.input = parser.input;
-        options.output = "file:" + parser.output;
-        scially::OSGFolder dataFolder;
-        if (!dataFolder.load(options))
-            return -1;
-        
-        if(!dataFolder.toB3DMPerTile(options))
-            return -1;
 
-        if (parser.mergeTop) {
-            if (!dataFolder.mergeTop(options))
-                return -1;
-        }
     }
 
     qInfo() << "finish convert in" << beginTime.secsTo(QTime::currentTime()) << "s";
