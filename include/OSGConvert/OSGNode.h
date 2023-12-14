@@ -18,7 +18,7 @@ namespace scially {
     using QPointerList = QList<QSharedPointer<T>>;
 
 	#if __cplusplus == 202002L
-		using remove_cvrf = std::remove_cvref_t;
+		using remove_cvref_t = std::remove_cvref_t;
 	#else
 		template<class T>
 		struct remove_cvref
@@ -43,8 +43,7 @@ namespace scially {
 
 		template <typename T>
 		bool isSameKindAs(const OSGNode* obj) const {
-			using NCVRT = remove_cvref_t<T>;
-			return dynamic_cast<const NCVRT*>(obj) != nullptr;
+			return dynamic_cast<const remove_cvref_t<T>*>(obj) != nullptr;
 		}
 
 		QString fileName() const {
@@ -238,6 +237,7 @@ namespace scially {
 			return matchNodes;
 		}
 
+		// base path with tileset.json
 		RootTile toRootTile(bool withChilden) const;
 
 		bool saveJson(const TileStorage& storage, const osg::Matrixd& transform) const;

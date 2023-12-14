@@ -47,15 +47,5 @@ namespace scially {
 		// class OSGTile
 		B3DMTile() = default;
 		virtual ~B3DMTile() = default;
-		
-		bool isToTileset() const {
-			return mIsToTileset;
-		}
-		bool& isToTileset() {
-			return mIsToTileset;
-		}
-
-	private:
-		bool mIsToTileset = false;
 	};
 }

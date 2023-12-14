@@ -24,10 +24,18 @@ namespace scially {
 		root.refine = "REPLACE";
 		root.boundingVolume.box = osgBoundingToCesiumBoundBox(boundingBox());
 
+		const QString& name = mFileName;
 		// child node to 3dtiles content
 		if (withChilden) {
 			for (size_t i = 0; i < size(); i++) {
-				RootTile r = node<OSGIndexNode>(i)->toRootTile(withChilden);
+				RootTile r;
+				auto dyn = node<OSGIndexNode>(i);
+				if (dyn->fileName() != name) {
+					r = node<OSGIndexNode>(i)->toRootTile(false);
+				}
+				else {
+					r = node<OSGIndexNode>(i)->toRootTile(true);
+				}
 				root.children.append(r);
 			}
 		}
@@ -37,7 +45,7 @@ namespace scially {
 			root.content.value().uri = tileName() + ".b3dm";
 		}
 		else {
-			root.content.value().uri = fileName() + "/" + tileName() + ".json";
+			root.content.value().uri = "../" + fileName() + "/" + tileName() + ".json";
 		}
 
 		return root;
