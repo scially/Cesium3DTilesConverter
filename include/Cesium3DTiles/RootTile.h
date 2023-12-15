@@ -2,9 +2,9 @@
 
 #include "BoundingVolume.h"
 #include "Content.h"
-#include "RootTile.h"
 
 #include <optional>
+
 #include <QVector>
 
 namespace scially {
@@ -29,9 +29,10 @@ namespace scially {
     /// </summary>
     struct RootTile final{
         static constexpr const char* TypeName = "root"; 
+        static const QVector<double> TRANSFORM;
 
         BoundingVolume  boundingVolume;
-        QVector<double> transform = { 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1 };
+        QVector<double> transform = TRANSFORM;
         double          geometricError = 0;
         
         /// <summary>

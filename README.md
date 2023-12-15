@@ -1,58 +1,59 @@
-# About Project
+# Cesium3DTilesConveter:Overview
+[简体中文](README_zh_CN.md)  [English](README.md)
 
-基于C++17、Qt5的3DTiles转换工具, 全网唯一支持根节点合并的开源工具
+The Cesium3DTilesConveter based on C++17 and Qt supports the conversion of oblique photography model and vector data in multiple coordinate systems. It is also the only open source tool in the github that supports the oblique photography model pyramid reconstruction.
 
-# 简介
+# Introduction
 
-3DTiles转换工具, 快速将OSGB转为Cesium 3DTiles。
+1. Oblique Photography Model(OpenSceneGraph Binary) to 3DTiles: convert huge of osgb file to 3DTiles.
 
-这是一个基于c++ 17 和 Qt5.15 项目。
+2. Vector to 3DTiles: convert vector data which gdal supported to 3D-Tiles.
 
-提供 `OSGB(OpenSceneGraph Binary)` 转 `3DTiles`
+# Usage
 
-# 用法说明
+Simplify the input parameters from the CLI, adopt GLTF2.0 format by default (y-axis upward), and multi threaded parallel processing.
 
-简化命令行传入参数，默认采用GLTF2.0格式(y轴向上),多线程并行。
-##  命令行格式
+##  CLI Format
 
 ```sh
 Converter -f <FORMAT> [OPTIONS] <INPUT> <OUTPUT> 
 ```
 
-## 示例命令
+## Example
 
 ```sh
 # from osgb dataset
 Converter -f OSGB -m true -i <OSGB> -o <OUTPUT> 
 ```
 
-## 参数说明
+## Parameter Description
 ```
 Options:
   -?, -h, --help           displays help on commandline options.
-  -f, --format <format>    OSGB or Vector(required), OSGB 为倾斜摄影格式数据, Vector为GDAL支持的面(Polygon)数据
-  -m, --merge <true/false> 根节点合并开关选项
-  -i, --input  <INPUT>     输入数据的目录，OSGB数据截止到 `<DIR>/Data` 目录的上一级，GDAL参考GDAL数据格式。
-  -o, --ouput  <OUTPUT>    输出目录。OSGB转换的3DTiles输出的数据文件位于 <DIR>/Data`目录, GDAL转换的3DTiles输出的数据文件位于<DIR>/Tile目录，tileset.json位于<DIR>根目录。
+  -f, --format <format>    OSGB or Vector(required)
+  -m, --merge <true/false> Top-level rebuild merge switch options
+  -i, --input  <INPUT>     Input path. for OSGB format, the path ends at the upper level of the `<INPUT>/Data` directory. for GDAL, please refers to the GDAL data format.
+  -o, --ouput  <OUTPUT>    Output path。for OSGB format, the data files output are located in the <OUTPUT>/Data` directory. for GDAL format, the data files output are located in the <DIR>/Tile directory, and tileset.json is located in the <OUTPUT> root directory.
 ```
 
-# 数据要求及说明
+# Data Requirements
 
-### 倾斜摄影数据
+### Oblique Photography Model
 
-倾斜摄影数据仅支持 smart3d 格式的 osgb 组织方式：
+Oblique photography model only supports the osgb organization method of smart3d format:
 
-- 数据目录必须有一个 `Data` 目录的总入口；
-- `Data` 目录同级放置一个 `metadata.xml` 文件用来记录模型的位置信息；
-- 每个瓦片目录下，必须有个和目录名同名的 osgb 文件，否则无法识别根节点；
+- the data directory must have a main entry to the `Data` directory;
+- a `metadata.xml` file at the same level of the `Data` directory to record the location information of the model;
+- each tile directory must have an osgb file with the same name as the directory name, otherwise the root node cannot be recognized;
 
-正确的目录结构示意：
+Correct directory structure diagram:
 
 ```
 - Your-data-folder
   ├ metadata.xml
   └ Data/Tile_000_000/Tile_000_000.osgb
 ```
+
 # Build Version
 
 | gdal | openscenegraph | qt |
@@ -61,15 +62,16 @@ Options:
 
 # How To Build(for Windows)
 1. vcpkg install "gdal" "osg" "osg[plugins]"
-2. 如果没有Qt5.15，可以通过以下两种方式安装：
-   1. 通过Qt官网安装
-   2. vcpkg install "qt5[all]"
-3. Visual Studio选择CMakeLists.txt，导入工程，编译
-4. 将OSGPlugins-${Version}文件夹复制到编译目录下
+2. If you do not have Qt5.15, you can install it in the following two ways:
+    1. Install through Qt official website
+    2. vcpkg install "qt5[all]"
+3. Open Visual Studio, selects CMakeLists.txt, imports the project and compiles
+4. Copy the OSGPlugins-${Version} folder to the compilation out directory
 
 # TODO
-1. 目前只迁移了OSGB的转换转换工作，后面进行GDAL转换代码迁移
-2. 初步实现了根节点合并，目前只做到了Vertex简化，后面加入纹理简化
+1. Currently, only support OSGB, and the GDAL format conversion code will be migrated later.
+
+2. The root node merging has been initially implemented. But only Vertex simplification has been achieved, and texture simplification will be added later.
 
 # Reference
 1. 3dtiles specification [https://github.com/CesiumGS/3d-tiles](https://github.com/CesiumGS/3d-tiles)

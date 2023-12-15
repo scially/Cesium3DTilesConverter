@@ -8,6 +8,7 @@ file(GLOB Cesium3DTiles_Headers
 add_library(Cesium3DTiles 
 	STATIC 
 	${Cesium3DTiles_Headers}
+	${Cesium3DTiles_Sources}
 )
 
 target_compile_features(

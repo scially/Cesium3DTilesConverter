@@ -3,7 +3,7 @@ include(QtRuntimeLibraryFunction)
 
 set(TESTS 
 	TestOSGLodVisitor.cpp
-	TestOSGMergTopIndex.cpp
+	TestOSGConvert.cpp
 	TestOSGParseVisitor.cpp)
 
 foreach(TESTSRC ${TESTS})

@@ -1,12 +1,38 @@
-#include <OSGConvert/OSGFolder.h>
-#include <ConvertApp/CLIParse.h>
 #include <Commons/GDALRegister.h>
 #include <Commons/Version.h>
+#include <ConvertApp/CLIParse.h>
+#include <OSGConvert/OSGFolder.h>
+#include <OSGConvert/OSGVirtualFolder.h>
 
-#include <QTime>
 #include <QCoreApplication>
+#include <QTime>
+
+void MessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg)
+{
+    QByteArray localMsg = msg.toLocal8Bit();
+    const char* file = context.file ? context.file : "";
+    const char* function = context.function ? context.function : "";
+    switch (type) {
+    case QtDebugMsg:
+        fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtInfoMsg:
+        fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtWarningMsg:
+        fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtCriticalMsg:
+        fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    case QtFatalMsg:
+        fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
+        break;
+    }
+}
 
 int main(int argc, char** argv) {
+    qInstallMessageHandler(MessageOutput);
     QCoreApplication app(argc, argv);
     app.setApplicationVersion(SCIALLY_PROJECT_VERSION);
     app.setApplicationName(SCIALLY_PROJECT_NAME);
@@ -25,18 +51,24 @@ int main(int argc, char** argv) {
     }
     else if (parser.format == scially::CLIParse::OSGB)
     {
-        scially::OSGConvertOption options;
-        options.input = parser.input;
-        options.output = "file:" + parser.output;
-        scially::OSGFolder dataFolder;
-        if (!dataFolder.load(options))
+
+        scially::OSGFolder folder(parser.input);
+        if (!folder.load("file:" + parser.output))
             return -1;
-        
-        if(!dataFolder.toB3DMPerTile(options))
+
+        auto b3dms = folder.to3DTiles(0);
+        if (b3dms.isEmpty())
             return -1;
 
         if (parser.mergeTop) {
-            if (!dataFolder.mergeTop(options))
+            scially::OSGVirtualFolder vFolder(
+                b3dms,
+                folder.outSRS(),
+                *folder.transform(),
+                *folder.storage());
+
+            const auto nodes = vFolder.to3DTiles(1);
+            if (nodes.isEmpty())
                 return -1;
         }
     }

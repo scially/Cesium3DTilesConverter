@@ -10,7 +10,6 @@
 #include <optional>
 
 namespace scially {
-	
 	struct CesiumMaterial {
 		using Ptr = QSharedPointer<CesiumMaterial>;
 

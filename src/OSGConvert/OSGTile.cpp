@@ -1,22 +1,25 @@
-#include <OSGConvert/OSGTile.h>
-#include <OSGConvert/OSGLodVisitor.h>
-#include <CesiumGLTF/CesiumB3DM.h>
 #include <Commons/OSGUtil.h>
-#include <CesiumReadWrite/BaseTileReadWriter.h>
+#include <OSGConvert/B3DMTile.h>
+#include <OSGConvert/OSGFolder.h>
+#include <OSGConvert/OSGLodVisitor.h>
+#include <OSGConvert/OSGParseVisitor.h>
+#include <OSGConvert/OSGTile.h>
 
 #include <QDir>
 #include <QDomDocument>
-#include <QtDebug>
+#include <QException>
 #include <QtConcurrent>
-#include <osgDB/ReadFile>
+#include <QtDebug>
+
 #include <osg/BoundingBox>
+#include <osgDB/ReadFile>
 
 namespace scially {
-	bool OSGTile::init()
+	OSGTile::OSGTile(const QString& tileFolder, const QString& fileName, const QString& tileName)
 	{
-		QDir tileDir(mTileFolder);
-		mTileName = tileDir.dirName();
-		mFileName = tileDir.dirName();
+		mTileFolder = tileFolder;
+		mFileName = fileName;
+		mTileName = tileName;
 		//Tile_+018_+019
 		QStringList split = mTileName.split("_");
 
@@ -26,74 +29,71 @@ namespace scially {
 		if (split.length() >= 3) {
 			mYIndex = split[2].toInt();
 		}
-		
-		return loadRoot();
+
+		mOSGNode = osgDB::readRefNodeFile(absoluteNodePath(".osgb").toStdString());
+
+		// maybe throw exception if mOSGNode is null
+		// TODO
 	}
-
-	bool OSGTile::loadRoot() {
-		auto rootNode = osgDB::readRefNodeFile(rootTileFilePath().toStdString());
-
-		if (rootNode == nullptr) {
-			qCritical() << rootTileFilePath() << "load failed";
-			return false;
-		}
-
-		OSGLodVisitor visitor;
-		rootNode->accept(visitor);
-
-		mBoundingBox = visitor.boundingBox;
-		if (!mBoundingBox.valid())
-			return false;
-
-		return buildIndex();
-	}
-
+	
 	bool OSGTile::buildIndex() {
-		if (mSkipPerTile) {
-			mMinGeometricError = (mBoundingBox._max - mBoundingBox._min).length2() / mSplitPixel;
+		if (mOSGNode == nullptr)
+			return false;
+
+		OSGLodVisitor lodVisitor;
+		mOSGNode->accept(lodVisitor);
+
+		if (!lodVisitor.isValid()) {
+			qCritical() << "osg bounding box is not valid:" << tileName();
+            return false;
 		}
-
-		mOSGIndexNode = buildOSGTileNodeTree(
-			mTileFolder,
-			mFileName,
-			mMinGeometricError);
-
-		return mOSGIndexNode != nullptr;
-	}
-
-	bool OSGTile::toB3DM(const SpatialTransform& transform, TileStorage& storage) {
-        mB3DMIndexNode = OSGBToB3DM(
-			mTileFolder,
-			mOSGIndexNode, 
-			transform, 
-			storage, 
-			mSplitPixel);
-		return mB3DMIndexNode != nullptr;
-	}
-
-	bool OSGTile::saveJson(const SpatialReference &srs, TileStorage& storage) const {
-		RootTile r = mB3DMIndexNode->toRootTile(true);
-		BaseTile b;
-		b.root = r;
-		b.geometricError = r.geometricError;
-
-		BaseTileReadWriter brw;
+		mBoundingBox = lodVisitor.boundingBox;
 		
-		QString outTilesetName = mB3DMIndexNode->tileName() + '/' + mB3DMIndexNode->fileName() + ".json";
-        if (!storage.saveJson(outTilesetName, brw.writeToJson(b))) {
-			qCritical() << "save json " << outTilesetName << "failed";
-			return false;
+		double sumPixel = 0;
+		foreach(const auto & node, lodVisitor.children) {
+			sumPixel += node.maxPixel;
+		}
+		if (sumPixel == 0) {
+			mGeometricError = 0;
+		}
+		else {
+			mGeometricError = osgBoundingSize(mBoundingBox) / sumPixel;
 		}
 
-		// for debug
-		r.transform = osgMatrixToCesiumTransform(srs.originENU());
-		b.root = r;
-		b.geometricError = osgBoundingSize(mB3DMIndexNode->boundingBox);
-		outTilesetName = mB3DMIndexNode->tileName() + "/tileset.json";
-        if (!storage.saveJson(outTilesetName, brw.writeToJson(b))) {
-			qCritical() << "save json " << outTilesetName << "failed";
-			return false;
+		for(const auto & node: lodVisitor.children) {
+			for (const auto& tileName : node.tileNames) {
+				auto leafNode = QSharedPointer<OSGTile>::create(
+					mTileFolder,
+					mFileName,
+					tileName
+				);
+
+				if (leafNode->buildIndex()) {
+					mNodes.append(leafNode);
+				}
+			}
 		}
+
+		if (mNodes.isEmpty()) {
+			mGeometricError = 0;
+		}
+
+		else {
+			if (lodVisitor.hasContentOutLOD) {
+				auto leafNode = QSharedPointer<OSGTile>::create(
+					mTileFolder,
+					mFileName,
+					mTileName
+				);
+
+				leafNode->mBoundingBox = lodVisitor.boundingBox;
+			
+				leafNode->mGeometricError = 0;
+				leafNode->mSkipOSGLod = true;
+				mNodes.append(leafNode);
+			}
+		}
+
 		return true;
 	}
 }

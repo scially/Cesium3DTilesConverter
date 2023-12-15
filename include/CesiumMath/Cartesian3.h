@@ -2,8 +2,8 @@
 
 #include "Constant.h"
 
-#include <osg/Vec3d>
 #include <osg/Matrixd>
+#include <osg/Vec3d>
 
 namespace scially {
 	struct Cartesian3 {

@@ -8,6 +8,8 @@
 #include <ogrsf_frmts.h>
 
 namespace scially {
+    // register gdal and proj data, and register gdal driver
+    // must be called after QApplication init
     class GDALRegister {
     public:
         GDALRegister() {

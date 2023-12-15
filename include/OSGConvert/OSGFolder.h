@@ -1,33 +1,60 @@
 #pragma once
 
-#include <OSGConvert/OSGConvertOption.h>
-#include <OSGConvert/OSGTile.h>
-#include <Cesium3DTiles/BaseTile.h>
 #include <CesiumMath/SpatialReference.h>
 #include <CesiumMath/SpatialTransform.h>
 #include <Commons/TileStorage.h>
-
-#include <QString>
+#include <OSGConvert/OSGTile.h>
 
 namespace scially {
-	class OSGFolder {
+	// oblique photography datasets
+	// include metadata.xml and Data folder 
+	class OSGFolder: public OSGNode {
 	public:
-		bool load(const OSGConvertOption& options);
-		bool toB3DMPerTile(const OSGConvertOption& options);
-		bool mergeTile() const;
-		bool mergeTop(const OSGConvertOption& options) const;
-
-		QList<OSGTile::Ptr> tiles() const;
-	private:
-		bool loadMetaData(const QString& input);
+		using Ptr = QSharedPointer<OSGFolder>;
+		static SpatialReference::Ptr ReadMetaData(const QString& input);
 		
-		BaseTile toBaseTile() const;
+		// inherit from OSGNode
+		virtual QString name() {
+			return "OSGFolder"; 
+		}
+		// end inherit
 
-		QList<OSGTile::Ptr> mTiles;
-        SpatialReference::Ptr mInSRS;
-        SpatialReferenceMatrix mOutSRS;
+		// begin class Folder
+		OSGFolder(const QString& basePath) 
+		{
+			mTileFolder = basePath;
+		}
+
+		SpatialReference* inSRS() const {
+			return mInSRS.get();
+		}
+
+		const SpatialReferenceMatrix& outSRS() const {
+			return mOutSRS;
+		}
+
+		SpatialTransform* transform() const {
+			return mSTS.get();
+		}
+
+		TileStorage* storage() const {
+			return mStorage.get();
+		}
+
+		QString dataPath() const {
+			return tileFolder();
+		}
+
+		bool load(const QString& output);
+		
+		QPointerList<OSGIndexNode> to3DTiles(uint32_t thread);
+
+	private:	
+        SpatialReference::Ptr  mInSRS;
+		SpatialReferenceMatrix mOutSRS;
 		SpatialTransform::Ptr mSTS;
 		TileStorage::Ptr mStorage;
-		osg::Vec3f mOrigin = { 0,0,0 };
+
+        QPointerList<OSGIndexNode> mB3dms; // osgb to b3dm link
 	};
 }

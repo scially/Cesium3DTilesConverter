@@ -2,7 +2,6 @@
 
 #include <CesiumGLTF/CesiumMesh.h>
 #include <CesiumMath/SpatialTransform.h>
-#include <CesiumGLTF/CesiumB3dm.h>
 
 #include <osg/Node>
 #include <osg/Vec3d>

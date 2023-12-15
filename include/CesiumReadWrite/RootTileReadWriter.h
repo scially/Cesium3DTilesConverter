@@ -1,8 +1,9 @@
 #pragma once
 
-#include <Cesium3DTiles/RootTile.h>
 #include "BoundingVolumeReadWriter.h"
 #include "ContentReadWriter.h"
+
+#include <Cesium3DTiles/RootTile.h>
 
 #include <QJsonObject>
 
@@ -36,12 +37,14 @@ namespace scially {
             object["geometricError"] = tile.geometricError;
             object["refine"] = tile.refine;
 
-            QJsonArray transformJsonValue;
-            for (double v : tile.transform) {
-                transformJsonValue.append(v);
+            if (tile.transform != tile.TRANSFORM) {
+                QJsonArray transformJsonValue;
+                for (double v : tile.transform) {
+                    transformJsonValue.append(v);
+                }
+                object["transform"] = transformJsonValue;
             }
-            object["transform"] = transformJsonValue;
-
+            
             if (tile.content.has_value()) {
                 object["content"] = mContentReadWriter.writeToJson(tile.content.value());
             }
@@ -51,7 +54,9 @@ namespace scially {
                 QJsonValue childJsonValue = writeToJson(child);
                 childrenJsonValue.append(childJsonValue);
             }
-            object["children"] = childrenJsonValue;
+            if(!childrenJsonValue.isEmpty())
+                object["children"] = childrenJsonValue;
+            
             return object;
         }
     private:
