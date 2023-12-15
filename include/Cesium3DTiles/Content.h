@@ -3,6 +3,7 @@
 #include "BoundingVolume.h"
 
 #include <optional>
+
 #include <QString>
 
 namespace scially {

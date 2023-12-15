@@ -14,7 +14,7 @@ namespace scially {
 			const TileStorage& storage);
 
 		// convert to b3dm
-		QPointerList<OSGIndexNode> to3DTiles(uint32_t thread);
+		QPointerList<OSGIndexNode> to3DTiles(uint32_t thread) const;
 
 	private:
 		// pyramid
@@ -29,7 +29,7 @@ namespace scially {
 		// t  t t  t z = 3  1 / pyramid * 3 = ratio ( ratio = 1 )
 		void generateOSGNodeInPyramid(
 			const QPointerList<OSGIndexNode> &nodes,
-			uint32_t z = 1);
+			uint32_t z = 1) const;
 
 		int32_t mMaxZ;
 		const SpatialReference& mOutSrs;

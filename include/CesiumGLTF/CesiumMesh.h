@@ -3,16 +3,17 @@
 #include "CesiumMaterial.h"
 #include "CesiumTexture.h"
 
-#include <QString>
-#include <QSharedPointer>
-#include <QByteArray>
-#include <QVector>
-#include <osg/Matrixd>
-#include <osg/Vec3f>
-#include <osg/Vec3d>
-#include <osg/Vec2f>
-#include <osg/Vec4f>
 #include <osg/BoundingBox>
+#include <osg/Matrixd>
+#include <osg/Vec2f>
+#include <osg/Vec3d>
+#include <osg/Vec3f>
+#include <osg/Vec4f>
+
+#include <QByteArray>
+#include <QSharedPointer>
+#include <QString>
+#include <QVector>
 
 namespace scially {
 	class CesiumMesh {

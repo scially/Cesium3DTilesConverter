@@ -5,7 +5,6 @@
 #include <OSGConvert/OSGParseVisitor.h>
 
 namespace scially {
-	
 	bool OSGIndexNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
 		if (z >= mZIndex) {
 			qWarning() << "try to new level zoom";
@@ -18,23 +17,22 @@ namespace scially {
 		return true;
 	}
 
-	RootTile OSGIndexNode::toRootTile(bool withChilden) const {
+	RootTile OSGIndexNode::toRootTile(bool withChilden, QString basePath) const {
 		RootTile root;
 		root.geometricError = geometricError() * 16;
 		root.refine = "REPLACE";
 		root.boundingVolume.box = osgBoundingToCesiumBoundBox(boundingBox());
 
-		const QString& name = mFileName;
 		// child node to 3dtiles content
 		if (withChilden) {
 			for (size_t i = 0; i < size(); i++) {
 				RootTile r;
 				auto dyn = node<OSGIndexNode>(i);
-				if (dyn->fileName() != name) {
-					r = node<OSGIndexNode>(i)->toRootTile(false);
+				if (dyn->fileName() != mFileName) {
+					r = dyn->toRootTile(false, "../");
 				}
 				else {
-					r = node<OSGIndexNode>(i)->toRootTile(true);
+					r = dyn->toRootTile(true);
 				}
 				root.children.append(r);
 			}
@@ -45,7 +43,7 @@ namespace scially {
 			root.content.value().uri = tileName() + ".b3dm";
 		}
 		else {
-			root.content.value().uri = "../" + fileName() + "/" + tileName() + ".json";
+			root.content.value().uri = basePath + fileName() + "/" + tileName() + ".json";
 		}
 
 		return root;
@@ -69,7 +67,7 @@ namespace scially {
 		r.transform = osgMatrixToCesiumTransform(transform);
 		b.root = r;
 		b.geometricError = osgBoundingSize(boundingBox());
-		outTilesetName = tileName() + "/tileset.json";
+		outTilesetName = fileName() + "/tileset.json";
 		if (!storage.saveJson(outTilesetName, brw.writeToJson(b))) {
 			qCritical() << "save json " << outTilesetName << "failed";
 			return false;

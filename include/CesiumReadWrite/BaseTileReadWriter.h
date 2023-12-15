@@ -1,8 +1,9 @@
 #pragma once
 
-#include <Cesium3DTiles/BaseTile.h>
-#include "RootTileReadWriter.h"
 #include "AssetReadWriter.h"
+#include "RootTileReadWriter.h"
+
+#include <Cesium3DTiles/BaseTile.h>
 
 #include <QJsonObject>
 

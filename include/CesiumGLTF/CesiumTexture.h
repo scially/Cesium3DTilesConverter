@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QString>
-#include <QSharedPointer>
 #include <QByteArray>
+#include <QSharedPointer>
+#include <QString>
 
 #include <osg/Image>
 #include <tiny_gltf.h>

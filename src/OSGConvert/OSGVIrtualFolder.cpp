@@ -85,7 +85,7 @@ namespace scially
 		}
 	}
 
-	QPointerList<OSGIndexNode> OSGVirtualFolder::to3DTiles(uint32_t thread) {
+	QPointerList<OSGIndexNode> OSGVirtualFolder::to3DTiles(uint32_t thread) const {
 		if (mMaxZ == 1) {
 			return {};
 		}
@@ -102,7 +102,7 @@ namespace scially
 
 		for (size_t i = 0; i < size(); i++) {
 			auto dyn = node<OSGIndexNode>(i);
-			QFuture<bool> f = QtConcurrent::run(&threadPool, [this, &dyn, &b3dms]() {
+			QFuture<bool> f = QtConcurrent::run(&threadPool, [this, dyn, &b3dms]() {
 				auto r = dyn->toB3DM(mSTS, mStorage);
 				if (r && r->saveJson(mStorage, mOutSrs.originENU())) {
 					b3dms.append(r);
@@ -129,7 +129,7 @@ namespace scially
 
 	void OSGVirtualFolder::generateOSGNodeInPyramid(
 		const QPointerList<OSGIndexNode>& nodes,
-		uint32_t z)
+		uint32_t z) const
 	{
 		if (z == 0 || z == mMaxZ)
 			return;

@@ -2,7 +2,6 @@
 
 #include "SpatialReference.h"
 
-#include <QSharedPointer>
 #include <osg/Matrixd>
 
 namespace scially {

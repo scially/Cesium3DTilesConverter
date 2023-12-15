@@ -1,8 +1,8 @@
 #pragma once
 
+#include <osg/Matrixd>
 #include <osg/Vec3d>
 #include <osg/Vec3f>
-#include <osg/Matrixd>
 
 #include <QSharedPointer>
 

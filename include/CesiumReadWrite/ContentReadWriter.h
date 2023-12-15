@@ -1,7 +1,8 @@
 #pragma once
 
-#include <Cesium3DTiles/Content.h>
 #include "BoundingVolumeReadWriter.h"
+
+#include <Cesium3DTiles/Content.h>
 
 #include <QJsonObject>
 

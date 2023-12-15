@@ -238,7 +238,7 @@ namespace scially {
 		}
 
 		// base path with tileset.json
-		RootTile toRootTile(bool withChilden) const;
+		RootTile toRootTile(bool withChilden, QString basePath = "./") const;
 
 		bool saveJson(const TileStorage& storage, const osg::Matrixd& transform) const;
 
