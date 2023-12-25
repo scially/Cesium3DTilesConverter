@@ -87,9 +87,10 @@ namespace scially {
 		char* cSRS = const_cast<char*>(stdSRS.c_str());
 		if (srs.indexOf("EPSG") == 0)
 		{
-			bool ret = OSRSetFromUserInput(&srf, cSRS);
-			if (!ret) {
-				qCritical() << "OSRSetFromUserInput failed£º" << srs;
+			auto epsgCode = srs.mid(5).toInt();
+			auto ret = srf.importFromEPSG(epsgCode);
+			if (OGRERR_NONE != ret) {
+				qCritical() << "importFromEPSG failed£º" << srs;
 				return false;
 			}
 
@@ -99,21 +100,21 @@ namespace scially {
 		{
 			//try wkt
 			auto ret = OSRImportFromWkt(&srf, &cSRS);
-			if (!ret) {
+			if (OGRERR_NONE != ret) {
 				// try esri prj
 				ret = OSRMorphFromESRI(&srf);
-				if (!ret) 
+				if (OGRERR_NONE == ret)
 					return true;
 			}
 	
 			//try proj4
 			ret = OSRImportFromProj4(&srf, srs.toStdString().c_str());
-			if (!ret) 
+			if (OGRERR_NONE == ret)
 				return true;
 
 			//try esri prj
 			ret = OSRImportFromESRI(&srf, &cSRS);
-			if (!ret) 
+			if (OGRERR_NONE == ret)
 				return true;
 
 			return false;
