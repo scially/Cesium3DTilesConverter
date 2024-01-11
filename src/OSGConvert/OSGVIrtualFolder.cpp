@@ -7,6 +7,8 @@
 #include <QFuture>
 #include <QtConcurrent>
 
+#include <osgDB/ReadFile>
+
 namespace scially
 {
 	OSGVirtualFolder::OSGVirtualFolder(
@@ -143,8 +145,17 @@ namespace scially
 			osg::BoundingBoxd box;
 			for (size_t i = 0; i < topNode->size(); i++) {
 				auto dyn = topNode->node<OSGIndexNode>(i);
-				if (dyn && dyn->osgNode()) {
-					group->addChild(dyn->osgNode());
+				if (dyn) {
+					if (dyn->isSameKindAs<B3DMTile>()) {
+						auto node = osgDB::readRefNodeFile(dyn->absoluteNodePath(".osgb").toStdString());
+						if (node) {
+							group->addChild(node);
+						}
+					}
+					else { // virtual tile
+						auto dycn = dyn.dynamicCast<OSGVirtualTile>();
+						group->addChild(dycn->osgNode());
+					}
 				}
 				maxGeometricError = std::max(maxGeometricError, dyn->geometricError());
 				box.expandBy(dyn->boundingBox());
@@ -153,11 +164,14 @@ namespace scially
 			// simplify
 			OSGSimplify simp(*group);
 			simp.simplify(1.0 / mMaxZ);
-
-			topNode->osgNode() = group;
+			
+			if (topNode->isSameKindAs<OSGVirtualTile>()) {
+				auto dycn = topNode.dynamicCast<OSGVirtualTile>();
+				dycn->osgNode() = group;
+			}
+			
 			topNode->geometricError() = maxGeometricError * 2;
 			topNode->boundingBox() = box;
 		}
-
 	}
 }

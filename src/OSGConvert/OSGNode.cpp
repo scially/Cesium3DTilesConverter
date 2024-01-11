@@ -4,6 +4,8 @@
 #include <OSGConvert/B3DMTile.h>
 #include <OSGConvert/OSGParseVisitor.h>
 
+#include <osgDB/ReadFile>
+
 namespace scially {
 	bool OSGIndexNode::parentIndex(uint32_t z, int32_t& x, int32_t& y) const {
 		if (z >= mZIndex) {
@@ -79,7 +81,7 @@ namespace scially {
 		const SpatialTransform& transform,
 		const TileStorage& storage) {
 
-		if (isSameKindAs<B3DMTile>(this))
+		if (isSameKindAs<B3DMTile>())
 			return sharedFromThis();
 
 		double geometricError = osgBoundingSize(mBoundingBox) / SPLIT_PIXEL;
@@ -97,11 +99,13 @@ namespace scially {
 		double maxGeometricError = 0;
 
 		for (const auto& node : osgIndexNodes) {
-			if (node->mOSGNode == nullptr)
+			auto osgNode = osgDB::readRefNodeFile(node->absoluteNodePath(".osgb").toStdString());
+			
+			if (osgNode == nullptr)
 				continue;
 
 			auto meshes = OSGBtoCesiumMesh(
-				*node->mOSGNode,
+				*osgNode,
 				tileCenter,
 				transform);
 
@@ -113,19 +117,19 @@ namespace scially {
 			return nullptr;
 		}
 
-		auto b3dmTopNode = QSharedPointer<B3DMTile>::create();
-		b3dmTopNode->tileName() = tileName();
-		b3dmTopNode->fileName() = fileName();
-		b3dmTopNode->xIndex() = xIndex();
-		b3dmTopNode->yIndex() = yIndex();
-		b3dmTopNode->zIndex() = zIndex();
-		b3dmTopNode->geometricError() = maxGeometricError;
-		b3dmTopNode->osgNode() = osgNode();
-		QString outFileName = b3dmTopNode->relativeNodePath(".b3dm");
+		auto b3dmNode = QSharedPointer<B3DMTile>::create();
+		b3dmNode->tileName() = tileName();
+		b3dmNode->fileName() = fileName();
+		b3dmNode->xIndex() = xIndex();
+		b3dmNode->yIndex() = yIndex();
+		b3dmNode->zIndex() = zIndex();
+		b3dmNode->geometricError() = maxGeometricError;
+		b3dmNode->tileFolder() = tileFolder();
+		QString outFileName = b3dmNode->relativeNodePath(".b3dm");
 
 		QByteArray b3dmBuffer = CesiumMesh::toGltfBinaryWithNoPack(tileMeshes, tileCenter);
 		if (b3dmBuffer.isEmpty()) {
-			qCritical() << "fialed convert meshes to b3dm buffer";
+			qCritical("fialed convert meshes to b3dm buffer");
 			return nullptr;
 		}
 
@@ -133,18 +137,17 @@ namespace scially {
 			return nullptr;
 		}
 
-
 		for (const auto& mesh : tileMeshes) {
-			b3dmTopNode->boundingBox().expandBy(mesh.boundingBox());
+			b3dmNode->boundingBox().expandBy(mesh.boundingBox());
 		}
 
 		// Attention
-		b3dmTopNode->boundingBox().xMin() += tileCenter.x();
-		b3dmTopNode->boundingBox().yMin() += tileCenter.y();
-		b3dmTopNode->boundingBox().zMin() += tileCenter.z();
-		b3dmTopNode->boundingBox().xMax() += tileCenter.x();
-		b3dmTopNode->boundingBox().yMax() += tileCenter.y();
-		b3dmTopNode->boundingBox().zMax() += tileCenter.z();
+		b3dmNode->boundingBox().xMin() += tileCenter.x();
+		b3dmNode->boundingBox().yMin() += tileCenter.y();
+		b3dmNode->boundingBox().zMin() += tileCenter.z();
+		b3dmNode->boundingBox().xMax() += tileCenter.x();
+		b3dmNode->boundingBox().yMax() += tileCenter.y();
+		b3dmNode->boundingBox().zMax() += tileCenter.z();
 
 		auto children = firstSplitedChild<OSGIndexNode>();
 		if (children.isEmpty()) {
@@ -154,9 +157,9 @@ namespace scially {
 		for (const auto& cn : children) {
 			auto n = cn->toB3DM(transform, storage);
 			if (n) {
-				b3dmTopNode->append(n);
+				b3dmNode->append(n);
 			}
 		}
-		return b3dmTopNode;
+		return b3dmNode;
 	}
 }

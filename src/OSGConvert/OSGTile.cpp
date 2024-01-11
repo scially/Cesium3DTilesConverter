@@ -9,7 +9,6 @@
 #include <QDomDocument>
 #include <QException>
 #include <QtConcurrent>
-#include <QtDebug>
 
 #include <osg/BoundingBox>
 #include <osgDB/ReadFile>
@@ -30,23 +29,22 @@ namespace scially {
 			mYIndex = split[2].toInt();
 		}
 
-		mOSGNode = osgDB::readRefNodeFile(absoluteNodePath(".osgb").toStdString());
-
-		// maybe throw exception if mOSGNode is null
-		// TODO
 	}
 	
 	bool OSGTile::buildIndex() {
-		if (mOSGNode == nullptr)
+		auto osgNode = osgDB::readRefNodeFile(absoluteNodePath(".osgb").toStdString());
+
+		if (osgNode == nullptr)
 			return false;
 
 		OSGLodVisitor lodVisitor;
-		mOSGNode->accept(lodVisitor);
+		osgNode->accept(lodVisitor);
 
 		if (!lodVisitor.isValid()) {
-			qCritical() << "osg bounding box is not valid:" << tileName();
+			qCritical("tile %s bounding box is not valid", qUtf8Printable(tileName()));
             return false;
 		}
+
 		mBoundingBox = lodVisitor.boundingBox;
 		
 		double sumPixel = 0;

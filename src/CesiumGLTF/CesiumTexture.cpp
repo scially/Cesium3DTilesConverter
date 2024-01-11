@@ -39,7 +39,7 @@ namespace scially {
 		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
 		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
 		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-			qCritical() << "don't support osg dds texture format";
+			qCritical("don't support osg dds texture format");
 			return false;
 		default:
 			return false;

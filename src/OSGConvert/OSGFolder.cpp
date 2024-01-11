@@ -35,7 +35,7 @@ namespace scially {
 			auto tileNode = QSharedPointer<OSGTile>::create(tileFolder.path(), fn, tn);
 			
 			if (!tileNode->buildIndex()) {
-				qWarning() << "load" << tileFolder.fileName() << "failed";
+				qWarning("load tile %s failed", qUtf8Printable(tileFolder.fileName()));
 				continue;
 			}
 
@@ -45,7 +45,6 @@ namespace scially {
 
 		if (size() == 0)
 			return false;
-
 
 		const osg::Vec3d osgCenter = mInSRS->toWorld(osgBound.center());
 		mOutSRS.initWithCartesian3(osgCenter);
@@ -60,19 +59,19 @@ namespace scially {
 	SpatialReference::Ptr OSGFolder::ReadMetaData(const QString& input) {
 		QFile metaDataFile(input);
 		if (!metaDataFile.exists()) {
-			qCritical() << "can't find metadata.xml";
+			qCritical("can't find metadata.xml");
 			return nullptr;
 		}
 
 		QDomDocument metaDataDom;
 		if (!metaDataDom.setContent(&metaDataFile)) {
-			qCritical() << "can't parse metadata.xml file";
+			qCritical("can't parse metadata.xml file");
 			return nullptr;
 		}
 
 		QDomElement rootElement = metaDataDom.documentElement();
 		if (rootElement.tagName() != "ModelMetadata") {
-			qCritical() << "not find ModelMetaData node in metadata.xml";
+			qCritical("not find ModelMetaData node in metadata.xml");
 			return nullptr;
 		}
 
@@ -80,7 +79,7 @@ namespace scially {
 		QDomNodeList originNodes = rootElement.elementsByTagName("SRSOrigin");
 
 		if (srsNodes.isEmpty()) {
-			qCritical() << "not find SRS node in metadata.xml";
+			qCritical("not find SRS node in metadata.xml");
 			return nullptr;
 		}
 
@@ -111,7 +110,7 @@ namespace scially {
 		for (size_t i = 0; i < size(); i++) {
 			auto tile = node<OSGTile>(i);
 			QFuture<bool> f = QtConcurrent::run(&threadPool, [this, tile]() {
-				qInfo() << tile->tileName() << "tile start convert to b3dm";
+				qInfo("%s tile start convert to b3dm", qUtf8Printable(tile->tileName()));
 			
 				auto b3dm = tile->toB3DM(*mSTS, *mStorage);
 				if(b3dm && b3dm->saveJson(*mStorage, mOutSRS.originENU())) {
@@ -126,13 +125,13 @@ namespace scially {
 		for (auto& worker : workFutures) {
 			worker.waitForFinished();
 		}
-		qInfo() << "all tile process finished";
+		qInfo("all tile process finished");
 		
 		const BaseTile b = B3DMTile::toBaseTile(mB3dms, mOutSRS.originENU());
 		BaseTileReadWriter brw;
 		const QJsonObject obj = brw.writeToJson(b);
 		if (!mStorage->saveJson("tileset.json", obj)) {
-			qCritical() << "write tileset.json failed";
+			qCritical("write tileset.json failed");
 		}
 		
 		return mB3dms;

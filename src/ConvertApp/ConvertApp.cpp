@@ -7,32 +7,8 @@
 #include <QCoreApplication>
 #include <QTime>
 
-void MessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg)
-{
-    QByteArray localMsg = msg.toLocal8Bit();
-    const char* file = context.file ? context.file : "";
-    const char* function = context.function ? context.function : "";
-    switch (type) {
-    case QtDebugMsg:
-        fprintf(stderr, "Debug: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
-    case QtInfoMsg:
-        fprintf(stderr, "Info: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
-    case QtWarningMsg:
-        fprintf(stderr, "Warning: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
-    case QtCriticalMsg:
-        fprintf(stderr, "Critical: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
-    case QtFatalMsg:
-        fprintf(stderr, "Fatal: %s (%s:%u, %s)\n", localMsg.constData(), file, context.line, function);
-        break;
-    }
-}
-
 int main(int argc, char** argv) {
-    qInstallMessageHandler(MessageOutput);
+    qSetMessagePattern("[%{type} %{time yyyy-MM-dd h:mm:ss.zzz}] %{file}:%{line} %{message}");
     QCoreApplication app(argc, argv);
     app.setApplicationVersion(SCIALLY_PROJECT_VERSION);
     app.setApplicationName(SCIALLY_PROJECT_NAME);
@@ -73,6 +49,6 @@ int main(int argc, char** argv) {
         }
     }
 
-    qInfo() << "finish convert in" << beginTime.secsTo(QTime::currentTime()) << "s";
+    qInfo("finish convert in %d s", beginTime.secsTo(QTime::currentTime()));
     return 0;
 }

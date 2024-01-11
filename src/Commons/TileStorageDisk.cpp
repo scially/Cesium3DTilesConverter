@@ -22,7 +22,7 @@ namespace scially {
 
 		QFile writer(outPath);
 		if (!writer.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-			qCritical() << "can't write file:" << file;
+			qCritical("can't write file %s", qUtf8Printable(file));
 			return false;
 		}
 

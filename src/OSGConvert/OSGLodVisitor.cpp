@@ -27,7 +27,6 @@ namespace scially {
 			parentClassName = geode.getParent(0)->className();
 
 		if (parentClassName != "PagedLOD") {
-			qWarning() << "find a geode not in PagedLOD";
 			hasContentOutLOD = true;
 		}
 
@@ -89,7 +88,7 @@ namespace scially {
 	bool OSGLodVisitor::processPagedLod(osg::PagedLOD& lod) {
 		auto ranges = lod.getRangeList();
 		if (ranges.empty()) {
-			qWarning() << lod.getName().c_str() << "is empty rangelist";
+			qWarning("%s is empty rangelist", lod.getName().data());
 			return false;
 		}
 

@@ -94,7 +94,7 @@ namespace scially {
 		void addGltfMesh(const CesiumMesh& m) {
 			if (m.vertex.isEmpty() || m.indices.isEmpty())
 			{
-				qWarning() << "empty packed mesh";
+				qWarning( "empty packed mesh");
 				return;
 			}
 

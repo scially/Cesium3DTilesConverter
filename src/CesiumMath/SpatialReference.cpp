@@ -65,7 +65,7 @@ namespace scially {
 		mOrigin = origin;
 		OGRSpatialReference srf;
 		if (!importFromStr(srf, inSrs)) {
-            qCritical() << "parse crs" << inSrs << "failed";
+            qCritical("parse crs %s failed", qUtf8Printable(inSrs)) ;
 			return false;
 		}
 
@@ -75,7 +75,7 @@ namespace scially {
 		t4326.SetAxisMappingStrategy(OAMS_TRADITIONAL_GIS_ORDER);
 		mTransfromer = OGRCreateCoordinateTransformation(&srf, &t4326);
 		if (!mTransfromer) {
-			qCritical() << inSrs << "can't transform to WGS84";
+			qCritical("%s can't transform to WGS84", qUtf8Printable(inSrs));
 			return false;
 		}
 		return true;
@@ -90,7 +90,7 @@ namespace scially {
 			auto epsgCode = srs.mid(5).toInt();
 			auto ret = srf.importFromEPSG(epsgCode);
 			if (OGRERR_NONE != ret) {
-				qCritical() << "importFromEPSG failed£º" << srs;
+				qCritical("importFromEPSG failed£º%s", qUtf8Printable (srs));
 				return false;
 			}
 
@@ -126,7 +126,7 @@ namespace scially {
 	{
 		QStringList srs = inSrs.mid(4).split(",");
 		if (srs.length() != 2) {
-			qCritical() << "parse enu:" << inSrs << "failed";
+			qCritical("parse enu %s failed", qUtf8Printable(inSrs));
 			return false;
 		}
 

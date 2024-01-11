@@ -9,14 +9,14 @@ namespace scially {
 		
         auto outSRS = dynamic_cast<const SpatialReferenceMatrix*>(&out);
 		if (!outSRS) {
-			qCritical() << "not surpport output srs";
+			qCritical("don't support output srs");
 			return nullptr;
 		}
 
         auto inSRSMatrix = dynamic_cast<const SpatialReferenceMatrix*>(&in);
         auto inSRSProj = dynamic_cast<const SpatialReferenceProj*>(&in);
 		if (!inSRSMatrix && !inSRSProj) {
-			qCritical() << "not surpport input srs";
+			qCritical("don't support output srs");
 			return nullptr;
 		}
 

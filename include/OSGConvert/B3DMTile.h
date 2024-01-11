@@ -47,5 +47,7 @@ namespace scially {
 		// class OSGTile
 		B3DMTile() = default;
 		virtual ~B3DMTile() = default;
+
+	private:
 	};
 }

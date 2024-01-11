@@ -28,5 +28,14 @@ namespace scially {
 		}
 
 		virtual ~OSGVirtualTile() = default;
+
+		const osg::Node* osgNode() const {
+			return mOSGNode;
+		}
+		osg::ref_ptr<osg::Node>& osgNode() {
+			return mOSGNode;
+		}
+	private:
+		osg::ref_ptr<osg::Node> mOSGNode;
 	};
 }

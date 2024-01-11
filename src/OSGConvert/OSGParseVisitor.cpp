@@ -49,7 +49,7 @@ namespace scially {
 
 		auto img = texture->getImage();
 		if (img == nullptr) {
-			qWarning() << "image in texture of model is empty";
+			qWarning("image in texture of model is empty");
             return std::nullopt;
 		}
 
@@ -182,7 +182,7 @@ namespace scially {
 					}
 					break;
 				default:
-					qCritical() << "primitive mode isn't triangle";
+					qCritical("primitive mode isn't triangle");
 					continue;
 				}
 			}

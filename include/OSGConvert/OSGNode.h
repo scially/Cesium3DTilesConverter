@@ -17,18 +17,6 @@ namespace scially {
     template <typename T>
     using QPointerList = QList<QSharedPointer<T>>;
 
-	#if __cplusplus == 202002L
-		using remove_cvref_t = std::remove_cvref_t;
-	#else
-		template<class T>
-		struct remove_cvref
-		{
-			typedef std::remove_cv_t<std::remove_reference_t<T>> type;
-		};
-		template< class T >
-		using remove_cvref_t = typename remove_cvref<T>::type;
-	#endif
-
 	constexpr double SPLIT_PIXEL = 512;
 
 	// for TileNode and TileNodeView, use Pointer as child node type?
@@ -42,8 +30,8 @@ namespace scially {
 		}
 
 		template <typename T>
-		bool isSameKindAs(const OSGNode* obj) const {
-			return dynamic_cast<const remove_cvref_t<T>*>(obj) != nullptr;
+		bool isSameKindAs() const {
+			return dynamic_cast<const T*>(this) != nullptr;
 		}
 
 		QString fileName() const {
@@ -124,7 +112,8 @@ namespace scially {
 		QString mFileName;
 	};
 
-	class OSGIndexNode: public OSGNode, public QEnableSharedFromThis<OSGIndexNode> {
+	class OSGIndexNode: public OSGNode, public QEnableSharedFromThis<OSGIndexNode> 
+	{
 	public:
 		// child nodes
 		virtual QString name() const override { 
@@ -157,10 +146,6 @@ namespace scially {
 
         virtual bool parentIndex(uint32_t z, int32_t& x, int32_t& y) const;
 
-		osg::ref_ptr<osg::Node> osgNode() const {
-			return mOSGNode;
-		}
-
 		osg::BoundingBoxd boundingBox() const {
 			return mBoundingBox;
 		}
@@ -175,10 +160,6 @@ namespace scially {
 
 		double& geometricError() {
 			return mGeometricError;
-		}
-
-		osg::ref_ptr<osg::Node>& osgNode() {
-			return mOSGNode;
 		}
 
 		// convert
@@ -249,8 +230,6 @@ namespace scially {
 		}
 
 	protected:
-		osg::ref_ptr<osg::Node> mOSGNode;
-
 		int32_t mXIndex = -1;
 		int32_t mYIndex = -1;
 		int32_t mZIndex = 1;
